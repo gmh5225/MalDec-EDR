@@ -1,1 +1,1 @@
-# LinPsyGuard: Antivirus for Linux servers
+KageDefend: Antivirus for Linux servers
