@@ -1,22 +1,21 @@
 # Information cmake
 cmake_minimum_required(VERSION 3.0.2)
 
-include(GoogleTest)
-
 # add subdirectory
-add_subdirectory( ../submodules/googletest build/googletest)
+add_subdirectory(../libraries/cmocka build/cmocka)
 
 add_definitions(-DUNIT_TESTS)
 set(PROJECT_SOURCES
-
+	Simple.c
 )
 
-add_executable(model_test ${PROJECT_SOURCES})
+add_executable(kagetest ${PROJECT_SOURCES})
 
-target_include_directories (model_test PRIVATE 
+target_include_directories (kagetest PRIVATE 
 		../include/
 		../packages/
+		../libraries/cmocka/include
 )
 
 
-target_link_libraries(model_test gtest gtest_main)
+target_link_libraries(kagetest cmocka)
