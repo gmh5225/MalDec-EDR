@@ -1,3 +1,3 @@
-# KageDefend: Antivirus for linux servers 
+# KageDefender: Antivirus for linux servers 
 
-![kagedefend](assets/kagedefend.png)
+![kagedefender](assets/kagedefender.png)
