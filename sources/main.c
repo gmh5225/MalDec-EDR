@@ -2,7 +2,7 @@
 
 int  main()
 {
-	printf("KageDefend init\n");
+	printf("KageDefender init\n");
 
 	return 0;
 }

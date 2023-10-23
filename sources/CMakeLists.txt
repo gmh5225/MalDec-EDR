@@ -9,9 +9,9 @@ cmake_minimum_required(VERSION 3.0.2)
 # add subdirectory
 
 # add executable and target libraries
-add_executable(kagedefend main.c)
+add_executable(kagedefender main.c)
 
-target_include_directories (kagedefend PRIVATE 
+target_include_directories (kagedefender PRIVATE 
 		../include/
 		../packages/
 		../interfaces
@@ -21,9 +21,9 @@ file(GLOB_RECURSE SOURCES
         *.c
 )
 
-target_sources(kagedefend PRIVATE 
+target_sources(kagedefender PRIVATE 
 		${SOURCES}
 )
 
 
-target_link_libraries(kagedefend PRIVATE )
+target_link_libraries(kagedefender PRIVATE )
