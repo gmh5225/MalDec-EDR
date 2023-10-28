@@ -1,3 +1,6 @@
 [submodule "libraries/cmocka"]
 	path = libraries/cmocka
 	url = https://git.cryptomilk.org/projects/cmocka.git
+[submodule "rules/YARA-Mindshield-Analysis"]
+	path = rules/YARA-Mindshield-Analysis
+	url = git@github.com:mlg-security/YARA-Mindshield-Analysis.git
