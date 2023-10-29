@@ -26,4 +26,4 @@ target_sources(kagedefender PRIVATE
 )
 
 
-target_link_libraries(kagedefender PRIVATE )
+target_link_libraries(kagedefender PRIVATE yara)
