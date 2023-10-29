@@ -1,8 +1,7 @@
-#include <stdio.h>
+#include <yr_inspector.h>
 
 int  main()
 {
-	printf("KageDefender init\n");
-
-	return 0;
+	INSPECTOR *inspector;
+	inspector_init(&inspector);
 }
