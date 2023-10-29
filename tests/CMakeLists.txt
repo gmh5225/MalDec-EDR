@@ -6,7 +6,7 @@ add_subdirectory(../libraries/cmocka build/cmocka)
 
 add_definitions(-DUNIT_TESTS)
 set(PROJECT_SOURCES
-	Simple.c
+	Tests.c
 )
 
 add_executable(kagetest ${PROJECT_SOURCES})
