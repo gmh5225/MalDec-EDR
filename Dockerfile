@@ -4,15 +4,14 @@ RUN apt update && \
     apt install -y \
         g++ \
         cmake \
+        libyara-dev \
+        binutils
         
 COPY . /app
 
 WORKDIR /app
 
-RUN mkdir build && \
+RUN mkdir -p build && \
     cd build && \
     cmake .. && \
-    make;
-
-CMD [ "/app/build/sources/project" ]
-
+    make
