@@ -8,6 +8,7 @@ add_definitions(-DUNIT_TESTS)
 set(PROJECT_SOURCES
 	YaraTest.c
     ../../sources/yara/yr_inspector.c
+	../../sources/yara/yr_scan.c
 )
 
 add_executable(yara_test ${PROJECT_SOURCES})

@@ -134,7 +134,7 @@ int inspector_scan_file(INSPECTOR *inspector, const char *file, YR_CALLBACK_FUNC
 {
     int fd = open(file, O_RDONLY);
 
-    int err = yr_rules_scan_fd(inspector->yr_rules, fd, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, NULL, 0);
+        int err = yr_rules_scan_fd(inspector->yr_rules, fd, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, NULL, 0);
 
     close(fd);
 
