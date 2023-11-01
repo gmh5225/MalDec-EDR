@@ -4,3 +4,6 @@
 [submodule "rules/YARA-Mindshield-Analysis"]
 	path = rules/YARA-Mindshield-Analysis
 	url = git@github.com:mlg-security/YARA-Mindshield-Analysis.git
+[submodule "libraries/uthash"]
+	path = libraries/uthash
+	url = https://github.com/troydhanson/uthash.git

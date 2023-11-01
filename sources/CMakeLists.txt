@@ -14,7 +14,8 @@ add_executable(kagedefender main.c)
 target_include_directories (kagedefender PRIVATE 
 		../include/
 		../packages/
-		../interfaces
+		../interfaces/
+		../libraries/uthash/include/
 )
 
 file(GLOB_RECURSE SOURCES

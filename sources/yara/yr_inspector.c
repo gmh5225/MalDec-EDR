@@ -28,10 +28,8 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
     switch (message)
     {
     case CALLBACK_MSG_SCAN_FINISHED:
-        printf("FINISHED: %d\n", message);
         break;
     case CALLBACK_MSG_RULE_MATCHING:
-        printf("MATCHED: %d\n", message);
         break;
     }
 
@@ -130,11 +128,34 @@ int inspector_init(INSPECTOR **inspector)
     return 0;
 } 
 
+int inspector_destroy(INSPECTOR **inspector)
+{
+    if (!inspector)
+        return -1;
+
+    YR_COMPILER *compiler = (*inspector)->yr_compiler;
+    YR_RULES *rules = (*inspector)->yr_rules;
+
+    if (yr_finalize())
+    {
+        fprintf(stderr, "Yara : yr_finalize() ERROR\n");
+        return -1;
+    }
+
+    if (compiler)
+        yr_compiler_destroy(compiler);
+
+    if (rules)
+        yr_rules_destroy(rules);
+
+    return 0;
+}
+
 int inspector_scan_file(INSPECTOR *inspector, const char *file, YR_CALLBACK_FUNC callback)
 {
     int fd = open(file, O_RDONLY);
 
-        int err = yr_rules_scan_fd(inspector->yr_rules, fd, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, NULL, 0);
+    int err = yr_rules_scan_fd(inspector->yr_rules, fd, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, NULL, 0);
 
     close(fd);
 
