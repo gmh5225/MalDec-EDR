@@ -7,3 +7,6 @@
 [submodule "libraries/uthash"]
 	path = libraries/uthash
 	url = https://github.com/troydhanson/uthash.git
+[submodule "drivers/telekinesis"]
+	path = drivers/telekinesis
+	url = git@github.com:mlg-security/Telekinesis.git
