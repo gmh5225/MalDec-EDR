@@ -1,7 +1,7 @@
 #define _GNU_SOURCE /* DT_DIR, DT_REG */
 
-#include <yr_inspector.h>
-#include <yr_ignore_dirs.h>
+#include <yara/yr_inspector.h>
+#include <yara/yr_ignore_dirs.h>
 
 #include <fcntl.h>
 #include <unistd.h>

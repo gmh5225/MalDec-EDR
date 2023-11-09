@@ -4,7 +4,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include <yr_inspector.h>
+#include <yara/yr_inspector.h>
 
 static void yara_inspector(void **state) {
     INSPECTOR *inspector;

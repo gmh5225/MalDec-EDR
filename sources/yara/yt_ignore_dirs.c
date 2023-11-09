@@ -1,4 +1,4 @@
-#include <yr_ignore_dirs.h>
+#include <yara/yr_ignore_dirs.h>
 
 inline void add_ignore_dir(struct dir_list **ignore_list, const char *path)
 {

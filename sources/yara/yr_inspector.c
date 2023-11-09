@@ -1,6 +1,6 @@
 #define _GNU_SOURCE /* DT_DIR */
 
-#include <yr_inspector.h>
+#include <yara/yr_inspector.h>
 
 #include <yara.h>
 #include <fcntl.h>

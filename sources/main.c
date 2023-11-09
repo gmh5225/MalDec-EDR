@@ -1,4 +1,4 @@
-#include <yr_inspector.h>
+#include <yara/yr_inspector.h>
 
 int  main()
 {

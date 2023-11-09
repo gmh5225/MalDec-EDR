@@ -9,9 +9,9 @@ cmake_minimum_required(VERSION 3.0.2)
 # add subdirectory
 
 # add executable and target libraries
-add_executable(kagedefender main.c)
+add_executable(LinuxDefender main.c)
 
-target_include_directories (kagedefender PRIVATE 
+target_include_directories (LinuxDefender PRIVATE 
 		../include/
 		../packages/
 		../interfaces/
@@ -22,9 +22,9 @@ file(GLOB_RECURSE SOURCES
         *.c
 )
 
-target_sources(kagedefender PRIVATE 
+target_sources(LinuxDefender PRIVATE 
 		${SOURCES}
 )
 
 
-target_link_libraries(kagedefender PRIVATE yara)
+target_link_libraries(LinuxDefender PRIVATE yara)

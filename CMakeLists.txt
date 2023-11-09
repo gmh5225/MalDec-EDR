@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 # Information projec
-project(KageDefender VERSION 0.1 LANGUAGES C)
+project(LinuxDefender VERSION 0.1 LANGUAGES C)
 set(LIB_MAJOR_VERSION "0")
 set(LIB_MINOR_VERSION "1")
 set(LIB_PATCH_VERSION "0")
