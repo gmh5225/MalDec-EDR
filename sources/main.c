@@ -1,7 +1,7 @@
-#include <yara/yr_inspector.h>
+#include <scan/scan.h>
 
 int  main()
 {
-	INSPECTOR *inspector;
-	inspector_init(&inspector);
+	SCANNER *scanner;
+	scanner_init(&scanner);
 }

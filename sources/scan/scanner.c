@@ -1,20 +1,15 @@
 #define _GNU_SOURCE /* DT_DIR */
 
-#include <yara/yr_inspector.h>
+#include <scan/scan.h>
 
 #include <yara.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
-#include<string.h>
+#include <string.h>
 
 #define RULES_FOLDER "../rules/YARA-Mindshield-Analysis"
-
-typedef struct INSPECTOR {
-    YR_RULES *yr_rules;
-    YR_COMPILER *yr_compiler;
-} INSPECTOR;
 
 int default_scan_callback(YR_SCAN_CONTEXT *context,
                                         int message,
@@ -27,7 +22,7 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
 
     switch (message)
     {
-    case CALLBACK_MSG_SCAN_FINISHED:
+    case CALLBACK_MSG_RULE_NOT_MATCHING:
         break;
     case CALLBACK_MSG_RULE_MATCHING:
         break;
@@ -36,11 +31,11 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
     return CALLBACK_CONTINUE;
 }
 
-static int inspector_set_rule(INSPECTOR *inspector, const char *path, const char *yara_file_name)
+static int scanner_set_rule(SCANNER *scanner, const char *path, const char *yara_file_name)
 {
     YR_FILE_DESCRIPTOR rules_fd = open(path, O_RDONLY);
 
-    if (yr_compiler_add_fd(inspector->yr_compiler, rules_fd, NULL, yara_file_name))
+    if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL, yara_file_name))
     {
         fprintf(stderr, "Yara : yr_compiler_add_fd ERROR\n");
         return -1;
@@ -51,12 +46,12 @@ static int inspector_set_rule(INSPECTOR *inspector, const char *path, const char
     return 0;
 }
 
-static int inspector_set_rules_from_dir(INSPECTOR *inspector, const char *folder)
+static int scanner_set_rules_from_dir(SCANNER *scanner, const char *folder)
 {
     DIR *dir = opendir(folder);
     if (!dir)
     {
-        fprintf(stderr, "Yara : inspector_set_rules_from_dir ERROR (%s : %s)\n", folder, strerror(errno));
+        fprintf(stderr, "Yara : scanner_set_rules_from_dir ERROR (%s : %s)\n", folder, strerror(errno));
         return -1;
     }
 
@@ -78,16 +73,16 @@ static int inspector_set_rules_from_dir(INSPECTOR *inspector, const char *folder
 
         if (strstr(name, ".yar"))
         {
-            if (inspector_set_rule(inspector, full_path, name))
+            if (scanner_set_rule(scanner, full_path, name))
             {
-                fprintf(stderr, "Yara : inspector_set_rule() ERROR\n");
+                fprintf(stderr, "Yara : scanner_set_rule() ERROR\n");
                 return -1;
             }
         }
         
         if (entry->d_type == DT_DIR)
         {
-            inspector_set_rules_from_dir(inspector, full_path);
+            scanner_set_rules_from_dir(scanner, full_path);
         }
     }
 
@@ -97,9 +92,9 @@ static int inspector_set_rules_from_dir(INSPECTOR *inspector, const char *folder
 
 // ! TODO !
 // - Add logs
-int inspector_init(INSPECTOR **inspector)
+int scanner_init(SCANNER **scanner)
 {
-    *inspector = malloc(sizeof(INSPECTOR));
+    *scanner = malloc(sizeof(SCANNER));
 
     if (yr_initialize())
     {
@@ -107,19 +102,19 @@ int inspector_init(INSPECTOR **inspector)
         return -1;
     }
 
-    if (yr_compiler_create(&(*inspector)->yr_compiler))
+    if (yr_compiler_create(&(*scanner)->yr_compiler))
     {
         fprintf(stderr, "Yara : yr_compiler_create() ERROR\n");
         return -1;
     }
 
-    if (inspector_set_rules_from_dir(*inspector, RULES_FOLDER))
+    if (scanner_set_rules_from_dir(*scanner, RULES_FOLDER))
     {
-        fprintf(stderr, "Yara : inspector_set_rule() ERROR\n");
+        fprintf(stderr, "Yara : scanner_set_rule() ERROR\n");
         return -1;
     }
 
-    if (yr_compiler_get_rules((*inspector)->yr_compiler, &(*inspector)->yr_rules))
+    if (yr_compiler_get_rules((*scanner)->yr_compiler, &(*scanner)->yr_rules))
     {
         fprintf(stderr, "Yara : yr_compiler_create() ERROR\n");
         return -1;
@@ -128,13 +123,13 @@ int inspector_init(INSPECTOR **inspector)
     return 0;
 } 
 
-int inspector_destroy(INSPECTOR **inspector)
+int scanner_destroy(SCANNER **scanner)
 {
-    if (!inspector)
+    if (!scanner)
         return -1;
 
-    YR_COMPILER *compiler = (*inspector)->yr_compiler;
-    YR_RULES *rules = (*inspector)->yr_rules;
+    YR_COMPILER *compiler = (*scanner)->yr_compiler;
+    YR_RULES *rules = (*scanner)->yr_rules;
 
     if (yr_finalize())
     {
@@ -149,15 +144,4 @@ int inspector_destroy(INSPECTOR **inspector)
         yr_rules_destroy(rules);
 
     return 0;
-}
-
-int inspector_scan_file(INSPECTOR *inspector, const char *file, YR_CALLBACK_FUNC callback)
-{
-    int fd = open(file, O_RDONLY);
-
-    int err = yr_rules_scan_fd(inspector->yr_rules, fd, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, NULL, 0);
-
-    close(fd);
-
-    return err;
 }
