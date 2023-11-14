@@ -43,8 +43,8 @@ static void yara_scan_ignored(void **state) {
 
 int main(void) {
     const struct CMUnitTest tests[] = {
-        // cmocka_unit_test(yara_scanner),
-        // cmocka_unit_test(yara_scan),
+        cmocka_unit_test(yara_scanner),
+        cmocka_unit_test(yara_scan),
         cmocka_unit_test(yara_scan_ignored),
     };
 
