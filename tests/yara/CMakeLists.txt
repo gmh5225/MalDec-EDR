@@ -7,9 +7,9 @@ add_subdirectory(../../libraries/cmocka build/cmocka)
 add_definitions(-DUNIT_TESTS)
 set(PROJECT_SOURCES
 	YaraTest.c
-    ../../sources/yara/yr_inspector.c
-	../../sources/yara/yr_scan.c
-	../../sources/yara/yt_ignore_dirs.c
+    ../../sources/scan/scan.c
+	../../sources/scan/scanner.c
+	../../sources/scan/ignored_dirs.c
 )
 
 add_executable(yara_test ${PROJECT_SOURCES})

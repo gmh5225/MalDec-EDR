@@ -4,29 +4,29 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
-#include <yr_inspector.h>
+#include <scan/scan.h>
 
-static void yara_inspector(void **state) {
-    INSPECTOR *inspector;
+static void yara_scanner(void **state) {
+    SCANNER *scanner;
     
-    assert_int_equal(inspector_init(&inspector), 0);
+    assert_int_equal(scanner_init(&scanner), 0);
 
     (void)state;
 }
 
-static void yara_inspector_scan_folder(void **state) {
-    INSPECTOR *inspector;
-    inspector_init(&inspector);
+static void yara_scan(void **state) {
+    SCANNER *scanner;
+    scanner_init(&scanner);
 
-    assert_int_equal(inspector_scan_folder(inspector, "/", default_scan_callback), 0);
+    assert_int_equal(scan_folder(scanner, "/", DEFAULT_SCAN_CALLBACK), 0);
 
     (void)state;
 }
 
 int main(void) {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(yara_inspector),
-        cmocka_unit_test(yara_inspector_scan_folder),
+        cmocka_unit_test(yara_scanner),
+        cmocka_unit_test(yara_scan),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
