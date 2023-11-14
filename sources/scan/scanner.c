@@ -34,7 +34,7 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
 static int scanner_set_rule(SCANNER *scanner, const char *path, const char *yara_file_name)
 {
     YR_FILE_DESCRIPTOR rules_fd = open(path, O_RDONLY);
-
+    
     if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL, yara_file_name))
     {
         fprintf(stderr, "Yara : yr_compiler_add_fd ERROR\n");
@@ -46,30 +46,30 @@ static int scanner_set_rule(SCANNER *scanner, const char *path, const char *yara
     return 0;
 }
 
-static int scanner_set_rules_from_dir(SCANNER *scanner, const char *folder)
+static int scanner_load_rules(SCANNER *scanner, const char *dir)
 {
-    DIR *dir = opendir(folder);
-    if (!dir)
+    DIR *dd;
+    struct dirent *entry;
+    const size_t dir_size = strlen(dir);
+
+    if ((dd = opendir(dir)) == NULL)
     {
-        fprintf(stderr, "Yara : scanner_set_rules_from_dir ERROR (%s : %s)\n", folder, strerror(errno));
+        fprintf(stderr, "Yara : scanner_load_rules ERROR (%s : %s)\n", dir, strerror(errno));
         return -1;
     }
 
-    const size_t folder_size = strlen(folder);
-    struct dirent *entry;
-
-    while ((entry = readdir(dir)) != NULL)
+    while ((entry = readdir(dd)))
     {
         const char *name = entry->d_name;
-        size_t size = folder_size+strlen(name)+2;
+        size_t size = dir_size + strlen(name) + 2;
         
-        if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
+        if (!strcmp(name, ".") || !strcmp(name, ".."))
         {
             continue;
         }
 
         char full_path[size];
-        snprintf(full_path, size, "%s/%s", folder, name);
+        snprintf(full_path, size, "%s/%s", dir, name);
 
         if (strstr(name, ".yar"))
         {
@@ -82,11 +82,11 @@ static int scanner_set_rules_from_dir(SCANNER *scanner, const char *folder)
         
         if (entry->d_type == DT_DIR)
         {
-            scanner_set_rules_from_dir(scanner, full_path);
+            // scanner_load_rules(scanner, full_path);
         }
     }
 
-    closedir(dir);
+    closedir(dd);
     return 0;
 }
 
@@ -108,7 +108,7 @@ int scanner_init(SCANNER **scanner)
         return -1;
     }
 
-    if (scanner_set_rules_from_dir(*scanner, RULES_FOLDER))
+    if (scanner_load_rules(*scanner, RULES_FOLDER))
     {
         fprintf(stderr, "Yara : scanner_set_rule() ERROR\n");
         return -1;
