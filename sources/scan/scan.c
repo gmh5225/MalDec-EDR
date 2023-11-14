@@ -1,8 +1,7 @@
 #define _GNU_SOURCE /* DT_DIR, DT_REG */
 
-#include <scan/scan.h>
-#include <scan/ignored_dirs.h>
-
+#include "scan/scan.h"
+#include "scan/skip_dirs.h"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -13,8 +12,6 @@
 #include <errno.h>
 
 #define ROOT "/"
-
-struct ignored_dirs_list *IGNORE_DIR = NULL;
 
 int scan_file(SCANNER *scanner, const char *file, YR_CALLBACK_FUNC callback)
 {
@@ -27,45 +24,38 @@ int scan_file(SCANNER *scanner, const char *file, YR_CALLBACK_FUNC callback)
     return err;
 }
 
-int scan_folder(SCANNER *scanner, const char *folder, YR_CALLBACK_FUNC callback)
+int scan_dir(SCANNER *scanner, const char *dir, YR_CALLBACK_FUNC callback, struct skip_dirs *skip)
 {
 
-    DIR *dir = opendir(folder);
-    if (!dir)
+    DIR *dd;
+    struct dirent *entry;
+    const size_t dir_size = strlen(dir);
+    const char *fmt = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
+
+    if ((dd = opendir(dir)) == NULL)
     {
-        fprintf(stderr, "Yara : scan_folder ERROR %s : %d (%s)\n", folder, errno, strerror(errno));
+        fprintf(stderr, "Yara : scan_dir ERROR %s : %d (%s)\n", dir, errno, strerror(errno));
         return -1;
     }
-
-    const size_t folder_size = strlen(folder);
-
-    add_ignore_dirs_from_list(
-        &IGNORE_DIR,
-        (const char *[]){ ".", "..", "sys", "proc", "run", "dev", "boot" }, 7);
-
-    struct dirent *entry;
-    const char *fmt = (strcmp(folder, ROOT) == 0) ? "%s%s" : "%s/%s";
     
-    while ((entry = readdir(dir)) != NULL)
+    while ((entry = readdir(dd)) != NULL)
     {
         const char *name = entry->d_name;
-        size_t size = folder_size+strlen(name)+2;
+        size_t size = dir_size + strlen(name) + 2;
         
-        if(find_ignored(&IGNORE_DIR, name))
+        if (!strcmp(name, ".") || !strcmp(name, "..") || get_skipped(skip, dir))
         {
             continue;
         }
 
         char full_path[size];
-        snprintf(full_path, size, fmt, folder, name);
+        snprintf(full_path, size, fmt, dir, name);
 
         // ADVANCED DEBUG TECHNIQUE
-        // printf("%s\n", full_path);
+        // printf(">> %s\n", full_path);
 
         if (entry->d_type == DT_REG)
         {
-            struct stat s;
-
             int code = 0;
             if ((code = scan_file(scanner, full_path, DEFAULT_SCAN_CALLBACK)))
             {
@@ -73,10 +63,10 @@ int scan_folder(SCANNER *scanner, const char *folder, YR_CALLBACK_FUNC callback)
                 return -1;
             }
         } else if (entry->d_type == DT_DIR) {
-            scan_folder(scanner, full_path, DEFAULT_SCAN_CALLBACK);
+            scan_dir(scanner, full_path, DEFAULT_SCAN_CALLBACK, skip);
         }
     }
 
-    closedir(dir);
+    closedir(dd);
     return 0;
 }

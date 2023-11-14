@@ -9,7 +9,7 @@ set(PROJECT_SOURCES
 	YaraTest.c
     ../../sources/scan/scan.c
 	../../sources/scan/scanner.c
-	../../sources/scan/ignored_dirs.c
+	../../sources/scan/skip_dirs.c
 )
 
 add_executable(yara_test ${PROJECT_SOURCES})
