@@ -1,15 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <string.h>
+#include <stdint.h>
 
-int  main(int argc, char **argv)
+#define MAJOR 0
+#define MINOR 0
+#define PATCH 1
+
+void help(char *prog_name) __attribute__((__noreturn__));
+void help(char *prog_name)
 {
-	int c;
+	printf("LinuxDefender %d.%d.%d\n", MAJOR, MINOR, PATCH);
+	printf("Usage: %s [OPTIONS]\n", prog_name);
+	printf("\n\
+ -h, --help                     This help menu\n\
+ -s, --scan <file>|<folder>     Scans either a file or a folder (default max-depth X)\n\
+ --quick                        Enable quick scan\n\
+ --max-depth <depth>            Sets max-depth on folder scan\n\
+"
+	);
+	exit(1);	
+}
 
-	static struct option long_options[] ={
+int main(int argc, char **argv)
+{
+	if (argc < 2)
+	{
+		help(argv[0]);
+	}
+
+	int c;
+	int quick;
+
+	struct option long_options[] ={
+		{"help", no_argument, 0, 'h'},
 		{"scan", required_argument, 0, 's'},
-		{"max-depth", required_argument, 0, 'd'},
-		{"quick", no_argument, 0, 'q'},
+		{"quick", no_argument, &quick, 1},
+		{"max-depth", required_argument, 0, 0},
 		// FIXME: Not sure about this option yet,
 		// {"full", no_argument, 0, 0},
 		{0, 0, 0, 0},
@@ -26,20 +54,19 @@ int  main(int argc, char **argv)
 		switch (c)
 		{
 		case 0:
+			if (!strcmp(long_options[option_index].name, "max-depth"))
+			{
+				printf("--max-depth %d\n", atoi(optarg));
+			}
 			break;
 		
-		case 'q':
-			printf("quick scan\n");
+		case 'h':
+			help(argv[0]);
 			break;
 
 		case 's':
 			printf("--scan %s\n", optarg);
 			break;
-		
-		case 'd':
-			printf("--max-depth %d\n", atoi(optarg));
-			break;
-
 		
 		default:
 			break;
