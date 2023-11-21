@@ -146,8 +146,8 @@ int scanner_destroy(SCANNER **scanner)
     if (rules)
         yr_rules_destroy(rules);
 
-    free((*scanner)->config.file_path);
-    del_skip_dirs((*scanner)->config.skip);
+    if ((*scanner)->config.skip)
+        del_skip_dirs((*scanner)->config.skip);
 
     return 0;
 }

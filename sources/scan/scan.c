@@ -52,7 +52,7 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
         snprintf(full_path, size, fmt, dir, name);
         scanner->config.file_path = full_path;
 
-        // ADVANCED DEBUG TECHNIQUE
+        // ADVANCED DEBUG TECHNIQUE 
         // printf(">> %s\n", scanner->config.file_path);
 
         if (entry->d_type == DT_REG)

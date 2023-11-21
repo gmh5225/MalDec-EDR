@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 			if (!strcmp(long_options[option_index].name, "max-depth"))
 			{
 				uint32_t max_depth = (uint32_t)atoi(optarg);
-				if (max_depth < 0) scanner->config.max_depth = UINT32_MAX;
+				if (max_depth < 0) scanner->config.max_depth = 0;
 				scanner->config.max_depth = max_depth;
 			}
 			break;
