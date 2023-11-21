@@ -89,6 +89,7 @@ int scan(SCANNER *scanner)
     }
 
     mode_t mode = st.st_mode & S_IFMT;
+    close(fd);
 
     if (mode == S_IFDIR)
     {
@@ -97,6 +98,5 @@ int scan(SCANNER *scanner)
         scan_file(scanner, DEFAULT_SCAN_CALLBACK);
     }
 
-    close(fd);
     return 0;
 }
