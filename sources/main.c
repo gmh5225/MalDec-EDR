@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "scan/config.h"
+#include "scan/scan.h"
+
 #define MAJOR 0
 #define MINOR 0
 #define PATCH 1
@@ -31,15 +34,24 @@ int main(int argc, char **argv)
 	}
 
 	int c;
-	int quick;
+
+	SCANNER *scanner;
+	SCANNER_CONFIG config = (SCANNER_CONFIG) {
+		.file_path = NULL,
+		.max_depth = -1,
+		.scan_type = 0,
+		.skip = NULL,
+	};
+
+	scanner_init(&scanner, config);
 
 	struct option long_options[] ={
 		{"help", no_argument, 0, 'h'},
 		{"scan", required_argument, 0, 's'},
-		{"quick", no_argument, &quick, 1},
+		{"quick", no_argument, 0, 'q'},
 		{"max-depth", required_argument, 0, 0},
 		// FIXME: Not sure about this option yet,
-		// {"full", no_argument, 0, 0},
+		// {"full", no_argument, 0, 0},'
 		{0, 0, 0, 0},
 	};
 
@@ -56,7 +68,9 @@ int main(int argc, char **argv)
 		case 0:
 			if (!strcmp(long_options[option_index].name, "max-depth"))
 			{
-				printf("--max-depth %d\n", atoi(optarg));
+				uint32_t max_depth = (uint32_t)atoi(optarg);
+				if (max_depth < 0) scanner->config.max_depth = UINT32_MAX;
+				scanner->config.max_depth = max_depth;
 			}
 			break;
 		
@@ -65,7 +79,11 @@ int main(int argc, char **argv)
 			break;
 
 		case 's':
-			printf("--scan %s\n", optarg);
+			scanner->config.file_path = strdup(optarg);
+			break;
+
+		case 'q':
+			scanner->config.scan_type |= QUICK_SCAN;
 			break;
 		
 		default:
@@ -73,5 +91,5 @@ int main(int argc, char **argv)
 		}
 	}
 
-	return 0;
+	return scan(scanner);
 }

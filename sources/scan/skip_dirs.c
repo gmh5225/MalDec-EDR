@@ -14,6 +14,15 @@ void add_skip_dirs(struct skip_dirs **skip, const char *path[], size_t n)
     }
 }
 
+void del_skip_dirs(struct skip_dirs *skip) {
+  struct skip_dirs *current_user, *tmp;
+
+  HASH_ITER(hh, skip, current_user, tmp) {
+    HASH_DEL(skip, current_user);  /* delete; users advances to next */
+    free(current_user);             /* optional- if you want to free  */
+  }
+}
+
 inline struct skip_dirs* get_skipped(struct skip_dirs *skip, const char *path)
 {
     if (!skip)

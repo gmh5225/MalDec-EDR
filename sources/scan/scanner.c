@@ -92,7 +92,8 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
 
 // ! TODO !
 // - Add logs
-int scanner_init(SCANNER **scanner)
+// - Read config from file
+int scanner_init(SCANNER **scanner, SCANNER_CONFIG config)
 {
     *scanner = malloc(sizeof(SCANNER));
 
@@ -120,6 +121,8 @@ int scanner_init(SCANNER **scanner)
         return -1;
     }
 
+    (*scanner)->config = config;
+
     return 0;
 } 
 
@@ -142,6 +145,9 @@ int scanner_destroy(SCANNER **scanner)
 
     if (rules)
         yr_rules_destroy(rules);
+
+    free((*scanner)->config.file_path);
+    del_skip_dirs((*scanner)->config.skip);
 
     return 0;
 }

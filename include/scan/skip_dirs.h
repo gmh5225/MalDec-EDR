@@ -8,4 +8,5 @@ struct skip_dirs {
 };
 
 void add_skip_dirs(struct skip_dirs **skip, const char *path[], size_t n);
+void del_skip_dirs(struct skip_dirs *skip);
 struct skip_dirs* get_skipped(struct skip_dirs *skip, const char *path);
