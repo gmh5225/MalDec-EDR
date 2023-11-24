@@ -23,7 +23,8 @@ set(CMAKE_USE_PTHREADS_INIT 1)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # add subdirectory
-add_subdirectory( sources/ )
+add_subdirectory( sources/cli )
+add_subdirectory( sources/deamon )
 if(BUILD_TESTS)
 	add_subdirectory( tests/ )
 endif()
