@@ -10,3 +10,6 @@
 [submodule "drivers/telekinesis"]
 	path = drivers/telekinesis
 	url = git@github.com:mlg-security/Telekinesis.git
+[submodule "libraries/elfo"]
+	path = libraries/elfo
+	url = git@github.com:mlg-security/Elfo.git

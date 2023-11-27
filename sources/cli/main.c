@@ -6,10 +6,7 @@
 
 #include "scan/config.h"
 #include "scan/scan.h"
-
-#define MAJOR 0
-#define MINOR 0
-#define PATCH 1
+#include "version/version.h"
 
 void help(char *prog_name) __attribute__((__noreturn__));
 void help(char *prog_name)
