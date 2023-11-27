@@ -1,5 +1,5 @@
 # add subdirectory libraries
-add_subdirectory(../libraries/elfo build/elfo)
+add_subdirectory(../libraries/elfo libraries/elfo)
 
 # add subdirectory compiler library
 
