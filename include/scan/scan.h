@@ -14,7 +14,7 @@ typedef struct SCANNER {
 } SCANNER;
 
 int scan(SCANNER *scanner);
-int scanner_init(SCANNER **scanner, SCANNER_CONFIG config) check_return ;
+int scanner_init(SCANNER **scanner, SCANNER_CONFIG config) check_unused_result;
 int scanner_destroy(SCANNER **scanner);
 int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback);
 int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __current_depth);

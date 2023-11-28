@@ -2,4 +2,4 @@
 
 #include "compiler/compiler_attribute.h"
 
-int init_inotify() check_return;
+int init_inotify() check_unused_result;
