@@ -21,5 +21,4 @@ target_sources(defender PRIVATE
 		${SOURCES}
 )
 
-
-target_link_libraries(defender PRIVATE yara)
+target_link_libraries(defender PRIVATE yara "logger")

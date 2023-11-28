@@ -3,15 +3,18 @@
 
 #include <sys/inotify.h>
 #include <stdlib.h>
-#include <errno.h>
+#include "err/err.h"
 
-inline bool init_inotify()
+int init_inotify()
 {
-    //int fd = inotify_init1(IN_NONBLOCK);
+    int retval = SUCCESS;
+    // int fd = inotify_init1(IN_NONBLOCK);
+    logger_initConsoleLogger(stderr);
     LOG_INFO("console logging");
-    //if (fd == -1)
+    // if (fd == -1)
     {
-        // fprintf(stderr, "Inotify : scan_dir ERROR %s : %d (%s)\n", dir, errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
+
+    return retval;
 }

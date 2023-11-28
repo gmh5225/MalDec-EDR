@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
+#include "compiler/compiler_attribute.h"
 
-
-inline bool init_inotify();
+int init_inotify() check_return;

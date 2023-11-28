@@ -22,4 +22,4 @@ target_sources(defenderd PRIVATE
 )
 
 
-target_link_libraries(defenderd PRIVATE yara)
+target_link_libraries(defenderd PRIVATE yara "logger")

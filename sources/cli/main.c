@@ -4,12 +4,15 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "inotify/inotify.h"
 #include "scan/config.h"
 #include "scan/scan.h"
 #include "version/version.h"
 #include "err/err.h"
+#include "compiler/compiler_attribute.h"
 
-void help(char *prog_name) __attribute__((__noreturn__));
+void help(char *prog_name) no_return;
+
 void help(char *prog_name)
 {
 	printf("LinuxDefender %d.%d.%d\n", MAJOR, MINOR, PATCH);
@@ -29,6 +32,8 @@ int main(int argc, char **argv)
 	{
 		help(argv[0]);
 	}
+
+	init_inotify();
 
 	int c, retval;
 
