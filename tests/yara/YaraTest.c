@@ -5,16 +5,18 @@
 #include <cmocka.h>
 
 #include <scan/scan.h>
+#include "err/err.h"
 
-static void yara_scanner(void **state) {
+static void yara_scanner(void **state)
+{
     SCANNER *scanner;
 
-    SCANNER_CONFIG config = (SCANNER_CONFIG) {
-		.file_path = "/tmp",
-		.max_depth = -1,
-		.scan_type = 0,
+    SCANNER_CONFIG config = (SCANNER_CONFIG){
+        .file_path = "/tmp",
+        .max_depth = -1,
+        .scan_type = 0,
         .skip = NULL,
-	};
+    };
 
     assert_int_equal(scanner_init(&scanner, config), 0);
     assert_int_equal(scanner_destroy(&scanner), 0);
@@ -22,48 +24,55 @@ static void yara_scanner(void **state) {
     (void)state;
 }
 
-static void yara_scan(void **state) {
+static void yara_scan(void **state)
+{
     SCANNER *scanner;
 
-    SCANNER_CONFIG config = (SCANNER_CONFIG) {
-		.file_path = "/tmp",
-		.max_depth = -1,
-		.scan_type = 0,
+    SCANNER_CONFIG config = (SCANNER_CONFIG){
+        .file_path = "/tmp",
+        .max_depth = -1,
+        .scan_type = 0,
         .skip = NULL,
-	};
+    };
 
-    scanner_init(&scanner, config);
+    if (scanner_init(&scanner, config) != ERROR)
+    {
 
-    assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), 0);
-    assert_int_equal(scanner_destroy(&scanner), 0);
+        assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), 0);
+        assert_int_equal(scanner_destroy(&scanner), 0);
 
-    (void)state;
+        (void)state;
+    }
 }
 
-static void yara_scan_ignored(void **state) {
+static void yara_scan_ignored(void **state)
+{
     SCANNER *scanner;
 
-    SCANNER_CONFIG config = (SCANNER_CONFIG) {
-		.file_path = "/tmp",
-		.max_depth = -1,
-		.scan_type = 0,
-	};
+    SCANNER_CONFIG config = (SCANNER_CONFIG){
+        .file_path = "/tmp",
+        .max_depth = -1,
+        .scan_type = 0,
+    };
 
-    scanner_init(&scanner, config);
+    if (scanner_init(&scanner, config) != ERROR)
+    {
+        struct skip_dirs *skip = NULL;
+        const char *skip_list[] = {"/tmp/test"};
+        add_skip_dirs(&skip, skip_list, 1);
 
-    struct skip_dirs *skip = NULL;
-    const char *skip_list[] = { "/tmp/test" };
-    add_skip_dirs(&skip, skip_list, 1);
+        scanner->config.skip = skip;
 
-    scanner->config.skip = skip;
+        assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), 0);
+        assert_int_equal(scanner_destroy(&scanner), 0);
 
-    assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), 0);
-    assert_int_equal(scanner_destroy(&scanner), 0);
 
-    (void)state;
+        (void)state;
+    }
 }
 
-int main(void) {
+int main(void)
+{
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(yara_scanner),
         cmocka_unit_test(yara_scan),

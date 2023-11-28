@@ -13,3 +13,6 @@
 [submodule "libraries/elfo"]
 	path = libraries/elfo
 	url = git@github.com:mlg-security/Elfo.git
+[submodule "libraries/c-logger"]
+	path = libraries/c-logger
+	url = git@github.com:yksz/c-logger.git

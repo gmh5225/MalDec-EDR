@@ -7,6 +7,7 @@
 #include "scan/config.h"
 #include "scan/scan.h"
 #include "version/version.h"
+#include "err/err.h"
 
 void help(char *prog_name) __attribute__((__noreturn__));
 void help(char *prog_name)
@@ -18,9 +19,8 @@ void help(char *prog_name)
  -s, --scan <file>|<folder>     Scans either a file or a folder (default max-depth X)\n\
  --quick                        Enable quick scan\n\
  --max-depth <depth>            Sets max-depth on folder scan\n\
-"
-	);
-	exit(1);	
+");
+	exit(1);
 }
 
 int main(int argc, char **argv)
@@ -30,19 +30,22 @@ int main(int argc, char **argv)
 		help(argv[0]);
 	}
 
-	int c;
+	int c, retval = SUCCESS;
 
 	SCANNER *scanner;
-	SCANNER_CONFIG config = (SCANNER_CONFIG) {
+	SCANNER_CONFIG config = (SCANNER_CONFIG){
 		.file_path = NULL,
 		.max_depth = -1,
 		.scan_type = 0,
 		.skip = NULL,
 	};
 
-	scanner_init(&scanner, config);
+	if ((retval = scanner_init(&scanner, config)) == ERROR)
+	{
+		goto ret;
+	}
 
-	struct option long_options[] ={
+	struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"scan", required_argument, 0, 's'},
 		{"quick", no_argument, 0, 'q'},
@@ -57,8 +60,9 @@ int main(int argc, char **argv)
 		int option_index = 0;
 		c = getopt_long(argc, argv, "qs:d:",
 						long_options, &option_index);
-		
-		if (c < 0) break;
+
+		if (c < 0)
+			break;
 
 		switch (c)
 		{
@@ -66,11 +70,12 @@ int main(int argc, char **argv)
 			if (!strcmp(long_options[option_index].name, "max-depth"))
 			{
 				uint32_t max_depth = (uint32_t)atoi(optarg);
-				if (max_depth < 0) scanner->config.max_depth = 0;
+				if (max_depth < 0)
+					scanner->config.max_depth = 0;
 				scanner->config.max_depth = max_depth;
 			}
 			break;
-		
+
 		case 'h':
 			help(argv[0]);
 			break;
@@ -82,11 +87,15 @@ int main(int argc, char **argv)
 		case 'q':
 			scanner->config.scan_type |= QUICK_SCAN;
 			break;
-		
+
 		default:
 			break;
 		}
 	}
 
-	return scan(scanner);
+	retval = scan(scanner);
+	retval = scanner_destroy(&scanner);
+
+ret:
+	return retval;
 }

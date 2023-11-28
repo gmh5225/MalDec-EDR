@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include "err/err.h"
 
 #define ROOT "/"
 
@@ -20,7 +21,7 @@ inline int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 
 int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_depth)
 {
-
+    int retval = SUCCESS;
     DIR *dd;
     SCANNER_CONFIG config = scanner->config;
     struct dirent *entry;
@@ -30,19 +31,23 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
     const size_t dir_size = strlen(dir);
     const char *fmt = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
 
-    if (config.max_depth >= 0 && __currrent_depth > config.max_depth) return 0;
-
-    if ((dd = opendir(dir)) == NULL)
+    if (config.max_depth >= 0 && __currrent_depth > config.max_depth)
+    {
+        retval = ERROR;
+        goto ret;
+    }
+    else if ((dd = opendir(dir)) == NULL)
     {
         fprintf(stderr, "Yara : scan_dir ERROR %s : %d (%s)\n", dir, errno, strerror(errno));
-        return -1;
+        retval = ERROR;
+        goto ret;
     }
-    
+
     while ((entry = readdir(dd)) != NULL)
     {
         const char *name = entry->d_name;
         size_t size = dir_size + strlen(name) + 2;
-        
+
         if (!strcmp(name, ".") || !strcmp(name, "..") || get_skipped(skip, dir))
         {
             continue;
@@ -52,9 +57,6 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
         snprintf(full_path, size, fmt, dir, name);
         scanner->config.file_path = full_path;
 
-        // ADVANCED DEBUG TECHNIQUE 
-        // printf(">> %s\n", scanner->config.file_path);
-
         if (entry->d_type == DT_REG)
         {
             int code = scan_file(scanner, DEFAULT_SCAN_CALLBACK);
@@ -62,7 +64,6 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
             if (code < 0)
             {
                 fprintf(stderr, "Yara : scan_file ERROR %s : %d (%s)\n", full_path, code, strerror(errno));
-                // return -1;
             }
         }
         else if (entry->d_type == DT_DIR)
@@ -72,11 +73,14 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
     }
 
     closedir(dd);
-    return 0;
+    
+ret:
+    return retval;
 }
 
 int scan(SCANNER *scanner)
 {
+    int retval = SUCCESS;
     SCANNER_CONFIG config = scanner->config;
 
     struct stat st;
@@ -85,18 +89,22 @@ int scan(SCANNER *scanner)
     if (fstat(fd, &st) < 0)
     {
         fprintf(stderr, "scan : ERROR %s : (%s)\n", config.file_path, strerror(errno));
-        return -1;
+        retval = ERROR;
+        goto ret;
     }
 
     mode_t mode = st.st_mode & S_IFMT;
-    close(fd);
 
     if (mode == S_IFDIR)
     {
         scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0);
-    } else if (mode == S_IFREG) {
+    }
+    else if (mode == S_IFREG)
+    {
         scan_file(scanner, DEFAULT_SCAN_CALLBACK);
     }
 
-    return 0;
+ret:
+    close(fd);
+    return retval;
 }

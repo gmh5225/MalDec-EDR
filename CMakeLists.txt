@@ -9,7 +9,7 @@ set(LIB_PATCH_VERSION "0")
 
 
 # Information for builds
-set(FLAGS_DEBUG OFF )
+set(FLAGS_DEBUG ON )
 set(BUILD_TESTS ON )
 set(BUILD_BENCHMARK OFF )
 set(FLAGS_OPTIMIZATIONS ON)
@@ -37,5 +37,5 @@ set(CMAKE_CXX_FLAGS "-O2 -Os") # default flags
 if(FLAGS_OPTIMIZATIONS)
   set(CMAKE_CXX_FLAGS "-ftree-vectorize -mavx -fno-stack-protector -march=native -O2 -Os -fdelete-null-pointer-checks -fdelete-dead-exceptions")
 elseif(FLAGS_DEBUG)
-  set(CMAKE_CXX_FLAGS "-fsanitize=address -fms-extensions --all-warnings -DDEBUG -g  -O2 -Os  -Wvolatile  -Warray-bounds --extra-warnings")
+  set(CMAKE_CXX_FLAGS "-ggdb3 -fsanitize=address -fms-extensions --all-warnings -DDEBUG -g  -O2 -Os  -Wvolatile  -Warray-bounds --extra-warnings")
 endif()

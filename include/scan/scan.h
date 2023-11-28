@@ -3,6 +3,7 @@
 #include <yara.h>
 #include "scan/skip_dirs.h"
 #include "scan/config.h"
+#include "compiler/compiler_attribute.h"
 
 #define DEFAULT_SCAN_CALLBACK default_scan_callback 
 
@@ -13,7 +14,7 @@ typedef struct SCANNER {
 } SCANNER;
 
 int scan(SCANNER *scanner);
-int scanner_init(SCANNER **scanner, SCANNER_CONFIG config);
+int scanner_init(SCANNER **scanner, SCANNER_CONFIG config) check_return ;
 int scanner_destroy(SCANNER **scanner);
 int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback);
 int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __current_depth);
