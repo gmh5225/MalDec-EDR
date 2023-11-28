@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 		help(argv[0]);
 	}
 
-	int c, retval = SUCCESS;
+	int c, retval;
 
 	SCANNER *scanner;
 	SCANNER_CONFIG config = (SCANNER_CONFIG){
