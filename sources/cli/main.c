@@ -12,7 +12,8 @@
 #include "compiler/compiler_attribute.h"
 #include "logger/logger.h"
 
-void help(char *prog_name) no_return;
+inline void help(char *prog_name) no_return;
+inline void version();
 
 int main(int argc, char **argv)
 {
@@ -23,8 +24,6 @@ int main(int argc, char **argv)
 
 	init_logger("log.txt");
 
-	int c, retval;
-
 	SCANNER *scanner;
 	SCANNER_CONFIG config = (SCANNER_CONFIG){
 		.file_path = NULL,
@@ -33,26 +32,24 @@ int main(int argc, char **argv)
 		.skip = NULL,
 	};
 
+	int c, retval;
+
 	if ((IS_ERR((retval = init_scanner(&scanner, config)))))
-	{
 		goto ret;
-	}
 
 	struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"scan", required_argument, 0, 's'},
 		{"quick", no_argument, 0, 'q'},
 		{"max-depth", required_argument, 0, 0},
-		// FIXME: Not sure about this option yet,
-		// {"full", no_argument, 0, 0},'
+		{"version", no_argument, 0, 'v'},
 		{0, 0, 0, 0},
 	};
 
 	while (1)
 	{
 		int option_index = 0;
-		c = getopt_long(argc, argv, "qs:d:",
-						long_options, &option_index);
+		c = getopt_long(argc, argv, "qs:d:v:h", long_options, &option_index);
 
 		if (c < 0)
 			break;
@@ -81,6 +78,11 @@ int main(int argc, char **argv)
 			scanner->config.scan_type |= QUICK_SCAN;
 			break;
 
+		case 'v':
+			version();
+			exit(EXIT_SUCCESS);
+			break;
+
 		default:
 			break;
 		}
@@ -91,20 +93,26 @@ int main(int argc, char **argv)
 		retval = scan(scanner);
 		retval = exit_scanner(&scanner);
 	}
-	
+
 ret:
 	return retval;
 }
 
 void help(char *prog_name)
 {
-	printf("LinuxDefender %d.%d.%d\n", MAJOR, MINOR, PATCH);
+	version();
 	printf("Usage: %s [OPTIONS]\n", prog_name);
 	printf("\n\
  -h, --help                     This help menu\n\
  -s, --scan <file>|<folder>     Scans either a file or a folder (default max-depth X)\n\
- --quick                        Enable quick scan\n\
+ -q, --quick                    Enable quick scan\n\
  --max-depth <depth>            Sets max-depth on folder scan\n\
+ -v                             Version the Linux Defender\n\
 ");
 	exit(EXIT_SUCCESS);
+}
+
+void version()
+{
+	printf("LinuxDefender %d.%d.%d\n", MAJOR, MINOR, PATCH);
 }
