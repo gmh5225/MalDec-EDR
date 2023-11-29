@@ -10,6 +10,7 @@ set(PROJECT_SOURCES
     ../../sources/scan/scan.c
 	../../sources/scan/scanner.c
 	../../sources/scan/skip_dirs.c
+	../../sources/logger/logger.c
 )
 
 add_executable(yara_test ${PROJECT_SOURCES})
@@ -19,6 +20,7 @@ target_include_directories (yara_test PRIVATE
 		../../packages/
 		../../libraries/cmocka/include
 		../../libraries/uthash/include
+		../../libraries/c-logger/
 )
 
-target_link_libraries(yara_test cmocka yara)
+target_link_libraries(yara_test cmocka yara "logger")

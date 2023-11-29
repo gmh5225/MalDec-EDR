@@ -16,3 +16,6 @@
 [submodule "libraries/c-logger"]
 	path = libraries/c-logger
 	url = git@github.com:yksz/c-logger.git
+[submodule "libraries/json-c"]
+	path = libraries/json-c
+	url = git@github.com:json-c/json-c.git

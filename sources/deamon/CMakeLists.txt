@@ -9,7 +9,7 @@ target_include_directories (defenderd PRIVATE
     ../../packages/
     ../../interfaces/
     ../../libraries/uthash/include/
-    ../../libraries/c-logger/src
+    ../../libraries/c-logger/
 )
 
 file(GLOB_RECURSE SOURCES

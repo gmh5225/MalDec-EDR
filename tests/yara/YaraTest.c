@@ -6,6 +6,7 @@
 
 #include <scan/scan.h>
 #include "err/err.h"
+#include "logger/logger.h"
 
 static void yara_scanner(void **state)
 {
@@ -18,8 +19,8 @@ static void yara_scanner(void **state)
         .skip = NULL,
     };
 
-    assert_int_equal(scanner_init(&scanner, config), 0);
-    assert_int_equal(scanner_destroy(&scanner), 0);
+    assert_int_equal(init_scanner(&scanner, config), 0);
+    assert_int_equal(exit_scanner(&scanner), 0);
 
     (void)state;
 }
@@ -35,11 +36,11 @@ static void yara_scan(void **state)
         .skip = NULL,
     };
 
-    if (scanner_init(&scanner, config) != ERROR)
+    if (init_scanner(&scanner, config) != ERROR)
     {
 
         assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), 0);
-        assert_int_equal(scanner_destroy(&scanner), 0);
+        assert_int_equal(exit_scanner(&scanner), 0);
 
         (void)state;
     }
@@ -55,7 +56,7 @@ static void yara_scan_ignored(void **state)
         .scan_type = 0,
     };
 
-    if (scanner_init(&scanner, config) != ERROR)
+    if (init_scanner(&scanner, config) != ERROR)
     {
         struct skip_dirs *skip = NULL;
         const char *skip_list[] = {"/tmp/test"};
@@ -64,7 +65,7 @@ static void yara_scan_ignored(void **state)
         scanner->config.skip = skip;
 
         assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), 0);
-        assert_int_equal(scanner_destroy(&scanner), 0);
+        assert_int_equal(exit_scanner(&scanner), 0);
 
 
         (void)state;
@@ -73,6 +74,7 @@ static void yara_scan_ignored(void **state)
 
 int main(void)
 {
+    init_logger("testlog.txt");
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(yara_scanner),
         cmocka_unit_test(yara_scan),

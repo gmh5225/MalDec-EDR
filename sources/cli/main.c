@@ -10,21 +10,9 @@
 #include "version/version.h"
 #include "err/err.h"
 #include "compiler/compiler_attribute.h"
+#include "logger/logger.h"
 
 void help(char *prog_name) no_return;
-
-void help(char *prog_name)
-{
-	printf("LinuxDefender %d.%d.%d\n", MAJOR, MINOR, PATCH);
-	printf("Usage: %s [OPTIONS]\n", prog_name);
-	printf("\n\
- -h, --help                     This help menu\n\
- -s, --scan <file>|<folder>     Scans either a file or a folder (default max-depth X)\n\
- --quick                        Enable quick scan\n\
- --max-depth <depth>            Sets max-depth on folder scan\n\
-");
-	exit(EXIT_SUCCESS);
-}
 
 int main(int argc, char **argv)
 {
@@ -33,7 +21,7 @@ int main(int argc, char **argv)
 		help(argv[0]);
 	}
 
-	init_inotify();
+	init_logger("log.txt");
 
 	int c, retval;
 
@@ -45,7 +33,7 @@ int main(int argc, char **argv)
 		.skip = NULL,
 	};
 
-	if ((IS_ERR((retval = scanner_init(&scanner, config)))))
+	if ((IS_ERR((retval = init_scanner(&scanner, config)))))
 	{
 		goto ret;
 	}
@@ -86,7 +74,7 @@ int main(int argc, char **argv)
 			break;
 
 		case 's':
-			scanner->config.file_path = strdup(optarg);
+			scanner->config.file_path = optarg;
 			break;
 
 		case 'q':
@@ -98,9 +86,25 @@ int main(int argc, char **argv)
 		}
 	}
 
-	retval = scan(scanner);
-	retval = scanner_destroy(&scanner);
-
+	if (scanner->config.file_path != NULL)
+	{
+		retval = scan(scanner);
+		retval = exit_scanner(&scanner);
+	}
+	
 ret:
 	return retval;
+}
+
+void help(char *prog_name)
+{
+	printf("LinuxDefender %d.%d.%d\n", MAJOR, MINOR, PATCH);
+	printf("Usage: %s [OPTIONS]\n", prog_name);
+	printf("\n\
+ -h, --help                     This help menu\n\
+ -s, --scan <file>|<folder>     Scans either a file or a folder (default max-depth X)\n\
+ --quick                        Enable quick scan\n\
+ --max-depth <depth>            Sets max-depth on folder scan\n\
+");
+	exit(EXIT_SUCCESS);
 }

@@ -9,12 +9,13 @@ target_include_directories (defender PRIVATE
 		../../packages/
 		../../interfaces/
 		../../libraries/uthash/include/
-		../../libraries/c-logger/src
+		../../libraries/c-logger/
 )
 
 file(GLOB_RECURSE SOURCES
         ../scan/*.c
 		../inotify/*.c
+		../logger/*.c
 )
 
 target_sources(defender PRIVATE 

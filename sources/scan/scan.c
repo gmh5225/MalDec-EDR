@@ -11,12 +11,20 @@
 #include <string.h>
 #include <errno.h>
 #include "err/err.h"
+#include "logger/logger.h"
 
 #define ROOT "/"
 
 inline int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 {
-    return yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, NULL, 0);
+    CALLBACK_ARGS *user_data = (struct _CALLBACK_ARGS *)malloc(sizeof(struct _CALLBACK_ARGS));
+    user_data->file_path = scanner->config.file_path;
+    user_data->current_count = 0;
+    user_data->verbose = false;
+
+    yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, user_data, 0);
+
+    free(user_data);
 }
 
 int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_depth)
@@ -38,7 +46,7 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
     }
     else if ((dd = opendir(dir)) == NULL)
     {
-        fprintf(stderr, "Yara : scan_dir ERROR %s : %d (%s)\n", dir, errno, strerror(errno));
+        LOG_ERROR("Yara : scan_dir ERROR %s : %d (%s)", dir, errno, strerror(errno));
         retval = ERROR;
         goto ret;
     }
@@ -63,7 +71,7 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
 
             if (code < 0)
             {
-                fprintf(stderr, "Yara : scan_file ERROR %s : %d (%s)\n", full_path, code, strerror(errno));
+                LOG_ERROR("Yara : scan_file ERROR %s : %d (%s)", full_path, code, strerror(errno));
             }
         }
         else if (entry->d_type == DT_DIR)
@@ -89,7 +97,7 @@ int scan(SCANNER *scanner)
 
     if (fstat(fd, &st) < 0)
     {
-        fprintf(stderr, "scan : ERROR %s : (%s)\n", config.file_path, strerror(errno));
+        LOG_ERROR("scan : ERROR %s : (%s)", config.file_path, strerror(errno));
         retval = ERROR;
         goto ret;
     }

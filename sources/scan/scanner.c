@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <string.h>
 #include "err/err.h"
+#include "logger/logger.h"
 
 #define RULES_FOLDER "../../../rules/YARA-Mindshield-Analysis"
 
@@ -17,15 +18,62 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
                           void *message_data,
                           void *user_data)
 {
-    YR_RULE *rule = (YR_RULE *)(message_data);
+    YR_RULE *rule = (YR_RULE *)message_data;
     YR_STRING *string;
     YR_MATCH *match;
+    char *strings_match = NULL;
+    size_t strings_match_size = 0;
 
     switch (message)
     {
-    case CALLBACK_MSG_RULE_NOT_MATCHING:
+    case CALLBACK_MSG_SCAN_FINISHED:
+        if (((CALLBACK_ARGS *)user_data)->verbose || ((CALLBACK_ARGS *)user_data)->current_count)
+            LOG_INFO("Yara : All rules were passed in this file '%s', the scan is over, rules matching %d",
+                     ((CALLBACK_ARGS *)user_data)->file_path, ((CALLBACK_ARGS *)user_data)->current_count);
         break;
+
     case CALLBACK_MSG_RULE_MATCHING:
+        ((CALLBACK_ARGS *)user_data)->current_count++;
+
+        // allocate initial memory for strings_match
+        strings_match_size = 1028;
+        strings_match = malloc(strings_match_size);
+        if (strings_match == NULL)
+        {
+            LOG_ERROR("Yara : Memory allocation error\n");
+            exit(EXIT_FAILURE);
+        }
+
+        // initialize strings_match to an empty string
+        strings_match[0] = '\0';
+
+        yr_rule_strings_foreach(rule, string)
+        {
+            yr_string_matches_foreach(context, string, match)
+            {
+                size_t new_size = strings_match_size + strlen(string->identifier) + 20;
+
+                if (new_size > strings_match_size)
+                {
+                    strings_match = realloc(strings_match, new_size);
+                    if (strings_match == NULL)
+                    {
+                        LOG_ERROR("Yara : Memory reallocation error\n");
+                        exit(EXIT_FAILURE);
+                    }
+                    strings_match_size = new_size;
+                }
+                snprintf(strings_match + strlen(strings_match), new_size - strlen(strings_match), "[%s:0x%lx]", string->identifier, match->offset);
+            }
+        }
+
+        LOG_WARN("Yara : The rule '%s' were identified in this file '%s', Strings match %s",
+                 rule->identifier, ((CALLBACK_ARGS *)user_data)->file_path, strings_match);
+
+        free(strings_match);
+        break;
+
+    case CALLBACK_MSG_RULE_NOT_MATCHING:
         break;
     }
 
@@ -39,7 +87,7 @@ static int scanner_set_rule(SCANNER *scanner, const char *path, const char *yara
 
     if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL, yara_file_name))
     {
-        fprintf(stderr, "Yara : yr_compiler_add_fd ERROR\n");
+        LOG_ERROR("Yara : yr_compiler_add_fd ERROR");
         retval = ERROR;
         goto ret;
     }
@@ -58,7 +106,7 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
 
     if ((dd = opendir(dir)) == NULL)
     {
-        fprintf(stderr, "Yara : scanner_load_rules ERROR (%s : %s)\n", dir, strerror(errno));
+        LOG_ERROR("Yara : scanner_load_rules ERROR (%s : %s)", dir, strerror(errno));
         retval = ERROR;
         goto ret;
     }
@@ -80,7 +128,7 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
         {
             if (scanner_set_rule(scanner, full_path, name))
             {
-                fprintf(stderr, "Yara : scanner_set_rule() ERROR\n");
+                LOG_ERROR("Yara : scanner_set_rule() ERROR");
                 retval = ERROR;
                 goto ret;
             }
@@ -88,7 +136,7 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
 
         if (entry->d_type == DT_DIR)
         {
-            // scanner_load_rules(scanner, full_path);
+            scanner_load_rules(scanner, full_path);
         }
     }
 
@@ -100,35 +148,35 @@ ret:
 // ! TODO !
 // - Add logs
 // - Read config from file
-int scanner_init(SCANNER **scanner, SCANNER_CONFIG config)
+int init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
 {
     int retval = SUCCESS;
     *scanner = malloc(sizeof(SCANNER));
 
     if (yr_initialize())
     {
-        fprintf(stderr, "Yara : yr_initialize() ERROR\n");
+        LOG_ERROR("Yara : yr_initialize() ERROR");
         retval = ERROR;
         goto ret;
     }
 
     if (yr_compiler_create(&(*scanner)->yr_compiler))
     {
-        fprintf(stderr, "Yara : yr_compiler_create() ERROR\n");
+        LOG_ERROR("Yara : yr_compiler_create() ERROR");
         retval = ERROR;
         goto ret;
     }
 
     if (scanner_load_rules(*scanner, RULES_FOLDER))
     {
-        fprintf(stderr, "Yara : scanner_set_rule() ERROR\n");
+        LOG_ERROR("Yara : scanner_set_rule() ERROR");
         retval = ERROR;
         goto ret;
     }
 
     if (yr_compiler_get_rules((*scanner)->yr_compiler, &(*scanner)->yr_rules))
     {
-        fprintf(stderr, "Yara : yr_compiler_create() ERROR\n");
+        LOG_ERROR("Yara : yr_compiler_create() ERROR");
         retval = ERROR;
         goto ret;
     }
@@ -138,7 +186,7 @@ ret:
     return retval;
 }
 
-int scanner_destroy(SCANNER **scanner)
+int exit_scanner(SCANNER **scanner)
 {
     int retval = SUCCESS;
     if (!scanner)
@@ -147,21 +195,15 @@ int scanner_destroy(SCANNER **scanner)
         goto ret;
     }
 
-    YR_COMPILER *compiler = (*scanner)->yr_compiler;
-    YR_RULES *rules = (*scanner)->yr_rules;
-
     if (yr_finalize())
     {
-        fprintf(stderr, "Yara : yr_finalize() ERROR\n");
+        LOG_ERROR("Yara : yr_finalize() ERROR");
         retval = ERROR;
         goto ret;
     }
 
-    if (compiler)
-        yr_compiler_destroy(compiler);
-
-    if (rules)
-        yr_rules_destroy(rules);
+    yr_compiler_destroy((*scanner)->yr_compiler);
+    yr_rules_destroy((*scanner)->yr_rules);
 
     if ((*scanner)->config.skip)
         del_skip_dirs(&(*scanner)->config.skip);
