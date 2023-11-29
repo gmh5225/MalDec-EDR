@@ -107,7 +107,7 @@ void help(char *prog_name)
  -s, --scan <file>|<folder>     Scans either a file or a folder (default max-depth X)\n\
  -q, --quick                    Enable quick scan\n\
  --max-depth <depth>            Sets max-depth on folder scan\n\
- -v                             Version the Linux Defender\n\
+ -v, --version                  Version the Linux Defender\n\
 ");
 	exit(EXIT_SUCCESS);
 }
