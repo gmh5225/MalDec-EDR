@@ -23,7 +23,7 @@ void help(char *prog_name)
  --quick                        Enable quick scan\n\
  --max-depth <depth>            Sets max-depth on folder scan\n\
 ");
-	exit(1);
+	exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char **argv)
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 		.skip = NULL,
 	};
 
-	if ((retval = scanner_init(&scanner, config)) == ERROR)
+	if ((IS_ERR((retval = scanner_init(&scanner, config)))))
 	{
 		goto ret;
 	}

@@ -68,12 +68,13 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
         }
         else if (entry->d_type == DT_DIR)
         {
-            scan_dir(scanner, DEFAULT_SCAN_CALLBACK, __currrent_depth + 1);
+            if (IS_ERR(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, __currrent_depth + 1)))
+                ;
         }
     }
 
     closedir(dd);
-    
+
 ret:
     return retval;
 }
@@ -97,11 +98,15 @@ int scan(SCANNER *scanner)
 
     if (mode == S_IFDIR)
     {
-        scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0);
+        if (IS_ERR(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0)))
+        {
+        }
     }
     else if (mode == S_IFREG)
     {
-        scan_file(scanner, DEFAULT_SCAN_CALLBACK);
+        if (IS_ERR(scan_file(scanner, DEFAULT_SCAN_CALLBACK)))
+        {
+        }
     }
 
 ret:
