@@ -2,25 +2,29 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 # add subdirectory
-add_subdirectory(../libraries/cmocka build/cmocka)
+add_subdirectory(../libraries/cmocka bin/cmocka)
 
-add_definitions(-DUNIT_TESTS)
-set(PROJECT_SOURCES
-	yara.c
-    ../sources/scan/scan.c
-	../sources/scan/scanner.c
-	../sources/scan/skip_dirs.c
-	../sources/logger/logger.c
+set(tests
+    yara_test
+    yara_scanner_test
 )
 
-add_executable(yara_test ${PROJECT_SOURCES})
-
-target_include_directories (yara_test PRIVATE 
+include_directories(
 		../include/
 		../packages/
-		../libraries/cmocka/include
-		../libraries/uthash/include
-		../libraries/c-logger/
+		../libraries/
 )
 
-target_link_libraries(yara_test cmocka yara "logger")
+file(GLOB_RECURSE sources
+    ../sources/scan/*.c
+    ../sources/logger/*.c
+)
+
+foreach(test IN LISTS tests)
+	add_executable(${test} ${test}.c)
+	target_link_libraries(${test} PUBLIC cmocka yara logger)
+	target_sources(${test} PRIVATE ${sources})
+	add_test(NAME ${test}
+			COMMAND ${test}
+			WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests)
+endforeach()

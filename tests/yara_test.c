@@ -2,9 +2,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
-#include <cmocka.h>
+#include "cmocka.h"
 
-#include <scan/scan.h>
+#include "scan/scan.h"
 #include "err/err.h"
 #include "logger/logger.h"
 
