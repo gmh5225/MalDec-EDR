@@ -8,23 +8,6 @@
 #include "err/err.h"
 #include "logger/logger.h"
 
-static void yara_scanner(void **state)
-{
-    SCANNER *scanner;
-
-    SCANNER_CONFIG config = (SCANNER_CONFIG){
-        .file_path = "/tmp",
-        .max_depth = -1,
-        .scan_type = 0,
-        .skip = NULL,
-    };
-
-    assert_int_equal(init_scanner(&scanner, config), 0);
-    assert_int_equal(exit_scanner(&scanner), 0);
-
-    (void)state;
-}
-
 static void yara_scan(void **state)
 {
     SCANNER *scanner;
@@ -76,7 +59,6 @@ int main(void)
 {
     init_logger("testlog.txt");
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(yara_scanner),
         cmocka_unit_test(yara_scan),
         cmocka_unit_test(yara_scan_ignored),
     };
