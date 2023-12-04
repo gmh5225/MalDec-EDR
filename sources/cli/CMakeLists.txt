@@ -4,22 +4,10 @@ cmake_minimum_required(VERSION 3.0.2)
 # add executable and target libraries
 add_executable(defender main.c)
 
-target_include_directories (defender PRIVATE 
-		../../include/
-		../../packages/
-		../../interfaces/
-		../../libraries/uthash/include/
-		../../libraries/c-logger/
+file(GLOB_RECURSE sources
+    ../scan/*.c
+    ../logger/*.c
 )
 
-file(GLOB_RECURSE SOURCES
-        ../scan/*.c
-		../inotify/*.c
-		../logger/*.c
-)
-
-target_sources(defender PRIVATE 
-		${SOURCES}
-)
-
-target_link_libraries(defender PRIVATE yara "logger")
+target_sources(defender PRIVATE ${sources})
+target_link_libraries(defender PUBLIC yara logger)

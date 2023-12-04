@@ -1,6 +1,6 @@
 #pragma once
 
-#include <uthash.h>
+#include "uthash/include/uthash.h"
 #include "compiler/compiler_attribute.h"
 
 struct skip_dirs
