@@ -6,6 +6,7 @@
 #define QUICK_SCAN 1 << 0
 
 typedef struct SCANNER_CONFIG {
+    const char* rules;
     uint8_t scan_type;
     int32_t max_depth;
     char *file_path;
