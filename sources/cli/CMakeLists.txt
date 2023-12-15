@@ -7,7 +7,8 @@ add_executable(defender main.c)
 file(GLOB_RECURSE sources
     ../scan/*.c
     ../logger/*.c
+    ../cjson/*.c
 )
 
 target_sources(defender PRIVATE ${sources})
-target_link_libraries(defender PUBLIC yara logger)
+target_link_libraries(defender PUBLIC yara logger json-c)

@@ -18,6 +18,9 @@
 inline int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 {
     CALLBACK_ARGS *user_data = (struct _CALLBACK_ARGS *)malloc(sizeof(struct _CALLBACK_ARGS));
+
+    IS_MALLOC_CHECK(user_data);
+
     user_data->file_path = scanner->config.file_path;
     user_data->current_count = 0;
     user_data->verbose = false;
@@ -27,7 +30,7 @@ inline int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
     free(user_data);
 }
 
-int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_depth)
+int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth)
 {
     int retval = SUCCESS;
     DIR *dd;
@@ -39,7 +42,7 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
     const size_t dir_size = strlen(dir);
     const char *fmt = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
 
-    if (config.max_depth >= 0 && __currrent_depth > config.max_depth)
+    if (config.max_depth >= 0 && currrent_depth > config.max_depth)
     {
         retval = ERROR;
         goto ret;
@@ -76,7 +79,7 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t __currrent_dep
         }
         else if (entry->d_type == DT_DIR)
         {
-            if (IS_ERR(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, __currrent_depth + 1)))
+            if (IS_ERR(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, currrent_depth + 1)))
                 ;
         }
     }

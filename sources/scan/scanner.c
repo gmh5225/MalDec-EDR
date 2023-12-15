@@ -11,8 +11,6 @@
 #include "err/err.h"
 #include "logger/logger.h"
 
-#define RULES_FOLDER "../../../rules/YARA-Mindshield-Analysis"
-
 int default_scan_callback(YR_SCAN_CONTEXT *context,
                           int message,
                           void *message_data,
@@ -38,6 +36,9 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
         // allocate initial memory for strings_match
         strings_match_size = 1028;
         strings_match = malloc(strings_match_size);
+
+        IS_MALLOC_CHECK(strings_match);
+
         if (strings_match == NULL)
         {
             LOG_ERROR("Yara : Memory allocation error\n");
@@ -145,13 +146,13 @@ ret:
     return 0;
 }
 
-// ! TODO !
-// - Add logs
-// - Read config from file
 int init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
 {
     int retval = SUCCESS;
-    *scanner = malloc(sizeof(SCANNER));
+    *scanner = malloc(sizeof(struct SCANNER));
+    (*scanner)->config = config;
+
+    IS_MALLOC_CHECK(*scanner);
 
     if (yr_initialize())
     {
@@ -167,7 +168,7 @@ int init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
         goto ret;
     }
 
-    if (scanner_load_rules(*scanner, RULES_FOLDER))
+    if (scanner_load_rules(*scanner, (*scanner)->config.rules))
     {
         LOG_ERROR("Yara : scanner_set_rule() ERROR");
         retval = ERROR;
@@ -182,7 +183,6 @@ int init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
     }
 
 ret:
-    (*scanner)->config = config;
     return retval;
 }
 

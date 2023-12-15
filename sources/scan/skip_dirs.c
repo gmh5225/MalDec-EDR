@@ -22,6 +22,7 @@ void del_skip_dirs(struct skip_dirs **skip)
     HASH_ITER(hh, *skip, current_user, tmp)
     {
         HASH_DEL(*skip, current_user); /* delete; users advances to next */
+        free(current_user->dir);
         free(current_user);            /* optional- if you want to free  */
     }
 }

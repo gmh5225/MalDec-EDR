@@ -1,8 +1,25 @@
 #include "logger/logger.h"
+#include "err/err.h"
+#include <stdlib.h>
 
-void init_logger(const char *path)
+int init_logger(LOGGER **logger, LOGGER_CONFIG logger_config)
 {
-    logger_initConsoleLogger(NULL);
-    logger_initFileLogger(path, 0, 0);
-    logger_setLevel(LogLevel_DEBUG);
+    *logger = malloc(sizeof(struct LOGGER));
+
+    IS_MALLOC_CHECK(*logger);
+
+    (*logger)->config = logger_config;
+
+    logger_setLevel((LogLevel)(*logger)->config.level);
+    return (logger_initFileLogger((*logger)->config.filename,
+                                  (*logger)->config.max_file_size,
+                                  (*logger)->config.max_backup_files) == 0)
+               ? ERROR
+               : SUCCESS;
+}
+
+void exit_logger(LOGGER **logger)
+{
+    logger_exitFileLogger();
+    free(*logger);
 }

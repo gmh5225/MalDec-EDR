@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "cjson/cjson.h"
 #include "inotify/inotify.h"
 #include "scan/config.h"
 #include "scan/scan.h"
@@ -12,9 +13,17 @@
 #include "compiler/compiler_attribute.h"
 #include "logger/logger.h"
 
-inline void help(char *prog_name) no_return;
-inline void version();
+#define CONFIG_JSON_PATH "../../../config/appsettings.json"
 
+// Function declarations
+inline void init_logger_main(LOGGER **logger, struct json_object *json_obj);
+inline void init_scanner_main(SCANNER **scanner, struct json_object *json_obj);
+inline void process_command_line_options(int argc, char **argv, SCANNER *scanner);
+inline void cleanup_resources(struct json_object *json_obj, LOGGER *logger, SCANNER **scanner);
+inline void help(char *prog_name) no_return;
+inline void pr_version();
+
+// Main function
 int main(int argc, char **argv)
 {
 	if (argc < 2)
@@ -22,21 +31,109 @@ int main(int argc, char **argv)
 		help(argv[0]);
 	}
 
-	init_logger("log.txt");
+	int retval;
+	struct json_object *json_obj;
+	if (IS_ERR(init_json(&json_obj, CONFIG_JSON_PATH)))
+	{
+		fprintf(stderr, "Main : Error in parser json '%s'", CONFIG_JSON_PATH);
+		retval = ERROR;
+		goto ret;
+	}
 
+	LOGGER *logger;
 	SCANNER *scanner;
+
+	init_logger_main(&logger, json_obj);
+	init_scanner_main(&scanner, json_obj);
+
+	process_command_line_options(argc, argv, scanner);
+
+	// Perform scanning if a file path is provided
+	if (scanner->config.file_path != NULL)
+	{
+		retval = scan(scanner);
+	}
+
+	// Clean up and exit
+	cleanup_resources(json_obj, logger, &scanner);
+
+ret:
+	return retval;
+}
+
+void init_logger_main(LOGGER **logger, struct json_object *json_obj)
+{
+	struct json_object *logger_obj,
+		*filename_obj,
+		*max_file_size_obj,
+		*max_backup_files_obj,
+		*level_obj;
+
+	if (json_object_object_get_ex(json_obj, "logger", &logger_obj))
+	{
+		if (!json_object_object_get_ex(logger_obj, "filename", &filename_obj) ||
+			!json_object_object_get_ex(logger_obj, "max_file_size", &max_file_size_obj) ||
+			!json_object_object_get_ex(logger_obj, "max_backup_files", &max_backup_files_obj) ||
+			!json_object_object_get_ex(logger_obj, "level", &level_obj))
+		{
+			fprintf(stderr, "Init_logger : Unable to retrieve logger configuration from JSON\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else
+	{
+		fprintf(stderr, "Init_logger : Unable to retrieve 'logger' object from JSON\n");
+		exit(EXIT_FAILURE);
+	}
+
+	LOGGER_CONFIG logger_config = (LOGGER_CONFIG){
+		.filename = json_object_get_string(filename_obj),
+		.level = json_object_get_int(level_obj),
+		.max_backup_files = json_object_get_int(max_backup_files_obj),
+		.max_file_size = json_object_get_int(max_file_size_obj)};
+	*logger = NULL;
+
+	if (IS_ERR(init_logger(logger, logger_config)))
+	{
+		fprintf(stderr, "Init_logger_main : Error init logger\n");
+		exit(EXIT_FAILURE);
+	}
+}
+
+void init_scanner_main(SCANNER **scanner, struct json_object *json_obj)
+{
+	struct json_object *scan_obj, *rules_obj, *skip_dir_objs;
+	if (json_object_object_get_ex(json_obj, "scan", &scan_obj))
+	{
+		if (!json_object_object_get_ex(scan_obj, "rules", &rules_obj) ||
+			!json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs))
+		{
+			fprintf(stderr, "Init_scanner_main : Unable to retrieve scan configuration from JSON\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	struct skip_dirs *skip = NULL;
+	add_skip_dirs(&skip, (const char **)json_object_get_array(skip_dir_objs)->array, json_object_get_array(skip_dir_objs)->size);
 	SCANNER_CONFIG config = (SCANNER_CONFIG){
 		.file_path = NULL,
 		.max_depth = -1,
 		.scan_type = 0,
-		.skip = NULL,
-	};
+		.rules = json_object_get_string(rules_obj)};
+	*scanner = NULL;
 
-	int c, retval;
+	if (IS_ERR(init_scanner(scanner, config)))
+	{
+		fprintf(stderr, "Init_scanner_main : Error init scanner\n");
+		exit(EXIT_FAILURE);
+	}
 
-	if ((IS_ERR((retval = init_scanner(&scanner, config)))))
-		goto ret;
+	(*scanner)->config.skip = skip;
+}
 
+void process_command_line_options(int argc, char **argv, SCANNER *scanner)
+{
+	// Command-line options
 	struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"scan", required_argument, 0, 's'},
@@ -49,7 +146,7 @@ int main(int argc, char **argv)
 	while (1)
 	{
 		int option_index = 0;
-		c = getopt_long(argc, argv, ":qs:d:vh", long_options, &option_index);
+		const int c = getopt_long(argc, argv, ":qs:d:vh", long_options, &option_index);
 
 		if (c < 0)
 			break;
@@ -79,7 +176,7 @@ int main(int argc, char **argv)
 			break;
 
 		case 'v':
-			version();
+			pr_version();
 			exit(EXIT_SUCCESS);
 			break;
 
@@ -87,20 +184,21 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
+}
 
-	if (scanner->config.file_path != NULL)
+void cleanup_resources(struct json_object *json_obj, LOGGER *logger, SCANNER **scanner)
+{
+	exit_json(&json_obj);
+	exit_logger(&logger);
+	if (IS_ERR(exit_scanner(scanner)))
 	{
-		retval = scan(scanner);
-		retval = exit_scanner(&scanner);
+		fprintf(stderr, "Cleanup_resources : Error in exit_scanner");
 	}
-
-ret:
-	return retval;
 }
 
 void help(char *prog_name)
 {
-	version();
+	pr_version();
 	printf("Usage: %s [OPTIONS]\n", prog_name);
 	printf("\n\
  -h, --help                     This help menu\n\
@@ -112,7 +210,7 @@ void help(char *prog_name)
 	exit(EXIT_SUCCESS);
 }
 
-void version()
+void pr_version()
 {
 	printf("LinuxDefender %d.%d.%d\n", MAJOR, MINOR, PATCH);
 }
