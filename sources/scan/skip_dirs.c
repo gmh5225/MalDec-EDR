@@ -1,4 +1,4 @@
-#include <scan/skip_dirs.h>
+#include "skip_dirs.h"
 
 int prefix(const char *pre, const char *str)
 {

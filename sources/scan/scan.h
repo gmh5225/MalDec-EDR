@@ -1,9 +1,11 @@
 #pragma once
 
 #include <yara.h>
+
 #include "scan/skip_dirs.h"
 #include "scan/config.h"
 #include "compiler/compiler_attribute.h"
+#include "err/err.h"
 
 #define DEFAULT_SCAN_CALLBACK default_scan_callback
 
@@ -14,7 +16,7 @@ typedef struct SCANNER
     SCANNER_CONFIG config;
 } SCANNER;
 
-typedef struct _CALLBACK_ARGS
+typedef struct CALLBACK_ARGS
 {
     const char *file_path;
     int current_count;

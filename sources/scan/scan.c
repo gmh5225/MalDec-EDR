@@ -2,6 +2,8 @@
 
 #include "scan/scan.h"
 #include "scan/skip_dirs.h"
+#include "err/err.h"
+#include "logger/logger.h"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -10,16 +12,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include "err/err.h"
-#include "logger/logger.h"
 
 #define ROOT "/"
 
 inline int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 {
-    CALLBACK_ARGS *user_data = (struct _CALLBACK_ARGS *)malloc(sizeof(struct _CALLBACK_ARGS));
+    CALLBACK_ARGS *user_data = (struct CALLBACK_ARGS *)malloc(sizeof(struct CALLBACK_ARGS));
 
-    IS_MALLOC_CHECK(user_data);
+    ALLOC_ERR(user_data);
 
     user_data->file_path = scanner->config.file_path;
     user_data->current_count = 0;
@@ -38,7 +38,6 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth
     struct dirent *entry;
     const char *dir = config.file_path;
     struct skip_dirs *skip = config.skip;
-
     const size_t dir_size = strlen(dir);
     const char *fmt = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
 
@@ -47,7 +46,7 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth
         retval = ERROR;
         goto ret;
     }
-    else if ((dd = opendir(dir)) == NULL)
+    else if (NULL_PTR((dd = opendir(dir))))
     {
         LOG_ERROR("Yara : scan_dir ERROR %s : %d (%s)", dir, errno, strerror(errno));
         retval = ERROR;
@@ -100,7 +99,7 @@ int scan(SCANNER *scanner)
 
     if (fstat(fd, &st) < 0)
     {
-        LOG_ERROR("scan : ERROR %s : (%s)", config.file_path, strerror(errno));
+        LOG_ERROR("Yara : scan ERROR %s : (%s)", config.file_path, strerror(errno));
         retval = ERROR;
         goto ret;
     }
@@ -110,14 +109,12 @@ int scan(SCANNER *scanner)
     if (mode == S_IFDIR)
     {
         if (IS_ERR(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0)))
-        {
-        }
+            ;
     }
     else if (mode == S_IFREG)
     {
         if (IS_ERR(scan_file(scanner, DEFAULT_SCAN_CALLBACK)))
-        {
-        }
+            ;
     }
 
 ret:

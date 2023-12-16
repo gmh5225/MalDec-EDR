@@ -1,4 +1,5 @@
-#include "cjson/cjson.h"
+#include "cjson.h"
+#include "err/err.h"
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -7,7 +8,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "err/err.h"
 
 int init_json(struct json_object **json_obj, const char *filename)
 {

@@ -11,6 +11,7 @@ include_directories(
     ../include
     ../libraries
     ../packages
+    ../sources
 )
 
 add_subdirectory(cli)

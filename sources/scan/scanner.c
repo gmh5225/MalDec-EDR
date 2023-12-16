@@ -1,6 +1,8 @@
 #define _GNU_SOURCE /* DT_DIR */
 
-#include <scan/scan.h>
+#include "scan.h"
+#include "err/err.h"
+#include "logger/logger.h"
 
 #include <yara.h>
 #include <fcntl.h>
@@ -8,8 +10,6 @@
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
-#include "err/err.h"
-#include "logger/logger.h"
 
 int default_scan_callback(YR_SCAN_CONTEXT *context,
                           int message,
@@ -37,13 +37,7 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
         strings_match_size = 1028;
         strings_match = malloc(strings_match_size);
 
-        IS_MALLOC_CHECK(strings_match);
-
-        if (strings_match == NULL)
-        {
-            LOG_ERROR("Yara : Memory allocation error\n");
-            exit(EXIT_FAILURE);
-        }
+        ALLOC_ERR(strings_match);
 
         // initialize strings_match to an empty string
         strings_match[0] = '\0';
@@ -57,11 +51,9 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
                 if (new_size > strings_match_size)
                 {
                     strings_match = realloc(strings_match, new_size);
-                    if (strings_match == NULL)
-                    {
-                        LOG_ERROR("Yara : Memory reallocation error\n");
-                        exit(EXIT_FAILURE);
-                    }
+                    
+                    ALLOC_ERR(strings_match);
+
                     strings_match_size = new_size;
                 }
                 snprintf(strings_match + strlen(strings_match), new_size - strlen(strings_match), "[%s:0x%lx]", string->identifier, match->offset);
@@ -105,7 +97,7 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
     struct dirent *entry;
     const size_t dir_size = strlen(dir);
 
-    if ((dd = opendir(dir)) == NULL)
+    if (NULL_PTR((dd = opendir(dir))))
     {
         LOG_ERROR("Yara : scanner_load_rules ERROR (%s : %s)", dir, strerror(errno));
         retval = ERROR;
@@ -152,7 +144,7 @@ int init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
     *scanner = malloc(sizeof(struct SCANNER));
     (*scanner)->config = config;
 
-    IS_MALLOC_CHECK(*scanner);
+    ALLOC_ERR(*scanner);
 
     if (yr_initialize())
     {

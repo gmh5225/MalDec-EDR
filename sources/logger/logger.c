@@ -6,7 +6,7 @@ int init_logger(LOGGER **logger, LOGGER_CONFIG logger_config)
 {
     *logger = malloc(sizeof(struct LOGGER));
 
-    IS_MALLOC_CHECK(*logger);
+    ALLOC_ERR(*logger);
 
     (*logger)->config = logger_config;
 
