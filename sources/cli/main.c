@@ -13,7 +13,7 @@
 #include "compiler/compiler_attribute.h"
 #include "logger/logger.h"
 
-#define CONFIG_JSON_PATH "../../../config/appsettings.json"
+#define CONFIG_JSON_PATH "/home/mob/Documents/TOols/LinuxDefender/config/appsettings.json"
 
 inline void init_logger_main(LOGGER **logger, struct json_object **json_obj);
 inline void init_scanner_main(SCANNER **scanner, struct json_object **json_obj);
@@ -30,16 +30,17 @@ int main(int argc, char **argv)
 	}
 
 	int retval = SUCCESS;
-	struct json_object *json_obj;
+
+	LOGGER *logger = NULL;
+	SCANNER *scanner = NULL;
+	struct json_object *json_obj = NULL;
+
 	if (IS_ERR(init_json(&json_obj, CONFIG_JSON_PATH)))
 	{
-		fprintf(stderr, "Main : Error in parser json '%s'", CONFIG_JSON_PATH);
+		fprintf(stderr, "Main : Error in parser json '%s'\n", CONFIG_JSON_PATH);
 		retval = ERROR;
 		goto ret;
 	}
-
-	LOGGER *logger;
-	SCANNER *scanner;
 
 	init_logger_main(&logger, &json_obj);
 	init_scanner_main(&scanner, &json_obj);
@@ -47,15 +48,14 @@ int main(int argc, char **argv)
 	process_command_line_options(argc, argv, &scanner);
 
 	// Perform scanning if a file path is provided
-	if (!NULL_PTR(scanner->config.file_path))
+	if (!IS_NULL_PTR(scanner->config.file_path))
 	{
 		retval = scan(scanner);
 	}
 
+ret:
 	// clean up and exit
 	cleanup_resources(&json_obj, &logger, &scanner);
-
-ret:
 	return retval;
 }
 
@@ -89,7 +89,6 @@ void init_logger_main(LOGGER **logger, struct json_object **json_obj)
 		.level = json_object_get_int(level_obj),
 		.max_backup_files = json_object_get_int(max_backup_files_obj),
 		.max_file_size = json_object_get_int(max_file_size_obj)};
-	*logger = NULL;
 
 	if (IS_ERR(init_logger(logger, logger_config)))
 	{
@@ -113,12 +112,14 @@ void init_scanner_main(SCANNER **scanner, struct json_object **json_obj)
 
 	struct skip_dirs *skip = NULL;
 	add_skip_dirs(&skip, (const char **)json_object_get_array(skip_dir_objs)->array, json_object_get_array(skip_dir_objs)->size);
-	SCANNER_CONFIG config = (SCANNER_CONFIG){
+	
+	SCANNER_CONFIG config = (SCANNER_CONFIG)
+	{
 		.file_path = NULL,
 		.max_depth = -1,
 		.scan_type = 0,
-		.rules = json_object_get_string(rules_obj)};
-	*scanner = NULL;
+		.rules = json_object_get_string(rules_obj)
+	};
 
 	if (IS_ERR(init_scanner(scanner, config)))
 	{
@@ -189,11 +190,16 @@ void process_command_line_options(int argc, char **argv, SCANNER **scanner)
 
 void cleanup_resources(struct json_object **json_obj, LOGGER **logger, SCANNER **scanner)
 {
-	exit_json(json_obj);
-	exit_logger(logger);
-	if (IS_ERR(exit_scanner(scanner)))
+	if (!IS_NULL_PTR(*json_obj))
+		exit_json(json_obj);
+	if (!IS_NULL_PTR(*logger))
+		exit_logger(logger);
+	if (!IS_NULL_PTR(scanner))
 	{
-		fprintf(stderr, "Cleanup_resources : Error in exit_scanner");
+		if (IS_ERR(exit_scanner(scanner)))
+		{
+			fprintf(stderr, "Cleanup_resources : Error in exit_scanner");
+		}
 	}
 }
 

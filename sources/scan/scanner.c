@@ -25,13 +25,13 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
     switch (message)
     {
     case CALLBACK_MSG_SCAN_FINISHED:
-        if (((CALLBACK_ARGS *)user_data)->verbose || ((CALLBACK_ARGS *)user_data)->current_count)
+        if (((SCANNER_CALLBACK_ARGS *)user_data)->verbose || ((SCANNER_CALLBACK_ARGS *)user_data)->current_count)
             LOG_INFO("Yara : All rules were passed in this file '%s', the scan is over, rules matching %d",
-                     ((CALLBACK_ARGS *)user_data)->file_path, ((CALLBACK_ARGS *)user_data)->current_count);
+                     ((SCANNER_CALLBACK_ARGS *)user_data)->file_path, ((SCANNER_CALLBACK_ARGS *)user_data)->current_count);
         break;
 
     case CALLBACK_MSG_RULE_MATCHING:
-        ((CALLBACK_ARGS *)user_data)->current_count++;
+        ((SCANNER_CALLBACK_ARGS *)user_data)->current_count++;
 
         // allocate initial memory for strings_match
         strings_match_size = 1028;
@@ -61,9 +61,10 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
         }
 
         LOG_WARN("Yara : The rule '%s' were identified in this file '%s', Strings match %s",
-                 rule->identifier, ((CALLBACK_ARGS *)user_data)->file_path, strings_match);
+                 rule->identifier, ((SCANNER_CALLBACK_ARGS *)user_data)->file_path, strings_match);
 
         free(strings_match);
+        NO_USE_AFTER_FREE(strings_match);
         break;
 
     case CALLBACK_MSG_RULE_NOT_MATCHING:
@@ -97,7 +98,7 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
     struct dirent *entry;
     const size_t dir_size = strlen(dir);
 
-    if (NULL_PTR((dd = opendir(dir))))
+    if (IS_NULL_PTR((dd = opendir(dir))))
     {
         LOG_ERROR("Yara : scanner_load_rules ERROR (%s : %s)", dir, strerror(errno));
         retval = ERROR;
@@ -201,6 +202,7 @@ int exit_scanner(SCANNER **scanner)
         del_skip_dirs(&(*scanner)->config.skip);
 
     free(*scanner);
+    NO_USE_AFTER_FREE(*scanner);
 
 ret:
     return retval;

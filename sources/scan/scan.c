@@ -17,17 +17,18 @@
 
 inline int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 {
-    CALLBACK_ARGS *user_data = (struct CALLBACK_ARGS *)malloc(sizeof(struct CALLBACK_ARGS));
+    SCANNER_CALLBACK_ARGS *user_data = (struct SCANNER_CALLBACK_ARGS *)malloc(sizeof(struct SCANNER_CALLBACK_ARGS));
 
     ALLOC_ERR(user_data);
 
     user_data->file_path = scanner->config.file_path;
     user_data->current_count = 0;
-    user_data->verbose = false;
+    user_data->verbose = true;
 
     yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, user_data, 0);
 
     free(user_data);
+    NO_USE_AFTER_FREE(user_data);
 }
 
 int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth)
@@ -46,7 +47,7 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth
         retval = ERROR;
         goto ret;
     }
-    else if (NULL_PTR((dd = opendir(dir))))
+    else if (IS_NULL_PTR((dd = opendir(dir))))
     {
         LOG_ERROR("Yara : scan_dir ERROR %s : %d (%s)", dir, errno, strerror(errno));
         retval = ERROR;

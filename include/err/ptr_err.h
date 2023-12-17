@@ -7,7 +7,8 @@
  * @brief check cond ptr is NULL
  * 
  */
-#define NULL_PTR(ptr) ((ptr) == NULL)
+#define IS_NULL_PTR(ptr) ((ptr) == NULL)
+#define NO_USE_AFTER_FREE(ptr) (ptr) = NULL;
 
 /**
  * @brief Check if memory allocation was successful, and exit with an error message if not.
@@ -31,7 +32,7 @@
  */
 static inline void ALLOC_ERR(const void *restrict ptr)
 {
-    if (NULL_PTR(ptr))
+    if (IS_NULL_PTR(ptr))
     {
         fprintf(stderr,
                 "Error in memory allocation at %s:%s:%d\n",

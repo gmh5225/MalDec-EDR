@@ -16,13 +16,13 @@ typedef struct SCANNER
     SCANNER_CONFIG config;
 } SCANNER;
 
-typedef struct CALLBACK_ARGS
+typedef struct SCANNER_CALLBACK_ARGS
 {
     const char *file_path;
     int current_count;
     bool verbose;
 
-} CALLBACK_ARGS;
+} SCANNER_CALLBACK_ARGS;
 
 int scan(SCANNER *scanner) check_unused_result;
 int init_scanner(SCANNER **scanner, SCANNER_CONFIG config) check_unused_result;
