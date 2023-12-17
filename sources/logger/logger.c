@@ -10,7 +10,9 @@ int init_logger(LOGGER **logger, LOGGER_CONFIG logger_config)
 
     (*logger)->config = logger_config;
 
-    logger_initConsoleLogger(stdout);
+    if ((*logger)->config.console == true)
+        logger_initConsoleLogger(stdout);
+
     logger_setLevel((LogLevel)(*logger)->config.level);
     return (logger_initFileLogger((*logger)->config.filename,
                                   (*logger)->config.max_file_size,
