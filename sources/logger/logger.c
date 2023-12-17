@@ -10,7 +10,7 @@ int init_logger(LOGGER **logger, LOGGER_CONFIG logger_config)
 
     (*logger)->config = logger_config;
 
-    if ((*logger)->config.console == true)
+    if ((*logger)->config.console)
         logger_initConsoleLogger(stdout);
 
     logger_setLevel((LogLevel)(*logger)->config.level);
