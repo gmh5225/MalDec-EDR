@@ -7,13 +7,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
- #include <string.h>
+#include <string.h>
 #include <errno.h>
 
 int init_json(struct json_object **json_obj, const char *filename)
 {
     int fd = open(filename, O_RDONLY);
     int retval = SUCCESS;
+    char *json_string = NULL;
 
     if (fd == -1)
     {
@@ -30,7 +31,7 @@ int init_json(struct json_object **json_obj, const char *filename)
         goto ret;
     }
 
-    char *json_string = malloc(file_stat.st_size + 1);
+    json_string = malloc(file_stat.st_size + 1);
     if (json_string == NULL)
     {
         fprintf(stderr, "Cjson : Error allocating memory for JSON string ('%s') : %s \n", filename, strerror(errno));
@@ -64,7 +65,9 @@ ret:
         free(json_string);
         NO_USE_AFTER_FREE(json_string);
     }
-    close(fd);
+
+    if (fd)
+        close(fd);
 
     return retval;
 }

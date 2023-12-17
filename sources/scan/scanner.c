@@ -51,7 +51,7 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
                 if (new_size > strings_match_size)
                 {
                     strings_match = realloc(strings_match, new_size);
-                    
+
                     ALLOC_ERR(strings_match);
 
                     strings_match_size = new_size;
@@ -65,6 +65,7 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
 
         free(strings_match);
         NO_USE_AFTER_FREE(strings_match);
+
         break;
 
     case CALLBACK_MSG_RULE_NOT_MATCHING:
@@ -79,7 +80,7 @@ static int scanner_set_rule(SCANNER *scanner, const char *path, const char *yara
     int retval = SUCCESS;
     YR_FILE_DESCRIPTOR rules_fd = open(path, O_RDONLY);
 
-    if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL, yara_file_name))
+    if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL, yara_file_name) != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_compiler_add_fd ERROR");
         retval = ERROR;
@@ -120,7 +121,7 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
 
         if (strstr(name, ".yar"))
         {
-            if (scanner_set_rule(scanner, full_path, name))
+            if (IS_ERR(scanner_set_rule(scanner, full_path, name)))
             {
                 LOG_ERROR("Yara : scanner_set_rule() ERROR");
                 retval = ERROR;
@@ -147,28 +148,28 @@ int init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
 
     ALLOC_ERR(*scanner);
 
-    if (yr_initialize())
+    if (yr_initialize() != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_initialize() ERROR");
         retval = ERROR;
         goto ret;
     }
 
-    if (yr_compiler_create(&(*scanner)->yr_compiler))
+    if (yr_compiler_create(&(*scanner)->yr_compiler) != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_compiler_create() ERROR");
         retval = ERROR;
         goto ret;
     }
 
-    if (scanner_load_rules(*scanner, (*scanner)->config.rules))
+    if (IS_ERR(scanner_load_rules(*scanner, (*scanner)->config.rules)))
     {
         LOG_ERROR("Yara : scanner_set_rule() ERROR");
         retval = ERROR;
         goto ret;
     }
 
-    if (yr_compiler_get_rules((*scanner)->yr_compiler, &(*scanner)->yr_rules))
+    if (yr_compiler_get_rules((*scanner)->yr_compiler, &(*scanner)->yr_rules) != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_compiler_create() ERROR");
         retval = ERROR;
@@ -188,7 +189,7 @@ int exit_scanner(SCANNER **scanner)
         goto ret;
     }
 
-    if (yr_finalize())
+    if (yr_finalize() != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_finalize() ERROR");
         retval = ERROR;

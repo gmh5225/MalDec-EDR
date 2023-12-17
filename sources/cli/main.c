@@ -13,7 +13,7 @@
 #include "compiler/compiler_attribute.h"
 #include "logger/logger.h"
 
-#define CONFIG_JSON_PATH "/home/mob/Documents/TOols/LinuxDefender/config/appsettings.json"
+#define CONFIG_JSON_PATH "../../../config/appsettings.json"
 
 inline void init_logger_main(LOGGER **logger, struct json_object **json_obj);
 inline void init_scanner_main(SCANNER **scanner, struct json_object **json_obj);
@@ -73,7 +73,7 @@ void init_logger_main(LOGGER **logger, struct json_object **json_obj)
 		if (!json_object_object_get_ex(logger_obj, "filename", &filename_obj) ||
 			!json_object_object_get_ex(logger_obj, "max_file_size", &max_file_size_obj) ||
 			!json_object_object_get_ex(logger_obj, "max_backup_files", &max_backup_files_obj) ||
-			!json_object_object_get_ex(logger_obj, "level", &level_obj) || 
+			!json_object_object_get_ex(logger_obj, "level", &level_obj) ||
 			!json_object_object_get_ex(logger_obj, "console", &console_obj))
 		{
 			fprintf(stderr, "Init_logger_main : Unable to retrieve logger configuration from JSON\n");
@@ -86,14 +86,12 @@ void init_logger_main(LOGGER **logger, struct json_object **json_obj)
 		exit(EXIT_FAILURE);
 	}
 
-	LOGGER_CONFIG logger_config = (LOGGER_CONFIG)
-	{
+	LOGGER_CONFIG logger_config = (LOGGER_CONFIG){
 		.filename = json_object_get_string(filename_obj),
 		.level = json_object_get_int(level_obj),
 		.max_backup_files = json_object_get_int(max_backup_files_obj),
 		.max_file_size = json_object_get_int(max_file_size_obj),
-		.console =  json_object_get_boolean(console_obj)
-	};
+		.console = json_object_get_boolean(console_obj)};
 
 	if (IS_ERR(init_logger(logger, logger_config)))
 	{
@@ -117,14 +115,12 @@ void init_scanner_main(SCANNER **scanner, struct json_object **json_obj)
 
 	struct skip_dirs *skip = NULL;
 	add_skip_dirs(&skip, (const char **)json_object_get_array(skip_dir_objs)->array, json_object_get_array(skip_dir_objs)->size);
-	
-	SCANNER_CONFIG config = (SCANNER_CONFIG)
-	{
+
+	SCANNER_CONFIG config = (SCANNER_CONFIG){
 		.file_path = NULL,
 		.max_depth = -1,
 		.scan_type = 0,
-		.rules = json_object_get_string(rules_obj)
-	};
+		.rules = json_object_get_string(rules_obj)};
 
 	if (IS_ERR(init_scanner(scanner, config)))
 	{
@@ -197,9 +193,11 @@ void cleanup_resources(struct json_object **json_obj, LOGGER **logger, SCANNER *
 {
 	if (!IS_NULL_PTR(*json_obj))
 		exit_json(json_obj);
+
 	if (!IS_NULL_PTR(*logger))
 		exit_logger(logger);
-	if (!IS_NULL_PTR(scanner))
+
+	if (!IS_NULL_PTR(*scanner) && !IS_NULL_PTR(*logger)) // exit_scanner depends this logger for LOG_ERROR
 	{
 		if (IS_ERR(exit_scanner(scanner)))
 		{
