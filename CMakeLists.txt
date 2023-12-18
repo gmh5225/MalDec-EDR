@@ -32,10 +32,10 @@ if(BUILD_BENCHMARK)
 endif()
 
 # set flags
-set(CMAKE_CXX_FLAGS "-O2 -Os") # default flags
+set(CMAKE_CXX_FLAGS "-O2 -Os -Werr ") # default flags
 
 if(FLAGS_OPTIMIZATIONS)
-  set(CMAKE_CXX_FLAGS "-ftree-vectorize -mavx -fno-stack-protector -march=native -O2 -Os -fdelete-null-pointer-checks -fdelete-dead-exceptions")
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-ftree-vectorize -mavx -fno-stack-protector -march=native  -fdelete-null-pointer-checks -fdelete-dead-exceptions")
 elseif(FLAGS_DEBUG)
-  set(CMAKE_CXX_FLAGS "-ggdb3 -fsanitize=address -fms-extensions --all-warnings -DDEBUG -g  -O2 -Os  -Wvolatile  -Warray-bounds --extra-warnings")
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-ggdb3 -fsanitize=address -fms-extensions --all-warnings -DDEBUG -g  -Wvolatile  -Warray-bounds --extra-warnings")
 endif()

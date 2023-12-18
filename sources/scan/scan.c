@@ -23,12 +23,14 @@ inline int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 
     user_data->file_path = scanner->config.file_path;
     user_data->current_count = 0;
-    user_data->verbose = true;
+    user_data->verbose = scanner->config.verbose;
 
-    yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, user_data, 0);
+    int code = yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, user_data, 0);
 
     free(user_data);
     NO_USE_AFTER_FREE(user_data);
+
+    return code;
 }
 
 int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth)
@@ -70,11 +72,9 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth
 
         if (entry->d_type == DT_REG)
         {
-            int code = scan_file(scanner, DEFAULT_SCAN_CALLBACK);
-
-            if (code < 0)
+            if(scan_file(scanner, DEFAULT_SCAN_CALLBACK) != ERROR_SUCCESS)
             {
-                LOG_ERROR("Yara : scan_file ERROR %s : %d (%s)", full_path, code, strerror(errno));
+                LOG_ERROR("Yara : Error in scan file '%s'", scanner->config.file_path);
             }
         }
         else if (entry->d_type == DT_DIR)
@@ -114,8 +114,8 @@ int scan(SCANNER *scanner)
     }
     else if (mode == S_IFREG)
     {
-        if (IS_ERR(scan_file(scanner, DEFAULT_SCAN_CALLBACK)))
-            ;
+        if(scan_file(scanner, DEFAULT_SCAN_CALLBACK) != ERROR_SUCCESS)
+            LOG_ERROR("Yara : Error in scan file");
     }
 
 ret:

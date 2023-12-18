@@ -10,5 +10,6 @@ typedef struct SCANNER_CONFIG {
     uint8_t scan_type;
     int32_t max_depth;
     char *file_path;
+    bool verbose;
     struct skip_dirs *skip;
 } SCANNER_CONFIG;

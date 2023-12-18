@@ -24,9 +24,9 @@ typedef struct SCANNER_CALLBACK_ARGS
 
 } SCANNER_CALLBACK_ARGS;
 
-int scan(SCANNER *scanner) check_unused_result;
-int init_scanner(SCANNER **scanner, SCANNER_CONFIG config) check_unused_result;
-int exit_scanner(SCANNER **scanner) check_unused_result;
-int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback) check_unused_result;
-int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth) check_unused_result;
-int default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data, void *user_data) check_unused_result;
+int scan(SCANNER *scanner) warn_unused_result;
+int init_scanner(SCANNER **scanner, SCANNER_CONFIG config) warn_unused_result;
+int exit_scanner(SCANNER **scanner) warn_unused_result;
+int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback) warn_unused_result;
+int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth) warn_unused_result;
+int default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data, void *user_data) warn_unused_result;
