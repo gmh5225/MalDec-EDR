@@ -7,6 +7,8 @@
 #include "inotify/inotify.h"
 #include "compiler/compiler_attribute.h"
 
+#define CONFIG_JSON_PATH "../../../config/appsettings.json"
+
 struct packed(8) DEFENDER
 {
 	LOGGER *logger;

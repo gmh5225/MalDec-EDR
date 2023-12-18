@@ -9,8 +9,6 @@
 #include "compiler/compiler_attribute.h"
 #include "config.h"
 
-#define CONFIG_JSON_PATH "../../../config/appsettings.json"
-
 inline void init_logger_main();
 inline void init_scanner_main();
 void process_command_line_options(int argc, char **argv);
