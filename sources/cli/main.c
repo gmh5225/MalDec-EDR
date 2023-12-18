@@ -205,7 +205,7 @@ void cleanup_resources()
 
 void help(char *prog_name)
 {
-	puts("LinuxDefender : Anti0Day");
+	puts("Linux Defender Anti0Day");
 	printf("Usage: %s [OPTIONS]\n", prog_name);
 	printf("\n\
  -h, --help                     This help menu\n\
@@ -220,6 +220,6 @@ void help(char *prog_name)
 
 void pr_version()
 {
-	printf("LinuxDefender ( Moblog Security Researchers ) %d.%d.%d\n", LINUX_DEFENDER_VERSION_MAJOR, LINUX_DEFENDER_VERSION_PATCHLEVEL, LINUX_DEFENDER_VERSION_SUBLEVEL);
+	printf("Linux Defender Anti0Day ( Moblog Security Researchers ) %d.%d.%d\n", LINUX_DEFENDER_VERSION_MAJOR, LINUX_DEFENDER_VERSION_PATCHLEVEL, LINUX_DEFENDER_VERSION_SUBLEVEL);
 	exit(SUCCESS);
 }
