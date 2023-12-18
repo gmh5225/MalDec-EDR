@@ -1,4 +1,6 @@
-#include <scan/skip_dirs.h>
+#include "skip_dirs.h"
+
+#include "err/ptr_err.h"
 
 int prefix(const char *pre, const char *str)
 {
@@ -23,7 +25,7 @@ void del_skip_dirs(struct skip_dirs **skip)
     {
         HASH_DEL(*skip, current_user); /* delete; users advances to next */
         free(current_user->dir);
-        free(current_user);            /* optional- if you want to free  */
+        free(current_user); /* optional- if you want to free  */
     }
 }
 

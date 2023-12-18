@@ -6,9 +6,12 @@ int init_logger(LOGGER **logger, LOGGER_CONFIG logger_config)
 {
     *logger = malloc(sizeof(struct LOGGER));
 
-    IS_MALLOC_CHECK(*logger);
+    ALLOC_ERR(*logger);
 
     (*logger)->config = logger_config;
+
+    if ((*logger)->config.console)
+        logger_initConsoleLogger(stdout);
 
     logger_setLevel((LogLevel)(*logger)->config.level);
     return (logger_initFileLogger((*logger)->config.filename,
@@ -22,4 +25,5 @@ void exit_logger(LOGGER **logger)
 {
     logger_exitFileLogger();
     free(*logger);
+    NO_USE_AFTER_FREE(*logger);
 }

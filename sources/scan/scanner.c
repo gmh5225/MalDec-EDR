@@ -1,6 +1,8 @@
 #define _GNU_SOURCE /* DT_DIR */
 
-#include <scan/scan.h>
+#include "scan.h"
+#include "err/err.h"
+#include "logger/logger.h"
 
 #include <yara.h>
 #include <fcntl.h>
@@ -8,8 +10,6 @@
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
-#include "err/err.h"
-#include "logger/logger.h"
 
 int default_scan_callback(YR_SCAN_CONTEXT *context,
                           int message,
@@ -25,25 +25,19 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
     switch (message)
     {
     case CALLBACK_MSG_SCAN_FINISHED:
-        if (((CALLBACK_ARGS *)user_data)->verbose || ((CALLBACK_ARGS *)user_data)->current_count)
+        if (((SCANNER_CALLBACK_ARGS *)user_data)->verbose || ((SCANNER_CALLBACK_ARGS *)user_data)->current_count)
             LOG_INFO("Yara : All rules were passed in this file '%s', the scan is over, rules matching %d",
-                     ((CALLBACK_ARGS *)user_data)->file_path, ((CALLBACK_ARGS *)user_data)->current_count);
+                     ((SCANNER_CALLBACK_ARGS *)user_data)->file_path, ((SCANNER_CALLBACK_ARGS *)user_data)->current_count);
         break;
 
     case CALLBACK_MSG_RULE_MATCHING:
-        ((CALLBACK_ARGS *)user_data)->current_count++;
+        ((SCANNER_CALLBACK_ARGS *)user_data)->current_count++;
 
         // allocate initial memory for strings_match
         strings_match_size = 1028;
         strings_match = malloc(strings_match_size);
 
-        IS_MALLOC_CHECK(strings_match);
-
-        if (strings_match == NULL)
-        {
-            LOG_ERROR("Yara : Memory allocation error\n");
-            exit(EXIT_FAILURE);
-        }
+        ALLOC_ERR(strings_match);
 
         // initialize strings_match to an empty string
         strings_match[0] = '\0';
@@ -57,11 +51,9 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
                 if (new_size > strings_match_size)
                 {
                     strings_match = realloc(strings_match, new_size);
-                    if (strings_match == NULL)
-                    {
-                        LOG_ERROR("Yara : Memory reallocation error\n");
-                        exit(EXIT_FAILURE);
-                    }
+
+                    ALLOC_ERR(strings_match);
+
                     strings_match_size = new_size;
                 }
                 snprintf(strings_match + strlen(strings_match), new_size - strlen(strings_match), "[%s:0x%lx]", string->identifier, match->offset);
@@ -69,9 +61,11 @@ int default_scan_callback(YR_SCAN_CONTEXT *context,
         }
 
         LOG_WARN("Yara : The rule '%s' were identified in this file '%s', Strings match %s",
-                 rule->identifier, ((CALLBACK_ARGS *)user_data)->file_path, strings_match);
+                 rule->identifier, ((SCANNER_CALLBACK_ARGS *)user_data)->file_path, strings_match);
 
         free(strings_match);
+        NO_USE_AFTER_FREE(strings_match);
+
         break;
 
     case CALLBACK_MSG_RULE_NOT_MATCHING:
@@ -86,7 +80,7 @@ static int scanner_set_rule(SCANNER *scanner, const char *path, const char *yara
     int retval = SUCCESS;
     YR_FILE_DESCRIPTOR rules_fd = open(path, O_RDONLY);
 
-    if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL, yara_file_name))
+    if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL, yara_file_name) != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_compiler_add_fd ERROR");
         retval = ERROR;
@@ -105,7 +99,7 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
     struct dirent *entry;
     const size_t dir_size = strlen(dir);
 
-    if ((dd = opendir(dir)) == NULL)
+    if (IS_NULL_PTR((dd = opendir(dir))))
     {
         LOG_ERROR("Yara : scanner_load_rules ERROR (%s : %s)", dir, strerror(errno));
         retval = ERROR;
@@ -127,7 +121,7 @@ static int scanner_load_rules(SCANNER *scanner, const char *dir)
 
         if (strstr(name, ".yar"))
         {
-            if (scanner_set_rule(scanner, full_path, name))
+            if (IS_ERR(scanner_set_rule(scanner, full_path, name)))
             {
                 LOG_ERROR("Yara : scanner_set_rule() ERROR");
                 retval = ERROR;
@@ -152,30 +146,30 @@ int init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
     *scanner = malloc(sizeof(struct SCANNER));
     (*scanner)->config = config;
 
-    IS_MALLOC_CHECK(*scanner);
+    ALLOC_ERR(*scanner);
 
-    if (yr_initialize())
+    if (yr_initialize() != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_initialize() ERROR");
         retval = ERROR;
         goto ret;
     }
 
-    if (yr_compiler_create(&(*scanner)->yr_compiler))
+    if (yr_compiler_create(&(*scanner)->yr_compiler) != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_compiler_create() ERROR");
         retval = ERROR;
         goto ret;
     }
 
-    if (scanner_load_rules(*scanner, (*scanner)->config.rules))
+    if (IS_ERR(scanner_load_rules(*scanner, (*scanner)->config.rules)))
     {
         LOG_ERROR("Yara : scanner_set_rule() ERROR");
         retval = ERROR;
         goto ret;
     }
 
-    if (yr_compiler_get_rules((*scanner)->yr_compiler, &(*scanner)->yr_rules))
+    if (yr_compiler_get_rules((*scanner)->yr_compiler, &(*scanner)->yr_rules) != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_compiler_create() ERROR");
         retval = ERROR;
@@ -195,7 +189,7 @@ int exit_scanner(SCANNER **scanner)
         goto ret;
     }
 
-    if (yr_finalize())
+    if (yr_finalize() != ERROR_SUCCESS)
     {
         LOG_ERROR("Yara : yr_finalize() ERROR");
         retval = ERROR;
@@ -209,6 +203,7 @@ int exit_scanner(SCANNER **scanner)
         del_skip_dirs(&(*scanner)->config.skip);
 
     free(*scanner);
+    NO_USE_AFTER_FREE(*scanner);
 
 ret:
     return retval;

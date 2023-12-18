@@ -9,5 +9,5 @@ typedef struct LOGGER
     LOGGER_CONFIG config;
 } LOGGER;
 
-int init_logger(LOGGER** logger, LOGGER_CONFIG config) check_unused_result;
+int init_logger(LOGGER** logger, LOGGER_CONFIG config) warn_unused_result;
 void exit_logger(LOGGER** logger);

@@ -12,5 +12,5 @@
 
 #include "compiler/compiler_attribute.h"
 
-int init_json(struct json_object **json_obj, const char* filename) check_unused_result;
+int init_json(struct json_object **json_obj, const char* filename) warn_unused_result;
 void exit_json(struct json_object **json_obj);
