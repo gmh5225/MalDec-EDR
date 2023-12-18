@@ -67,13 +67,13 @@ void init_logger_main()
 			!json_object_object_get_ex(logger_obj, "console", &console_obj))
 		{
 			fprintf(stderr, "Init_logger_main : Unable to retrieve logger configuration from JSON\n");
-			exit(EXIT_FAILURE);
+			exit(ERROR);
 		}
 	}
 	else
 	{
 		fprintf(stderr, "Init_logger_main : Unable to retrieve 'logger' object from JSON\n");
-		exit(EXIT_FAILURE);
+		exit(ERROR);
 	}
 
 	LOGGER_CONFIG logger_config = (LOGGER_CONFIG){
@@ -86,7 +86,7 @@ void init_logger_main()
 	if (IS_ERR(init_logger(&DEFENDER.logger, logger_config)))
 	{
 		fprintf(stderr, "Init_logger_main : Error init logger\n");
-		exit(EXIT_FAILURE);
+		exit(ERROR);
 	}
 }
 
@@ -99,7 +99,7 @@ void init_scanner_main()
 			!json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs))
 		{
 			fprintf(stderr, "Init_scanner_main : Unable to retrieve scan configuration from JSON\n");
-			exit(EXIT_FAILURE);
+			exit(ERROR);
 		}
 	}
 
@@ -116,7 +116,7 @@ void init_scanner_main()
 	if (IS_ERR(init_scanner(&DEFENDER.scanner, config)))
 	{
 		fprintf(stderr, "Init_scanner_main : Error init scanner\n");
-		exit(EXIT_FAILURE);
+		exit(ERROR);
 	}
 
 	DEFENDER.scanner->config.skip = skip;
