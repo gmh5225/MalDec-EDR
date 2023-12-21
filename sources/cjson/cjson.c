@@ -1,5 +1,6 @@
 #include "cjson.h"
 #include "err/err.h"
+#include "logger/logger.h"
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -18,7 +19,7 @@ inline ERR init_json(struct json_object **json_obj, const char *filename)
 
     if (fd == -1)
     {
-        fprintf(stderr, "Cjson : Error opening file ('%s') : %s \n", filename, strerror(errno));
+        fprintf(stderr, LOG_MESSAGE_FORMAT("Error opening file ('%s') : %s \n", filename, strerror(errno)));
         retval = ERR_FAILURE;
         goto ret;
     }
@@ -26,7 +27,7 @@ inline ERR init_json(struct json_object **json_obj, const char *filename)
     struct stat file_stat;
     if (fstat(fd, &file_stat) == -1)
     {
-        fprintf(stderr, "Cjson : Error getting file stats ('%s') : %s\n", filename, strerror(errno));
+        fprintf(stderr, LOG_MESSAGE_FORMAT("Error getting file stats ('%s') : %s\n", filename, strerror(errno)));
         retval = ERR_FAILURE;
         goto ret;
     }
@@ -34,7 +35,7 @@ inline ERR init_json(struct json_object **json_obj, const char *filename)
     json_string = malloc(file_stat.st_size + 1);
     if (json_string == NULL)
     {
-        fprintf(stderr, "Cjson : Error allocating memory for JSON string ('%s') : %s \n", filename, strerror(errno));
+        fprintf(stderr, LOG_MESSAGE_FORMAT("Error allocating memory for JSON string ('%s') : %s \n", filename, strerror(errno)));
         retval = ERR_FAILURE;
         goto ret;
     }
@@ -43,8 +44,7 @@ inline ERR init_json(struct json_object **json_obj, const char *filename)
 
     if (bytes_read == -1)
     {
-        perror("Cjson : Error reading file");
-        fprintf(stderr, "'%s'\n", filename);
+        fprintf(stderr, LOG_MESSAGE_FORMAT("Error reading file ('%s') : %s \n", filename, strerror(errno)));
         retval = ERR_FAILURE;
         goto ret;
     }
@@ -54,7 +54,7 @@ inline ERR init_json(struct json_object **json_obj, const char *filename)
     *json_obj = json_tokener_parse(json_string);
     if (IS_NULL_PTR(*json_obj))
     {
-        fprintf(stderr, "Cjson : Error parsing JSON in file %s\n", filename);
+        fprintf(stderr, LOG_MESSAGE_FORMAT("Error parsing JSON in file %s\n", filename));
         retval = ERR_FAILURE;
         goto ret;
     }
