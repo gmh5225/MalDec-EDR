@@ -15,44 +15,62 @@
 
 #define ROOT "/"
 
-inline int scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
+inline ERR scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 {
+    int retval = ERR_SUCCESS;
     SCANNER_CALLBACK_ARGS *user_data = (struct SCANNER_CALLBACK_ARGS *)malloc(sizeof(struct SCANNER_CALLBACK_ARGS));
 
-    ALLOC_ERR(user_data);
+    ALLOC_ERR_FAILURE(user_data);
 
     user_data->file_path = scanner->config.file_path;
     user_data->current_count = 0;
     user_data->verbose = scanner->config.verbose;
 
-    int code = yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path, SCAN_FLAGS_REPORT_RULES_MATCHING, callback, user_data, 0);
+    int code = yr_rules_scan_file(
+        scanner->yr_rules,
+        scanner->config.file_path,
+        SCAN_FLAGS_REPORT_RULES_MATCHING,
+        callback,
+        user_data,
+        0);
+
+    if (code != ERROR_SUCCESS ||
+        code == ERROR_INSUFFICIENT_MEMORY ||
+        code == ERROR_COULD_NOT_MAP_FILE ||
+        code == ERROR_TOO_MANY_SCAN_THREADS ||
+        code == ERROR_SCAN_TIMEOUT ||
+        code == ERROR_CALLBACK_ERROR ||
+        code == ERROR_TOO_MANY_MATCHES)
+    {
+        retval = ERR_FAILURE;
+    }
 
     free(user_data);
     NO_USE_AFTER_FREE(user_data);
 
-    return code;
+    return retval;
 }
 
-int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth)
+inline ERR scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
 {
-    int retval = SUCCESS;
+    int retval = ERR_SUCCESS;
     DIR *dd;
     SCANNER_CONFIG config = scanner->config;
+    struct SKIP_DIRS *skip = config.skip;
     struct dirent *entry;
     const char *dir = config.file_path;
-    struct skip_dirs *skip = config.skip;
     const size_t dir_size = strlen(dir);
     const char *fmt = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
 
-    if (config.max_depth >= 0 && currrent_depth > config.max_depth)
+    if (config.max_depth >= 0 && current_depth > config.max_depth)
     {
-        retval = ERROR;
+        retval = ERR_FAILURE;
         goto ret;
     }
     else if (IS_NULL_PTR((dd = opendir(dir))))
     {
-        LOG_ERROR("Yara : scan_dir ERROR %s : %d (%s)", dir, errno, strerror(errno));
-        retval = ERROR;
+        LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %s : %d (%s)", dir, errno, strerror(errno)));
+        retval = ERR_FAILURE;
         goto ret;
     }
 
@@ -61,7 +79,7 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth
         const char *name = entry->d_name;
         size_t size = dir_size + strlen(name) + 2;
 
-        if (!strcmp(name, ".") || !strcmp(name, "..") || get_skipped(skip, dir))
+        if (!strcmp(name, ".") || !strcmp(name, "..") || get_skipped(&skip, dir))
         {
             continue;
         }
@@ -72,15 +90,13 @@ int scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t currrent_depth
 
         if (entry->d_type == DT_REG)
         {
-            if(scan_file(scanner, DEFAULT_SCAN_CALLBACK) != ERROR_SUCCESS)
-            {
-                LOG_ERROR("Yara : Error in scan file '%s'", scanner->config.file_path);
-            }
+            if (IS_ERR_FAILURE(scan_file(scanner, DEFAULT_SCAN_CALLBACK)))
+                retval = ERR_FAILURE;
         }
         else if (entry->d_type == DT_DIR)
         {
-            if (IS_ERR(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, currrent_depth + 1)))
-                ;
+            if (IS_ERR_FAILURE(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, current_depth + 1)))
+                retval = ERR_FAILURE;
         }
     }
 
@@ -90,9 +106,9 @@ ret:
     return retval;
 }
 
-int scan(SCANNER *scanner)
+inline ERR scan(SCANNER *scanner)
 {
-    int retval = SUCCESS;
+    int retval = ERR_SUCCESS;
     SCANNER_CONFIG config = scanner->config;
 
     struct stat st;
@@ -100,8 +116,8 @@ int scan(SCANNER *scanner)
 
     if (fstat(fd, &st) < 0)
     {
-        LOG_ERROR("Yara : scan ERROR %s : (%s)", config.file_path, strerror(errno));
-        retval = ERROR;
+        LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE  %s : (%s)", config.file_path, strerror(errno)));
+        retval = ERR_FAILURE;
         goto ret;
     }
 
@@ -109,13 +125,19 @@ int scan(SCANNER *scanner)
 
     if (mode == S_IFDIR)
     {
-        if (IS_ERR(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0)))
-            ;
+        if (IS_ERR_FAILURE(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0)))
+        {
+            retval = ERR_FAILURE;
+            LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE"));
+        }
     }
     else if (mode == S_IFREG)
     {
-        if(scan_file(scanner, DEFAULT_SCAN_CALLBACK) != ERROR_SUCCESS)
-            LOG_ERROR("Yara : Error in scan file");
+        if (IS_ERR_FAILURE(scan_file(scanner, DEFAULT_SCAN_CALLBACK)))
+        {
+            retval = ERR_FAILURE;
+            LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE"));
+        }
     }
 
 ret:

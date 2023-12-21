@@ -1,40 +1,39 @@
 #include "skip_dirs.h"
+#include "err/err.h"
 
-#include "err/ptr_err.h"
-
-int prefix(const char *pre, const char *str)
+inline int prefix(const char *pre, const char *str)
 {
     return strncmp(pre, str, strlen(pre)) == 0;
 }
 
-void add_skip_dirs(struct skip_dirs **skip, const char *path[], size_t n)
+inline void add_skip_dirs(struct SKIP_DIRS **skip, const char *path[], size_t n)
 {
     for (int i = 0; i < n; i++)
     {
-        struct skip_dirs *skp = malloc(sizeof(struct skip_dirs));
+        struct SKIP_DIRS *skp = malloc(sizeof(struct SKIP_DIRS));
         skp->dir = strdup(path[i]);
         HASH_ADD_STR(*skip, dir, skp);
     }
 }
 
-void del_skip_dirs(struct skip_dirs **skip)
+inline void del_skip_dirs(struct SKIP_DIRS **skip)
 {
-    struct skip_dirs *current_user, *tmp;
+    struct SKIP_DIRS *current_user, *tmp;
 
     HASH_ITER(hh, *skip, current_user, tmp)
     {
         HASH_DEL(*skip, current_user); /* delete; users advances to next */
         free(current_user->dir);
-        free(current_user); /* optional- if you want to free  */
+        free(current_user);
     }
 }
 
-inline struct skip_dirs *get_skipped(struct skip_dirs *skip, const char *path)
+inline struct SKIP_DIRS *get_skipped(struct SKIP_DIRS **skip, const char *path)
 {
-    if (!skip)
+    if (!*skip)
         return NULL;
 
-    struct skip_dirs *ig;
-    HASH_FIND_STR(skip, path, ig);
+    struct SKIP_DIRS *ig;
+    HASH_FIND_STR(*skip, path, ig);
     return ig;
 }

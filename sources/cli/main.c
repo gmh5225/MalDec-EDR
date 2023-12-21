@@ -11,10 +11,12 @@
 
 inline void init_logger_main();
 inline void init_scanner_main();
-void process_command_line_options(int argc, char **argv);
+inline void process_command_line_options(int argc, char **argv);
 inline void cleanup_resources();
 inline void help(char *prog_name) no_return;
 inline void pr_version() no_return;
+
+#define CONFIG_JSON_PATH "../../../config/appsettings.json"
 
 int main(int argc, char **argv)
 {
@@ -23,23 +25,23 @@ int main(int argc, char **argv)
 		help(argv[0]);
 	}
 
-	int retval = SUCCESS;
-	DEFENDER.logger = NULL;
-	DEFENDER.scanner = NULL;
-	DEFENDER.config_json = NULL;
+	int retval = ERR_SUCCESS;
+
+	DEFENDER_CONFIG.logger = NULL;
+	DEFENDER_CONFIG.scanner = NULL;
+	DEFENDER_CONFIG.config_json = NULL;
 
 	atexit(cleanup_resources);
 
-	if (IS_ERR(init_json(&DEFENDER.config_json, CONFIG_JSON_PATH)))
+	if (IS_ERR_FAILURE(init_json(&DEFENDER_CONFIG.config_json, CONFIG_JSON_PATH)))
 	{
-		fprintf(stderr, "Main : Error in parser json config '%s'\n", CONFIG_JSON_PATH);
-		retval = ERROR;
+		fprintf(stderr, LOG_MESSAGE_FORMAT(" Error in parser json config '%s'\n", CONFIG_JSON_PATH));
+		retval = ERR_FAILURE;
 		goto ret;
 	}
 	else
 	{
 		init_logger_main();
-		init_scanner_main(DEFENDER.scanner, DEFENDER.config_json);
 		process_command_line_options(argc, argv);
 	}
 
@@ -56,7 +58,7 @@ void init_logger_main()
 		*level_obj,
 		*console_obj;
 
-	if (json_object_object_get_ex(DEFENDER.config_json, "logger", &logger_obj))
+	if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "logger", &logger_obj))
 	{
 		if (!json_object_object_get_ex(logger_obj, "filename", &filename_obj) ||
 			!json_object_object_get_ex(logger_obj, "max_file_size", &max_file_size_obj) ||
@@ -64,14 +66,14 @@ void init_logger_main()
 			!json_object_object_get_ex(logger_obj, "level", &level_obj) ||
 			!json_object_object_get_ex(logger_obj, "console", &console_obj))
 		{
-			fprintf(stderr, "Init_logger_main : Unable to retrieve logger configuration from JSON\n");
-			exit(ERROR);
+			fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve logger configuration from JSON\n"));
+			exit(ERR_FAILURE);
 		}
 	}
 	else
 	{
-		fprintf(stderr, "Init_logger_main : Unable to retrieve 'logger' object from JSON\n");
-		exit(ERROR);
+		fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve 'logger' object from JSON\n"));
+		exit(ERR_FAILURE);
 	}
 
 	LOGGER_CONFIG logger_config = (LOGGER_CONFIG){
@@ -81,43 +83,50 @@ void init_logger_main()
 		.max_file_size = json_object_get_int(max_file_size_obj),
 		.console = json_object_get_boolean(console_obj)};
 
-	if (IS_ERR(init_logger(&DEFENDER.logger, logger_config)))
+	if (IS_ERR_FAILURE(init_logger(&DEFENDER_CONFIG.logger, logger_config)))
 	{
-		fprintf(stderr, "Init_logger_main : Error init logger\n");
-		exit(ERROR);
+		fprintf(stderr, LOG_MESSAGE_FORMAT("Error init logger\n"));
+		exit(ERR_FAILURE);
 	}
 }
 
 void init_scanner_main()
 {
 	struct json_object *scan_obj, *rules_obj, *skip_dir_objs;
-	if (json_object_object_get_ex(DEFENDER.config_json, "scan", &scan_obj))
+	if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "scan", &scan_obj))
 	{
 		if (!json_object_object_get_ex(scan_obj, "rules", &rules_obj) ||
 			!json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs))
 		{
-			fprintf(stderr, "Init_scanner_main : Unable to retrieve scan configuration from JSON\n");
-			exit(ERROR);
+			fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve scan configuration from JSON\n"));
+			exit(ERR_FAILURE);
 		}
 	}
 
-	struct skip_dirs *skip = NULL;
-	add_skip_dirs(&skip, (const char **)json_object_get_array(skip_dir_objs)->array, json_object_get_array(skip_dir_objs)->size);
+	const int length = json_object_array_length(skip_dir_objs);
+	const char **skip_dir = alloca(length * sizeof(const char *));
+	for (int i = 0; i < length; ++i)
+	{
+		struct json_object *element = json_object_array_get_idx(skip_dir_objs, i);
+		skip_dir[i] = (element != NULL) ? json_object_get_string(element) : NULL;
+	}
+
+	struct SKIP_DIRS *skip = NULL;
+	add_skip_dirs(&skip, skip_dir, length);
 
 	SCANNER_CONFIG config = (SCANNER_CONFIG){
 		.file_path = NULL,
 		.max_depth = -1,
 		.scan_type = 0,
 		.verbose = false,
-		.rules = json_object_get_string(rules_obj)};
+		.rules = json_object_get_string(rules_obj),
+		.skip = skip};
 
-	if (IS_ERR(init_scanner(&DEFENDER.scanner, config)))
+	if (IS_ERR_FAILURE(init_scanner(&DEFENDER_CONFIG.scanner, config)))
 	{
-		fprintf(stderr, "Init_scanner_main : Error init scanner\n");
-		exit(ERROR);
+		fprintf(stderr, LOG_MESSAGE_FORMAT("Error init scanner\n"));
+		exit(ERR_FAILURE);
 	}
-
-	DEFENDER.scanner->config.skip = skip;
 }
 
 void process_command_line_options(int argc, char **argv)
@@ -148,16 +157,18 @@ void process_command_line_options(int argc, char **argv)
 		switch (c)
 		{
 		case 0:
-			if (!strcmp(long_options[option_index].name, "max-depth"))
+			if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
 			{
-				uint32_t max_depth = (uint32_t)atoi(optarg);
-				if (max_depth < 0)
-					DEFENDER.scanner->config.max_depth = 0;
-				DEFENDER.scanner->config.max_depth = max_depth;
+				if (!strcmp(long_options[option_index].name, "max-depth"))
+				{
+					uint32_t max_depth = (uint32_t)atoi(optarg);
+					if (max_depth < 0)
+						DEFENDER_CONFIG.scanner->config.max_depth = 0;
+					DEFENDER_CONFIG.scanner->config.max_depth = max_depth;
+				}
+				if (!strcmp(long_options[option_index].name, "verbose"))
+					DEFENDER_CONFIG.scanner->config.verbose = true;
 			}
-			if (!strcmp(long_options[option_index].name, "verbose"))
-				DEFENDER.scanner->config.verbose = true;
-
 			break;
 
 		case 'h':
@@ -165,11 +176,12 @@ void process_command_line_options(int argc, char **argv)
 			break;
 
 		case 's':
-			DEFENDER.scanner->config.file_path = optarg;
+			init_scanner_main();
+			DEFENDER_CONFIG.scanner->config.file_path = optarg;
 			break;
 
 		case 'q':
-			DEFENDER.scanner->config.scan_type |= QUICK_SCAN;
+			DEFENDER_CONFIG.scanner->config.scan_type |= QUICK_SCAN;
 			break;
 
 		case 'v':
@@ -181,45 +193,46 @@ void process_command_line_options(int argc, char **argv)
 		}
 	}
 
-	if (!IS_NULL_PTR(DEFENDER.scanner))
+	if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
 	{
-		if (IS_ERR(scan(DEFENDER.scanner)))
+		if (IS_ERR_FAILURE(scan(DEFENDER_CONFIG.scanner)))
 			;
 	}
 }
 
 void cleanup_resources()
 {
-	if (!IS_NULL_PTR(DEFENDER.config_json))
-		exit_json(&DEFENDER.config_json);
+	if (!IS_NULL_PTR(DEFENDER_CONFIG.config_json))
+		exit_json(&DEFENDER_CONFIG.config_json);
 
-	if (!IS_NULL_PTR(DEFENDER.logger))
-		exit_logger(&DEFENDER.logger);
+	if (!IS_NULL_PTR(DEFENDER_CONFIG.logger))
+		exit_logger(&DEFENDER_CONFIG.logger);
 
-	if (!IS_NULL_PTR(DEFENDER.scanner))
+	if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
 	{
-		if (IS_ERR(exit_scanner(&DEFENDER.scanner)))
+		if (IS_ERR_FAILURE(exit_scanner(&DEFENDER_CONFIG.scanner)))
 			;
 	}
 }
 
 void help(char *prog_name)
 {
-	puts("Linux Defender Anti0Day");
-	printf("Usage: %s [OPTIONS]\n", prog_name);
-	printf("\n\
- -h, --help                     This help menu\n\
- -s, --scan <file>|<folder>     Scans either a file or a folder (default max-depth X)\n\
- -q, --quick                    Enable quick scan\n\
- --max-depth <depth>            Sets max-depth on folder scan\n\
- --verbose			Verbose for scan\n\
- -v, --version                  Version the Linux Defender\n\
-");
-	exit(SUCCESS);
+	printf("Linux Defender Anti0Day\n"
+		   "Usage: %s [OPTIONS]\n\n"
+		   "Options:\n"
+		   "  -h, --help                    Display this help menu\n"
+		   "  -s, --scan <file>|<folder>    Scan a file or folder (default max-depth X)\n"
+		   "  -q, --quick                   Enable quick scan\n"
+		   "      --max-depth <depth>       Set max-depth for folder scan\n"
+		   "      --verbose                Enable verbose mode for scan\n"
+		   "  -v, --version                 Display the version of Linux Defender\n",
+		   prog_name);
+
+	exit(ERR_SUCCESS);
 }
 
 void pr_version()
 {
 	printf("Linux Defender Anti0Day ( Moblog Security Researchers ) %d.%d.%d\n", LINUX_DEFENDER_VERSION_MAJOR, LINUX_DEFENDER_VERSION_PATCHLEVEL, LINUX_DEFENDER_VERSION_SUBLEVEL);
-	exit(SUCCESS);
+	exit(ERR_SUCCESS);
 }

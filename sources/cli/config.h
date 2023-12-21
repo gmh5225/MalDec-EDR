@@ -1,3 +1,7 @@
+/**
+ * @struct DEFENDER_CONFIG
+ * @brief Structure representing the configuration for the defender application.
+ */
 #pragma once
 
 #include "logger/logger.h"
@@ -7,11 +11,8 @@
 #include "inotify/inotify.h"
 #include "compiler/compiler_attribute.h"
 
-#define CONFIG_JSON_PATH "../../../config/appsettings.json"
-
-struct packed(8) DEFENDER
-{
-	LOGGER *logger;
-	SCANNER *scanner;
-	struct json_object *config_json;
-} DEFENDER;
+struct packed(8) DEFENDER_CONFIG {
+    LOGGER *logger;                 /**< Pointer to the LOGGER instance. */
+    SCANNER *scanner;               /**< Pointer to the SCANNER instance. */
+    struct json_object *config_json; /**< Pointer to the configuration JSON object. */
+} DEFENDER_CONFIG;
