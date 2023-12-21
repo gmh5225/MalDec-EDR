@@ -87,6 +87,6 @@ ERR scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
  * @param[in] message Type of the message.
  * @param[in] message_data Data associated with the message.
  * @param[in] user_data User data passed to the callback.
- * @return Returns ERR_SUCCESS on success, ERR_FAILURE on failure.
+ * @return Returns yara call_back_macros.
  */
 int default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data, void *user_data) warn_unused_result;
