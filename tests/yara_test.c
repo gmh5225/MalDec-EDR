@@ -19,10 +19,10 @@ static void yara_scan(void **state)
         .skip = NULL,
         .rules = "../rules/YARA-Mindshield-Analysis"};
 
-    if (init_scanner(&scanner, config) != ERROR)
+    if (!IS_ERR_FAILURE(init_scanner(&scanner, config)))
     {
-        assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), 0);
-        assert_int_equal(exit_scanner(&scanner), 0);
+        assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), ERR_SUCCESS);
+        assert_int_equal(exit_scanner(&scanner), ERR_SUCCESS);
         (void)state;
     }
 }
@@ -37,16 +37,16 @@ static void yara_scan_ignored(void **state)
         .scan_type = 0,
         .rules = "../rules/YARA-Mindshield-Analysis"};
 
-    if (init_scanner(&scanner, config) != ERROR)
+    if (!IS_ERR_FAILURE(init_scanner(&scanner, config)))
     {
-        struct skip_dirs *skip = NULL;
+        struct SKIP_DIRS *skip = NULL;
         const char *skip_list[] = {"/tmp/test"};
         add_skip_dirs(&skip, skip_list, 1);
 
         scanner->config.skip = skip;
 
-        assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), SUCCESS);
-        assert_int_equal(exit_scanner(&scanner), SUCCESS);
+        assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), ERR_SUCCESS);
+        assert_int_equal(exit_scanner(&scanner), ERR_SUCCESS);
 
         (void)state;
     }
@@ -62,9 +62,9 @@ int main(void)
         };
     LOGGER *logger;
 
-    if (IS_ERR(init_logger(&logger, logger_config)))
+    if (IS_ERR_FAILURE(init_logger(&logger, logger_config)))
     {
-        fprintf(stderr, "main: Error during logger initialization. Please review the 'appsettings.json' file and ensure that the 'logger' configuration is accurate.");
+        fprintf(stderr, LOG_MESSAGE_FORMAT("Error during logger initialization. Please review the 'appsettings.json' file and ensure that the 'logger' configuration is accurate."));
         exit(EXIT_FAILURE);
     }
     const struct CMUnitTest tests[] = {

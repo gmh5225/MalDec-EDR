@@ -11,4 +11,4 @@ file(GLOB_RECURSE sources
 )
 
 target_sources(defender PRIVATE ${sources})
-target_link_libraries(defender PUBLIC yara logger json-c)
+target_link_libraries(defender PUBLIC yara c-logger json-c)

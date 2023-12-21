@@ -15,7 +15,7 @@
 static void json_config(void **state)
 {
     struct json_object *json_obj;
-    assert_int_equal(init_json(&json_obj, CONFIG_JSON_PATH), SUCCESS);
+    assert_int_equal(init_json(&json_obj, CONFIG_JSON_PATH), ERR_SUCCESS);
 
     struct json_object *logger_obj,
         *filename_obj,

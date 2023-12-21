@@ -25,7 +25,7 @@ file(GLOB_RECURSE sources
 
 foreach(test IN LISTS tests)
 	add_executable(${test} ${test}.c)
-	target_link_libraries(${test} PUBLIC cmocka yara logger json-c)
+	target_link_libraries(${test} PUBLIC cmocka yara c-logger json-c)
 	target_sources(${test} PRIVATE ${sources})
 	add_test(NAME ${test}
 			COMMAND ${test}

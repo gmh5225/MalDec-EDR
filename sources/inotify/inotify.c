@@ -6,7 +6,7 @@
 
 int init_inotify()
 {
-    int retval = SUCCESS;
+    int retval = ERR_SUCCESS;
     int fd = inotify_init1(IN_NONBLOCK);
    
     if (fd == -1)
