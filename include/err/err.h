@@ -5,17 +5,18 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /**
  * @brief Enumeration for success and error values.
  */
-typedef enum ERR {
-    ERR_SUCCESS = EXIT_SUCCESS, /**< Indicates successful operation. */
-    ERR_FAILURE = EXIT_FAILURE  /**< Indicates an error occurred. */
+typedef enum ERR
+{
+  ERR_SUCCESS = EXIT_SUCCESS, /**< Indicates successful operation. */
+  ERR_FAILURE = EXIT_FAILURE  /**< Indicates an error occurred. */
 } ERR;
 
 /**
@@ -49,8 +50,8 @@ typedef enum ERR {
  *
  * This macro checks if the provided pointer is NULL, indicating a failure in memory allocation.
  * If the pointer is NULL, a detailed error message is printed to the standard error stream,
- * indicating the file, function, and line number where the allocation error occurred. The program then exits
- * with a failure status.
+ * indicating the file, function, and line number where the allocation error occurred. The program
+ * then exits with a failure status.
  *
  * @param ptr Pointer to the allocated memory.
  *
@@ -62,7 +63,7 @@ typedef enum ERR {
  *   ALLOC_ERR_FAILURE(dynamicArray);
  * @endcode
  */
-#define ALLOC_ERR_FAILURE(ptr) assert(!IS_NULL_PTR(ptr))                                  
+#define ALLOC_ERR_FAILURE(ptr) assert(!IS_NULL_PTR(ptr))
 
 /**
  * @brief Macro to check if a value represents a failure error code.

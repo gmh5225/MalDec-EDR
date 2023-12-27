@@ -1,238 +1,247 @@
+#include <getopt.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <string.h>
-#include <stdint.h>
 
-#include "version/version.h"
-#include "err/err.h"
 #include "compiler/compiler_attribute.h"
 #include "config.h"
+#include "err/err.h"
+#include "version/version.h"
 
-inline void init_logger_main();
-inline void init_scanner_main();
-inline void process_command_line_options(int argc, char **argv);
-inline void cleanup_resources();
-inline void help(char *prog_name) no_return;
-inline void pr_version() no_return;
+inline void
+init_logger_main();
+inline void
+init_scanner_main();
+inline void
+process_command_line_options(int argc, char **argv);
+inline void
+cleanup_resources();
+inline void
+help(char *prog_name) no_return;
+inline void
+pr_version() no_return;
 
 #define CONFIG_JSON_PATH "../../../config/appsettings.json"
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
-	if (argc < 2)
-	{
-		help(argv[0]);
-	}
+  if (argc < 2) { help(argv[0]); }
 
-	int retval = ERR_SUCCESS;
+  int retval = ERR_SUCCESS;
 
-	DEFENDER_CONFIG.logger = NULL;
-	DEFENDER_CONFIG.scanner = NULL;
-	DEFENDER_CONFIG.config_json = NULL;
+  DEFENDER_CONFIG.logger      = NULL;
+  DEFENDER_CONFIG.scanner     = NULL;
+  DEFENDER_CONFIG.config_json = NULL;
 
-	atexit(cleanup_resources);
+  atexit(cleanup_resources);
 
-	if (IS_ERR_FAILURE(init_json(&DEFENDER_CONFIG.config_json, CONFIG_JSON_PATH)))
-	{
-		fprintf(stderr, LOG_MESSAGE_FORMAT(" Error in parser json config '%s'\n", CONFIG_JSON_PATH));
-		retval = ERR_FAILURE;
-		goto ret;
-	}
-	else
-	{
-		init_logger_main();
-		process_command_line_options(argc, argv);
-	}
+  if (IS_ERR_FAILURE(init_json(&DEFENDER_CONFIG.config_json, CONFIG_JSON_PATH)))
+  {
+    fprintf(stderr, LOG_MESSAGE_FORMAT(" Error in parser json config '%s'\n",
+                                       CONFIG_JSON_PATH));
+    retval = ERR_FAILURE;
+    goto ret;
+  }
+  else
+  {
+    init_logger_main();
+    process_command_line_options(argc, argv);
+  }
 
 ret:
-	return retval;
+  return retval;
 }
 
-void init_logger_main()
+void
+init_logger_main()
 {
-	struct json_object *logger_obj,
-		*filename_obj,
-		*max_file_size_obj,
-		*max_backup_files_obj,
-		*level_obj,
-		*console_obj;
+  struct json_object *logger_obj, *filename_obj, *max_file_size_obj,
+          *max_backup_files_obj, *level_obj, *console_obj;
 
-	if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "logger", &logger_obj))
-	{
-		if (!json_object_object_get_ex(logger_obj, "filename", &filename_obj) ||
-			!json_object_object_get_ex(logger_obj, "max_file_size", &max_file_size_obj) ||
-			!json_object_object_get_ex(logger_obj, "max_backup_files", &max_backup_files_obj) ||
-			!json_object_object_get_ex(logger_obj, "level", &level_obj) ||
-			!json_object_object_get_ex(logger_obj, "console", &console_obj))
-		{
-			fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve logger configuration from JSON\n"));
-			exit(ERR_FAILURE);
-		}
-	}
-	else
-	{
-		fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve 'logger' object from JSON\n"));
-		exit(ERR_FAILURE);
-	}
+  if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "logger",
+                                &logger_obj))
+  {
+    if (!json_object_object_get_ex(logger_obj, "filename", &filename_obj) ||
+        !json_object_object_get_ex(logger_obj, "max_file_size",
+                                   &max_file_size_obj) ||
+        !json_object_object_get_ex(logger_obj, "max_backup_files",
+                                   &max_backup_files_obj) ||
+        !json_object_object_get_ex(logger_obj, "level", &level_obj) ||
+        !json_object_object_get_ex(logger_obj, "console", &console_obj))
+    {
+      fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve logger "
+                                         "configuration from JSON\n"));
+      exit(ERR_FAILURE);
+    }
+  }
+  else
+  {
+    fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve 'logger' object "
+                                       "from JSON\n"));
+    exit(ERR_FAILURE);
+  }
 
-	LOGGER_CONFIG logger_config = (LOGGER_CONFIG){
-		.filename = json_object_get_string(filename_obj),
-		.level = json_object_get_int(level_obj),
-		.max_backup_files = json_object_get_int(max_backup_files_obj),
-		.max_file_size = json_object_get_int(max_file_size_obj),
-		.console = json_object_get_boolean(console_obj)};
+  LOGGER_CONFIG logger_config = (LOGGER_CONFIG){
+          .filename         = json_object_get_string(filename_obj),
+          .level            = json_object_get_int(level_obj),
+          .max_backup_files = json_object_get_int(max_backup_files_obj),
+          .max_file_size    = json_object_get_int(max_file_size_obj),
+          .console          = json_object_get_boolean(console_obj)};
 
-	if (IS_ERR_FAILURE(init_logger(&DEFENDER_CONFIG.logger, logger_config)))
-	{
-		fprintf(stderr, LOG_MESSAGE_FORMAT("Error init logger\n"));
-		exit(ERR_FAILURE);
-	}
+  if (IS_ERR_FAILURE(init_logger(&DEFENDER_CONFIG.logger, logger_config)))
+  {
+    fprintf(stderr, LOG_MESSAGE_FORMAT("Error init logger\n"));
+    exit(ERR_FAILURE);
+  }
 }
 
-void init_scanner_main()
+void
+init_scanner_main()
 {
-	struct json_object *scan_obj, *rules_obj, *skip_dir_objs;
-	if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "scan", &scan_obj))
-	{
-		if (!json_object_object_get_ex(scan_obj, "rules", &rules_obj) ||
-			!json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs))
-		{
-			fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve scan configuration from JSON\n"));
-			exit(ERR_FAILURE);
-		}
-	}
+  struct json_object *scan_obj, *rules_obj, *skip_dir_objs;
+  if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "scan", &scan_obj))
+  {
+    if (!json_object_object_get_ex(scan_obj, "rules", &rules_obj) ||
+        !json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs))
+    {
+      fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve scan "
+                                         "configuration from JSON\n"));
+      exit(ERR_FAILURE);
+    }
+  }
 
-	const int length = json_object_array_length(skip_dir_objs);
-	const char **skip_dir = alloca(length * sizeof(const char *));
-	for (int i = 0; i < length; ++i)
-	{
-		struct json_object *element = json_object_array_get_idx(skip_dir_objs, i);
-		skip_dir[i] = (element != NULL) ? json_object_get_string(element) : NULL;
-	}
+  const int    length   = json_object_array_length(skip_dir_objs);
+  const char **skip_dir = alloca(length * sizeof(const char *));
+  for (int i = 0; i < length; ++i)
+  {
+    struct json_object *element = json_object_array_get_idx(skip_dir_objs, i);
+    skip_dir[i] = (element != NULL) ? json_object_get_string(element) : NULL;
+  }
 
-	struct SKIP_DIRS *skip = NULL;
-	add_skip_dirs(&skip, skip_dir, length);
+  struct SKIP_DIRS *skip = NULL;
+  add_skip_dirs(&skip, skip_dir, length);
 
-	SCANNER_CONFIG config = (SCANNER_CONFIG){
-		.file_path = NULL,
-		.max_depth = -1,
-		.scan_type = 0,
-		.verbose = false,
-		.rules = json_object_get_string(rules_obj),
-		.skip = skip};
+  SCANNER_CONFIG config =
+          (SCANNER_CONFIG){.file_path = NULL,
+                           .max_depth = -1,
+                           .scan_type = 0,
+                           .verbose   = false,
+                           .rules     = json_object_get_string(rules_obj),
+                           .skip      = skip};
 
-	if (IS_ERR_FAILURE(init_scanner(&DEFENDER_CONFIG.scanner, config)))
-	{
-		fprintf(stderr, LOG_MESSAGE_FORMAT("Error init scanner\n"));
-		exit(ERR_FAILURE);
-	}
+  if (IS_ERR_FAILURE(init_scanner(&DEFENDER_CONFIG.scanner, config)))
+  {
+    fprintf(stderr, LOG_MESSAGE_FORMAT("Error init scanner\n"));
+    exit(ERR_FAILURE);
+  }
 }
 
-void process_command_line_options(int argc, char **argv)
+void
+process_command_line_options(int argc, char **argv)
 {
-	// Command-line options
-	struct option long_options[] = {
-		/* arguments */
-		{"help", no_argument, 0, 'h'},
-		{"scan", required_argument, 0, 's'},
-		{"quick", no_argument, 0, 'q'},
-		{"max-depth", required_argument, 0, 0},
-		{"version", no_argument, 0, 'v'},
-		{"verbose", no_argument, 0, 0},
+  // Command-line options
+  struct option long_options[] = {
+          /* arguments */
+          {"help", no_argument, 0, 'h'},
+          {"scan", required_argument, 0, 's'},
+          {"quick", no_argument, 0, 'q'},
+          {"max-depth", required_argument, 0, 0},
+          {"version", no_argument, 0, 'v'},
+          {"verbose", no_argument, 0, 0},
 
-		/* null byte */
-		{0, 0, 0, 0},
-	};
+          /* null byte */
+          {0, 0, 0, 0},
+  };
 
-	int option_index;
-	while (1)
-	{
-		option_index = 0;
-		const int c = getopt_long(argc, argv, ":qs:d:vh", long_options, &option_index);
+  int option_index;
+  while (1)
+  {
+    option_index = 0;
+    const int c =
+            getopt_long(argc, argv, ":qs:d:vh", long_options, &option_index);
 
-		if (c < 0)
-			break;
+    if (c < 0) break;
 
-		switch (c)
-		{
-		case 0:
-			if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
-			{
-				if (!strcmp(long_options[option_index].name, "max-depth"))
-				{
-					uint32_t max_depth = (uint32_t)atoi(optarg);
-					if (max_depth < 0)
-						DEFENDER_CONFIG.scanner->config.max_depth = 0;
-					DEFENDER_CONFIG.scanner->config.max_depth = max_depth;
-				}
-				if (!strcmp(long_options[option_index].name, "verbose"))
-					DEFENDER_CONFIG.scanner->config.verbose = true;
-			}
-			break;
+    switch (c)
+    {
+      case 0:
+        if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
+        {
+          if (!strcmp(long_options[option_index].name, "max-depth"))
+          {
+            uint32_t max_depth = (uint32_t)atoi(optarg);
+            if (max_depth < 0) DEFENDER_CONFIG.scanner->config.max_depth = 0;
+            DEFENDER_CONFIG.scanner->config.max_depth = max_depth;
+          }
+          if (!strcmp(long_options[option_index].name, "verbose"))
+            DEFENDER_CONFIG.scanner->config.verbose = true;
+        }
+        break;
 
-		case 'h':
-			help(argv[0]);
-			break;
+      case 'h': help(argv[0]); break;
 
-		case 's':
-			init_scanner_main();
-			DEFENDER_CONFIG.scanner->config.file_path = optarg;
-			break;
+      case 's':
+        init_scanner_main();
+        DEFENDER_CONFIG.scanner->config.file_path = optarg;
+        break;
 
-		case 'q':
-			DEFENDER_CONFIG.scanner->config.scan_type |= QUICK_SCAN;
-			break;
+      case 'q': DEFENDER_CONFIG.scanner->config.scan_type |= QUICK_SCAN; break;
 
-		case 'v':
-			pr_version();
-			break;
+      case 'v': pr_version(); break;
 
-		default:
-			break;
-		}
-	}
+      default: break;
+    }
+  }
 
-	if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
-	{
-		if (IS_ERR_FAILURE(scan(DEFENDER_CONFIG.scanner)))
-			;
-	}
+  if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
+  {
+    if (IS_ERR_FAILURE(scan(DEFENDER_CONFIG.scanner)))
+      ;
+  }
 }
 
-void cleanup_resources()
+void
+cleanup_resources()
 {
-	if (!IS_NULL_PTR(DEFENDER_CONFIG.config_json))
-		exit_json(&DEFENDER_CONFIG.config_json);
+  if (!IS_NULL_PTR(DEFENDER_CONFIG.config_json))
+    exit_json(&DEFENDER_CONFIG.config_json);
 
-	if (!IS_NULL_PTR(DEFENDER_CONFIG.logger))
-		exit_logger(&DEFENDER_CONFIG.logger);
+  if (!IS_NULL_PTR(DEFENDER_CONFIG.logger))
+    exit_logger(&DEFENDER_CONFIG.logger);
 
-	if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
-	{
-		if (IS_ERR_FAILURE(exit_scanner(&DEFENDER_CONFIG.scanner)))
-			;
-	}
+  if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
+  {
+    if (IS_ERR_FAILURE(exit_scanner(&DEFENDER_CONFIG.scanner)))
+      ;
+  }
 }
 
-void help(char *prog_name)
+void
+help(char *prog_name)
 {
-	printf("Linux Defender Anti0Day\n"
-		   "Usage: %s [OPTIONS]\n\n"
-		   "Options:\n"
-		   "  -h, --help                    Display this help menu\n"
-		   "  -s, --scan <file>|<folder>    Scan a file or folder (default max-depth X)\n"
-		   "  -q, --quick                   Enable quick scan\n"
-		   "      --max-depth <depth>       Set max-depth for folder scan\n"
-		   "      --verbose                Enable verbose mode for scan\n"
-		   "  -v, --version                 Display the version of Linux Defender\n",
-		   prog_name);
+  printf("Linux Defender Anti0Day\n"
+         "Usage: %s [OPTIONS]\n\n"
+         "Options:\n"
+         "  -h, --help                    Display this help menu\n"
+         "  -s, --scan <file>|<folder>    Scan a file or folder (default "
+         "max-depth X)\n"
+         "  -q, --quick                   Enable quick scan\n"
+         "      --max-depth <depth>       Set max-depth for folder scan\n"
+         "      --verbose                Enable verbose mode for scan\n"
+         "  -v, --version                 Display the version of Linux "
+         "Defender\n",
+         prog_name);
 
-	exit(ERR_SUCCESS);
+  exit(ERR_SUCCESS);
 }
 
-void pr_version()
+void
+pr_version()
 {
-	printf("Linux Defender Anti0Day ( Moblog Security Researchers ) %d.%d.%d\n", LINUX_DEFENDER_VERSION_MAJOR, LINUX_DEFENDER_VERSION_PATCHLEVEL, LINUX_DEFENDER_VERSION_SUBLEVEL);
-	exit(ERR_SUCCESS);
+  printf("Linux Defender Anti0Day ( Moblog Security Researchers ) %d.%d.%d\n",
+         LINUX_DEFENDER_VERSION_MAJOR, LINUX_DEFENDER_VERSION_PATCHLEVEL,
+         LINUX_DEFENDER_VERSION_SUBLEVEL);
+  exit(ERR_SUCCESS);
 }

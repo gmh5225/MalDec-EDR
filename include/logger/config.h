@@ -14,9 +14,9 @@
  */
 typedef struct LOGGER_CONFIG
 {
-    const char *filename; /**< The name of the log file. */
-    long max_file_size;   /**< The maximum size of the log file. */
-    unsigned char max_backup_files; /**< The maximum number of backup log files. */
-    LogLevel level;       /**< The logging level for terminal and file logging. */
-    bool console;         /**< Flag indicating whether to print logs to the terminal. */
+  const char   *filename;         /**< The name of the log file. */
+  long          max_file_size;    /**< The maximum size of the log file. */
+  unsigned char max_backup_files; /**< The maximum number of backup log files. */
+  LogLevel      level; /**< The logging level for terminal and file logging. */
+  bool console; /**< Flag indicating whether to print logs to the terminal. */
 } LOGGER_CONFIG;

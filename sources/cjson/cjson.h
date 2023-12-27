@@ -19,14 +19,14 @@
 #include "json-c/json_util.h"
 #include "json-c/linkhash.h"
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 /**
  * @brief Initializes a JSON object from a file.
@@ -37,7 +37,8 @@
  * @param filename Name of the JSON file to be read.
  * @return Returns ERR_SUCCESS on success, or ERROR on failure.
  */
-ERR init_json(struct json_object **json_obj, const char *filename);
+ERR
+init_json(struct json_object **json_obj, const char *filename);
 
 /**
  * @brief Frees resources associated with a JSON object.
@@ -46,4 +47,5 @@ ERR init_json(struct json_object **json_obj, const char *filename);
  *
  * @param[in,out] json_obj Pointer to the JSON object to be freed.
  */
-void exit_json(struct json_object **json_obj);
+void
+exit_json(struct json_object **json_obj);

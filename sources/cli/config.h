@@ -4,15 +4,18 @@
  */
 #pragma once
 
+#include "cjson/cjson.h"
+#include "compiler/compiler_attribute.h"
+#include "inotify/inotify.h"
 #include "logger/logger.h"
 #include "scan/config.h"
 #include "scan/scan.h"
-#include "cjson/cjson.h"
-#include "inotify/inotify.h"
-#include "compiler/compiler_attribute.h"
 
-struct packed(8) DEFENDER_CONFIG {
-    LOGGER *logger;                 /**< Pointer to the LOGGER instance. */
-    SCANNER *scanner;               /**< Pointer to the SCANNER instance. */
-    struct json_object *config_json; /**< Pointer to the configuration JSON object. */
-} DEFENDER_CONFIG;
+struct packed(8) DEFENDER_CONFIG
+{
+  LOGGER  *logger;  /**< Pointer to the LOGGER instance. */
+  SCANNER *scanner; /**< Pointer to the SCANNER instance. */
+  struct json_object
+          *config_json; /**< Pointer to the configuration JSON object. */
+}
+DEFENDER_CONFIG;
