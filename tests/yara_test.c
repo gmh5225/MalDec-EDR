@@ -1,8 +1,8 @@
-#include "cmocka.h"
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "cmocka.h"
 
 #include "err/err.h"
 #include "logger/logger.h"
