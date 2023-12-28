@@ -19,7 +19,7 @@
 inline ERR
 scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 {
-  int                    retval    = ERR_SUCCESS;
+  ERR                    retval    = ERR_SUCCESS;
   SCANNER_CALLBACK_ARGS *user_data = (struct SCANNER_CALLBACK_ARGS *)malloc(
           sizeof(struct SCANNER_CALLBACK_ARGS));
 
@@ -59,11 +59,7 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
   const size_t      dir_size = strlen(dir);
   const char       *fmt      = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
 
-  if (config.max_depth >= 0 && current_depth > config.max_depth)
-  {
-    retval = ERR_FAILURE;
-    goto ret;
-  }
+  if (config.max_depth >= 0 && current_depth > config.max_depth) { goto ret; }
   else if (IS_NULL_PTR((dd = opendir(dir))))
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %s : %d (%s)", dir, errno,
@@ -89,13 +85,17 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
     if (entry->d_type == DT_REG)
     {
       if (IS_ERR_FAILURE(scan_file(scanner, DEFAULT_SCAN_CALLBACK)))
+      {
         retval = ERR_FAILURE;
+      }
     }
     else if (entry->d_type == DT_DIR)
     {
       if (IS_ERR_FAILURE(
                   scan_dir(scanner, DEFAULT_SCAN_CALLBACK, current_depth + 1)))
+      {
         retval = ERR_FAILURE;
+      }
     }
   }
 
@@ -142,6 +142,6 @@ scan(SCANNER *scanner)
   }
 
 ret:
-  close(fd);
+  if (fd) close(fd);
   return retval;
 }
