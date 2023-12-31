@@ -86,7 +86,7 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 inline static ERR
 scanner_set_rule(SCANNER *scanner, const char *path, const char *yara_file_name)
 {
-  int                retval   = ERR_SUCCESS;
+  ERR                retval   = ERR_SUCCESS;
   YR_FILE_DESCRIPTOR rules_fd = open(path, O_RDONLY);
 
   if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL,
@@ -105,7 +105,7 @@ ret:
 inline static ERR
 scanner_load_rules(SCANNER *scanner, const char *dir)
 {
-  int            retval = ERR_SUCCESS;
+  ERR            retval = ERR_SUCCESS;
   DIR           *dd;
   struct dirent *entry;
   const size_t   dir_size = strlen(dir);
@@ -149,7 +149,7 @@ ret:
 inline ERR
 init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
 {
-  int retval         = ERR_SUCCESS;
+  ERR retval         = ERR_SUCCESS;
   *scanner           = malloc(sizeof(struct SCANNER));
   (*scanner)->config = config;
 
@@ -191,7 +191,7 @@ ret:
 inline ERR
 exit_scanner(SCANNER **scanner)
 {
-  int retval = ERR_SUCCESS;
+  ERR retval = ERR_SUCCESS;
 
   if (!scanner)
   {

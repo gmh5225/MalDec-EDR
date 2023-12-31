@@ -51,16 +51,16 @@ inline ERR
 scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
 {
   int               retval = ERR_SUCCESS;
-  DIR              *dd;
   SCANNER_CONFIG    config = scanner->config;
   struct SKIP_DIRS *skip   = config.skip;
   struct dirent    *entry;
   const char       *dir      = config.file_path;
+  DIR              *dd       = opendir(dir);
   const size_t      dir_size = strlen(dir);
   const char       *fmt      = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
 
   if (config.max_depth >= 0 && current_depth > config.max_depth) { goto ret; }
-  else if (IS_NULL_PTR((dd = opendir(dir))))
+  else if (IS_NULL_PTR((dd)))
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %s : %d (%s)", dir, errno,
                                  strerror(errno)));

@@ -10,17 +10,19 @@
 #include "version/version.h"
 
 inline void
-init_logger_main();
+init_logger_main(void);
 inline void
-init_scanner_main();
+init_scanner_main(void);
 inline void
 process_command_line_options(int argc, char **argv);
 inline void
-cleanup_resources();
+cleanup_resources(void);
 inline void
 help(char *prog_name) no_return;
 inline void
-pr_version() no_return;
+pr_version(void) no_return;
+inline void
+init_telekinesis_main(void);
 
 #define CONFIG_JSON_PATH "../../../config/appsettings.json"
 
@@ -29,11 +31,12 @@ main(int argc, char **argv)
 {
   if (argc < 2) { help(argv[0]); }
 
-  int retval = ERR_SUCCESS;
+  ERR retval = ERR_SUCCESS;
 
   DEFENDER_CONFIG.logger      = NULL;
   DEFENDER_CONFIG.scanner     = NULL;
   DEFENDER_CONFIG.config_json = NULL;
+  DEFENDER_CONFIG.telekinesis = NULL;
 
   atexit(cleanup_resources);
 
@@ -98,13 +101,49 @@ init_logger_main()
 }
 
 void
+init_telekinesis_main()
+{
+  struct json_object *drivers_obj, *telekinesis_obj, *driver_path_obj,
+          *driver_name_obj;
+
+  if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "drivers",
+                                &drivers_obj))
+  {
+    if (!json_object_object_get_ex(drivers_obj, "telekinesis",
+                                   &telekinesis_obj) ||
+        !json_object_object_get_ex(telekinesis_obj, "driver_path",
+                                   &driver_path_obj) ||
+        !json_object_object_get_ex(telekinesis_obj, "driver_name",
+                                   &driver_name_obj))
+    {
+      fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve scan "
+                                         "configuration from JSON\n"));
+      exit(ERR_FAILURE);
+    }
+  }
+
+  TELEKINESIS_CONFIG config = (TELEKINESIS_CONFIG){
+          .driver_name = json_object_get_string(driver_name_obj),
+          .driver_path = json_object_get_string(driver_path_obj)};
+
+  if (IS_ERR_FAILURE(
+              init_driver_telekinesis(&DEFENDER_CONFIG.telekinesis, config)))
+  {
+    fprintf(stderr, LOG_MESSAGE_FORMAT("Error in init driver %s\n",
+                                       config.driver_name));
+    exit(EXIT_FAILURE);
+  }
+}
+
+void
 init_scanner_main()
 {
-  struct json_object *scan_obj, *rules_obj, *skip_dir_objs;
+  struct json_object *scan_obj, *yara_obj, *rules_obj, *skip_dir_objs;
   if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "scan", &scan_obj))
   {
-    if (!json_object_object_get_ex(scan_obj, "rules", &rules_obj) ||
-        !json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs))
+    if (!json_object_object_get_ex(scan_obj, "yara", &yara_obj) ||
+        !json_object_object_get_ex(yara_obj, "rules", &rules_obj) ||
+        !json_object_object_get_ex(yara_obj, "skip_dirs", &skip_dir_objs))
     {
       fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve scan "
                                          "configuration from JSON\n"));
@@ -150,17 +189,18 @@ process_command_line_options(int argc, char **argv)
           {"max-depth", required_argument, 0, 0},
           {"version", no_argument, 0, 'v'},
           {"verbose", no_argument, 0, 0},
+          {"connect-telekinesis", no_argument, 0, 0},
 
           /* null byte */
           {0, 0, 0, 0},
   };
 
-  int option_index;
   while (1)
   {
-    option_index = 0;
-    const int c =
-            getopt_long(argc, argv, ":qs:d:vh", long_options, &option_index);
+    // clang-format off
+    int       option_index = 0;
+    const int c = getopt_long(argc, argv, ":qs:d:vh", long_options, &option_index);
+    // clang-format on
 
     if (c < 0) break;
 
@@ -177,6 +217,12 @@ process_command_line_options(int argc, char **argv)
           }
           if (!strcmp(long_options[option_index].name, "verbose"))
             DEFENDER_CONFIG.scanner->config.verbose = true;
+        }
+        if (!strcmp(long_options[option_index].name, "connect-telekinesis"))
+        {
+          init_telekinesis_main();
+          connect_driver_telekinesis(DEFENDER_CONFIG.telekinesis);
+          return;
         }
         break;
 
@@ -216,6 +262,10 @@ cleanup_resources()
     if (IS_ERR_FAILURE(exit_scanner(&DEFENDER_CONFIG.scanner)))
       ;
   }
+  if (!IS_NULL_PTR(DEFENDER_CONFIG.telekinesis))
+  {
+    exit_driver_telekinesis(&DEFENDER_CONFIG.telekinesis);
+  }
 }
 
 void
@@ -223,14 +273,18 @@ help(char *prog_name)
 {
   printf("Linux Defender Anti0Day\n"
          "Usage: %s [OPTIONS]\n\n"
-         "Options:\n"
-         "  -h, --help                    Display this help menu\n"
-         "  -s, --scan <file>|<folder>    Scan a file or folder (default "
+         "Options:\n\n"
+         "  Yara :\n"
+         "    -s, --scan <file>|<folder>    Scan a file or folder (default "
          "max-depth X)\n"
-         "  -q, --quick                   Enable quick scan\n"
-         "      --max-depth <depth>       Set max-depth for folder scan\n"
-         "      --verbose                Enable verbose mode for scan\n"
-         "  -v, --version                 Display the version of Linux "
+         "    -q, --quick                   Enable quick scan\n"
+         "    --max-depth <depth>           Set max-depth for folder scan\n"
+         "    --verbose                     Enable verbose mode for scan\n\n"
+         "  Telekinesis Driver :\n"
+         "    --connect-telekinesis         Connect driver Telekinesis shell\n"
+         "\n\n"
+         "    -v, --version                 Display the version of Linux \n"
+         "    -h, --help                    Display this help menu"
          "Defender\n",
          prog_name);
 

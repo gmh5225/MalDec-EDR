@@ -5,7 +5,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No color
 
 # Directories to be formatted
-directories=("sources" "tests" "include")
+directories=("sources" "include")
 
 # Run clang-format for each directory
 for dir in "${directories[@]}"; do

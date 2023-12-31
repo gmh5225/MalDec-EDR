@@ -8,6 +8,7 @@ file(GLOB_RECURSE sources
     ../scan/*.c
     ../logger/*.c
     ../cjson/*.c
+    ../telekinesis/*.c
 )
 
 target_sources(defender PRIVATE ${sources})
