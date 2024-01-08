@@ -185,6 +185,7 @@ process_command_line_options(int argc, char **argv)
           /* arguments */
           {"help", no_argument, 0, 'h'},
           {"scan", required_argument, 0, 's'},
+          {"inotify", required_argument, 0, 'i'},
           {"quick", no_argument, 0, 'q'},
           {"max-depth", required_argument, 0, 0},
           {"version", no_argument, 0, 'v'},
@@ -207,6 +208,7 @@ process_command_line_options(int argc, char **argv)
     switch (c)
     {
       case 0:
+        // Scan Yara
         if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
         {
           if (!strcmp(long_options[option_index].name, "max-depth"))
@@ -218,6 +220,7 @@ process_command_line_options(int argc, char **argv)
           if (!strcmp(long_options[option_index].name, "verbose"))
             DEFENDER_CONFIG.scanner->config.verbose = true;
         }
+        // Driver telekinesis
         if (!strcmp(long_options[option_index].name, "connect-telekinesis"))
         {
           init_telekinesis_main();
@@ -277,15 +280,20 @@ help(char *prog_name)
          "  Yara :\n"
          "    -s, --scan <file>|<folder>    Scan a file or folder (default "
          "max-depth X)\n"
+         "    -i, --inotify <time>          Place the file scan in a "
+         "monitoring system\n"
+         "                                  if a file is created or changed it "
+         "will scan the "
+         "file\n"
          "    -q, --quick                   Enable quick scan\n"
          "    --max-depth <depth>           Set max-depth for folder scan\n"
          "    --verbose                     Enable verbose mode for scan\n\n"
          "  Telekinesis Driver :\n"
          "    --connect-telekinesis         Connect driver Telekinesis shell\n"
          "\n\n"
-         "    -v, --version                 Display the version of Linux \n"
+         "    -v, --version                 Display the version of Linux Defender \n"
          "    -h, --help                    Display this help menu"
-         "Defender\n",
+         " Linux Defender\n",
          prog_name);
 
   exit(ERR_SUCCESS);

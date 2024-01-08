@@ -19,3 +19,6 @@
 [submodule "libraries/json-c"]
 	path = libraries/json-c
 	url = git@github.com:json-c/json-c.git
+[submodule "libraries/yara"]
+	path = libraries/yara
+	url = https://github.com/VirusTotal/yara.git

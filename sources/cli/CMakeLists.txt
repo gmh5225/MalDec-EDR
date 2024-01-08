@@ -9,6 +9,7 @@ file(GLOB_RECURSE sources
     ../logger/*.c
     ../cjson/*.c
     ../telekinesis/*.c
+    ../inotify/*.c
 )
 
 target_sources(defender PRIVATE ${sources})
