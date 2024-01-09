@@ -1,72 +1,59 @@
-from sys import argv
-import numpy as np
-import subprocess
-import shlex
-import time
-import re
+#!/usr/bin/python3
 
-# Strace output filter
-PID_REMOVE = re.compile(r'^\[.*\]')
-SYSCALL_NAME = re.compile(r'^[a-zA-Z][^(]+')
+from subprocess import Popen
+from regs import *
+from ptrace import *
+import argparse
+from syscall_table import *
 
-K = 3
+def print_syscall_name(syscalls_numbers):
+        for syscall_number in syscalls_numbers:
+            syscall_name = syscall_table.get(syscall_number)
+            if syscall_name is not None:
+                print(f"nr_{syscall_number} sys_{syscall_name}")
+            else:
+                print(f"nr_{syscall_number} not found in syscall_table")
+def main():
+    try:
+        parser = argparse.ArgumentParser(description="Script to trace system calls and analyze each one using a statistical calculation algorithm")
 
-def trace(prog: str) -> str:
-    args = shlex.split(f'/usr/bin/strace -f {prog}')
-    trace_command = subprocess.Popen(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=False, text=True)
-    return trace_command.stderr.readlines()
+        # Add arguments
+        parser.add_argument('-p', '--pid', type=int, help='PID of the running process')
+        parser.add_argument('-s', '--spawn', type=str, help='Spawn a process using name')
+        parser.add_argument('-v', '--verbose', action='store_true', help='Spawn a process using name')
 
-def read_trace_file(file: str) -> str:
-    with open(file) as f:
-        return f.readlines()
+        # Parse command line arguments
+        args = parser.parse_args()
 
-def filter_output(trace_output: [str]) -> [str]:
-    return [syscall.group() for syscall in filter(lambda x: x != None, [SYSCALL_NAME.match(PID_REMOVE.sub('', re.sub(r'strace.*', '', syscall))) for syscall in trace_output])]
+        # Access argument values
+        pid = args.pid
+        spawn = args.spawn
+        verbose = args.verbose
 
-def count_syscalls(syscalls: [str]) -> dict:
-    unique, counts = np.unique(syscalls, return_counts=True)
-    return dict(zip(unique, counts))
-
-def syscall_frequency(prog: str, trace_fn) -> dict:
-    syscalls = filter_output(trace_fn(prog))
-    TOTAL = len(syscalls)
-    frequency = dict([(syscall, count / TOTAL * 100) for syscall, count in count_syscalls(syscalls).items()])
-    return frequency
-
-def merge_dicts(dicts: [dict]):
-    return { k: [_d[k] for _d in dicts] for k in dicts[0].keys() }
-
-def syscall_std(freqs: [dict]):
-    merged = merge_dicts(freqs)
-    
-    for key, values in merged.items():
-        TOTAL = len(values)
-        mean = sum(values) / TOTAL
-        dp = sum([(value - mean)**2 / TOTAL for value in values])**1/2
-        merged[key] = dp
-    
-    return merged
-
-if __name__ == '__main__':
-    from time import sleep
-    import os
-    
-    if len(argv) < 2:
-        print(f'Usage: {argv[0]} <program>')
-    
-    trace_file = ' '.join(argv[1:])
-    freqs = []
-    
-    # TODO: Verify why it's not changing the frequency.
-    while True:
-        freq = syscall_frequency(argv[1], read_trace_file)
-        freqs.append(freq)
-        
-        if len(freqs) >= K:
-            stds = syscall_std(freqs)
-            print(list(filter(lambda x: x[1] != 0, stds.items())))
+        # Program logic based on arguments
+        if pid is not None and spawn is None:
+            print(f"Syscalls of process {pid}")
+            syscalls_numbers = ptrace_syscalls(pid)
             
-            freqs = []
-        
-        # os.system(f'echo -ne > {trace_file}')
-        sleep(1)
+            if(verbose):
+                print_syscall_name(syscalls_numbers)
+                    
+        elif spawn is not None and pid is None:
+            process = Popen(spawn, shell=True)
+            spawned_pid = process.pid
+            
+            print(f"Spawned process {spawn}:{spawned_pid}")
+            
+            syscalls_numbers = ptrace_syscalls(spawned_pid)
+            
+            if(verbose):
+                print_syscall_name(syscalls_numbers)
+            
+        else:
+            print("No arguments provided. Use -h or --help for help.")
+
+    except KeyboardInterrupt:
+        print("\nOperation interrupted by the user.")
+
+if __name__ == "__main__":
+    main()
