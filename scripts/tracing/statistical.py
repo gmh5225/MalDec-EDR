@@ -51,6 +51,7 @@ def analyzer(pid, freq_time, freq_count):
                 syscalls_list.clear()
 
                 if len(frequency_list) >= freq_count:
+                    print("Sample results:\t")
                     df = pd.DataFrame(syscall_statistical(frequency_list).items(), columns=['syscall', 'std'])
                     print(df)
                     frequency_list.clear()
