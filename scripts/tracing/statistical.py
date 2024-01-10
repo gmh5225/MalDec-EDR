@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from threading import Thread, Event, Lock
 from time import sleep
 from ptrace import *
@@ -28,10 +29,7 @@ def syscall_statistical(freqs: [dict]):
     merged = merge_dicts(freqs)
     
     for key, values in merged.items():
-        TOTAL = len(values)
-        mean = sum(values) / TOTAL
-        dp = sum([(value - mean)**2 / TOTAL for value in values])**1/2
-        merged[key] = dp
+        merged[key] = np.std(values)
     
     return merged
 
@@ -53,7 +51,8 @@ def analyzer(pid, freq_time, freq_count):
                 syscalls_list.clear()
 
                 if len(frequency_list) >= freq_count:
-                    print(f"syscall_statistical={syscall_statistical(frequency_list)}")
+                    df = pd.DataFrame(syscall_statistical(frequency_list).items(), columns=['syscall', 'std'])
+                    print(df)
                     frequency_list.clear()
                     
     except KeyboardInterrupt:
