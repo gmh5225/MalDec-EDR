@@ -1,10 +1,10 @@
 #include "inotify/inotify.h"
 
 #include "logger/logger.h"
+#include <errno.h>
 #include <stdlib.h>
 #include <sys/inotify.h>
 #include <unistd.h>
-#include <errno.h>
 
 #include "err/err.h"
 
@@ -19,10 +19,12 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
 
   if ((*inotify)->fd_inotify == -1)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d (%s)", errno,
-                                 strerror(errno)));
+    LOG_ERROR(
+            LOG_MESSAGE_FORMAT("ERR_FAILURE %d (%s)", errno, strerror(errno)));
     return retval;
   }
+
+  retval = ERR_SUCCESS;
 
   return retval;
 }

@@ -277,7 +277,7 @@ help(char *prog_name)
   printf("Linux Defender Anti0Day\n"
          "Usage: %s [OPTIONS]\n\n"
          "Options:\n\n"
-         "  Yara :\n"
+         "  Scan :\n"
          "    -s, --scan <file>|<folder>    Scan a file or folder (default "
          "max-depth X)\n"
          "    -i, --inotify <time>          Place the file scan in a "
