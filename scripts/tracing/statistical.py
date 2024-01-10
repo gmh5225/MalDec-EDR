@@ -1,18 +1,16 @@
 import numpy as np
-import re
 
 def count_syscalls(syscalls: [str]) -> dict:
     unique, counts = np.unique(syscalls, return_counts=True)
     return dict(zip(unique, counts))
 
-def syscall_frequency(prog: str, trace_fn) -> dict:
-    syscalls = filter_output(trace_fn(prog))
+def merge_dicts(dicts: [dict]):
+    return { k: [_d[k] for _d in dicts] for k in dicts[0].keys() }
+
+def syscall_frequency(syscalls) -> dict:
     TOTAL = len(syscalls)
     frequency = dict([(syscall, count / TOTAL * 100) for syscall, count in count_syscalls(syscalls).items()])
     return frequency
-
-def merge_dicts(dicts: [dict]):
-    return { k: [_d[k] for _d in dicts] for k in dicts[0].keys() }
 
 def syscall_std(freqs: [dict]):
     merged = merge_dicts(freqs)
