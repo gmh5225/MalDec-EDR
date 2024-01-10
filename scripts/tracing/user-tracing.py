@@ -2,9 +2,9 @@
 
 from subprocess import Popen
 from regs import *
-from ptrace import *
+from statistical import *
 import argparse
-from syscall_table import *
+
 
 def main():
     try:
