@@ -47,7 +47,7 @@ def analyzer(pid, freq_time, freq_count):
             if len(syscalls_list) > 0:
                 frequency_list.append(syscall_frequency(syscalls_list))
                 
-                print(f"Colleting sample {len(frequency_list)}")
+                print(f"Samples collected '{len(frequency_list)}', amounts of syscalls {len(syscalls_list)}")
                 syscalls_list.clear()
 
                 if len(frequency_list) >= freq_count:
