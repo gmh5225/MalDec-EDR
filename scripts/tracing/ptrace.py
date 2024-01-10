@@ -10,6 +10,10 @@ PTRACE_GETREGS = 12
 PTRACE_SYSCALL = 24
 PTRACE_ATTACH = 16
 PTRACE_DETACH = 17
+PTRACE_SETOPTIONS = 0x4200
+PTRACE_O_TRACEFORK = 0x00000002
+PTRACE_O_TRACECLONE = 0x00000008
+PTRACE_O_TRACEVFORK = 0x00000004
 
 def ptrace_syscalls(pid, syscalls_list, stop_event, lock):
     libc = ctypes.CDLL('libc.so.6')
@@ -17,8 +21,12 @@ def ptrace_syscalls(pid, syscalls_list, stop_event, lock):
     ptrace.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p]
     ptrace.restype = ctypes.c_long
 
-    if ptrace(PTRACE_ATTACH, pid, 0, 0) == -1:
+    if ptrace(PTRACE_ATTACH, pid, 0, 0) < 0:
         print("Error in ptrace attach process")
+        return -1
+    
+    if ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACEFORK|PTRACE_O_TRACECLONE|PTRACE_O_TRACEVFORK) < 0:
+        print("Error in ptrace PTRACE_SETOPTIONS")
         return -1
 
     status = ctypes.c_int(0)
@@ -33,6 +41,7 @@ def ptrace_syscalls(pid, syscalls_list, stop_event, lock):
 
             if count % 2 == 0:
                 syscall_name = syscall_table.get(regs.orig_rax)
+                print(syscall_name, regs.orig_rax)
                 if syscall_name is not None:
                     syscalls_list.append(syscall_name)
 
@@ -57,13 +66,15 @@ def analyzer(pid, freq_time, freq_count):
         while True:
             sleep(freq_time)
             
-            with lock:
-                frequency_list.append(syscall_frequency(syscalls_list))
-                print(f"frequency_list_items={frequency_list}, frequency_list_count={len(frequency_list)}")
+            if len(syscalls_list) > 0:
+                print(syscalls_list)
+                with lock:
+                    frequency_list.append(syscall_frequency(syscalls_list))
 
-                if len(frequency_list) >= freq_count:
-                    print(syscall_std(frequency_list))
-                    syscalls_list = frequency_list = []
+                    if len(frequency_list) >= freq_count:
+                        # print(f"frequency_list_items={frequency_list}, frequency_list_count={len(frequency_list)}")
+                        print(syscall_std(frequency_list))
+                        frequency_list = []
                     
     except KeyboardInterrupt:
         print("Terminating threads...")
