@@ -25,7 +25,7 @@ def main():
 
         # Program logic based on arguments
         if pid is not None and count is not None and time is not None:
-            print(f"Analyzer pid={pid} time={time} count={count}\n")
+            print(f"Analyzing the pid '{pid}', with sample collection '{count}' and data collection time '{time}s'")
             analyzer(pid, time, count)
         
         else:
