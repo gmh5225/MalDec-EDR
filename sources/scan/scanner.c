@@ -83,6 +83,63 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
   return CALLBACK_CONTINUE;
 }
 
+inline void
+default_scan_inotify(INOTIFY *inotify, void *buff)
+{
+  SCANNER *scanner = (SCANNER *)buff;
+
+  char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
+  const struct inotify_event *event;
+  ssize_t                     len;
+
+  for (;;)
+  {
+    len = read((*inotify).fd_inotify, buf, sizeof(buf));
+    if (len == -1 && errno != EAGAIN)
+    {
+      perror("read");
+      exit(EXIT_FAILURE);
+    }
+
+    /* If the nonblocking read() found no events to read, then
+                  it returns -1 with errno set to EAGAIN. In that case,
+                  we exit the loop. */
+
+    if (len <= 0) break;
+
+    /* Loop over all events in the buffer. */
+
+    for (char *ptr = buf; ptr < buf + len;
+         ptr += sizeof(struct inotify_event) + event->len)
+    {
+      event = (const struct inotify_event *)ptr;
+
+      /* Print event type. */
+
+      if (event->mask & IN_OPEN) printf("IN_OPEN: ");
+      if (event->mask & IN_CLOSE_NOWRITE) printf("IN_CLOSE_NOWRITE: ");
+      if (event->mask & IN_CLOSE_WRITE) printf("IN_CLOSE_WRITE: ");
+
+      /* Print the name of the watched directory. */
+
+      for (size_t i = 0; i < (*inotify).config.quantity_fds; ++i)
+      {
+        if ((*inotify).wd[i] == event->wd)
+        {
+          printf("%s/", (*inotify).config.paths[i]);
+          break;
+        }
+      }
+      if (event->len) printf("%s", event->name);
+
+      if (event->mask & IN_ISDIR)
+        printf(" [directory]\n");
+      else
+        printf(" [file]\n");
+    }
+  }
+}
+
 inline static ERR
 scanner_set_rule(SCANNER *scanner, const char *path, const char *yara_file_name)
 {

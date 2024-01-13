@@ -145,3 +145,12 @@ ret:
   if (fd) close(fd);
   return retval;
 }
+
+void
+scan_listen(SCANNER *scanner, INOTIFY *inotify)
+{
+  if (!IS_NULL_PTR(scanner) && !IS_NULL_PTR(inotify))
+  {
+    listen_to_events_inotify(&inotify, scanner, DEFAULT_SCAN_INOTIFY);
+  }
+}

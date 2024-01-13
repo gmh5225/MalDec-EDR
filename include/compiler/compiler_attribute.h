@@ -53,3 +53,22 @@
  * @endcode
  */
 #define packed(x) __attribute__((packed, aligned(x)))
+
+/**
+ * @brief Macro for marking a function as a constructor.
+ * 
+ * Use this macro to mark a function as a constructor, meaning it will be
+ * automatically executed before the `main` function is called during program
+ * startup.
+ * 
+ * Example:
+ * @code
+ * constructor void myConstructor() {
+ *     // Your constructor code here
+ * }
+ * @endcode
+ * 
+ * @warning This macro should be used with caution, as it may affect the order
+ * of initialization of global objects and have other side effects.
+ */
+#define constructor __attribute__((constructor))

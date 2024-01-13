@@ -20,6 +20,7 @@ struct packed(8) DEFENDER_CONFIG
   SCANNER             *scanner; /**< Pointer to the SCANNER instance. */
   struct json_object  *config_json; /**< Pointer to the configuration JSON object. */
   TELEKINESIS         *telekinesis; /**< Pointer to the TELEKINESIS Driver instance. */
+  INOTIFY             *inotify;
 }
 DEFENDER_CONFIG;
 

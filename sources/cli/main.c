@@ -23,6 +23,8 @@ inline void
 pr_version(void) no_return;
 inline void
 init_telekinesis_main(void);
+inline void
+init_inotify_main(void);
 
 #define CONFIG_JSON_PATH "../../../config/appsettings.json"
 
@@ -37,7 +39,7 @@ main(int argc, char **argv)
   DEFENDER_CONFIG.scanner     = NULL;
   DEFENDER_CONFIG.config_json = NULL;
   DEFENDER_CONFIG.telekinesis = NULL;
-
+  DEFENDER_CONFIG.inotify     = NULL;
   atexit(cleanup_resources);
 
   if (IS_ERR_FAILURE(init_json(&DEFENDER_CONFIG.config_json, CONFIG_JSON_PATH)))
@@ -178,58 +180,84 @@ init_scanner_main()
 }
 
 void
+init_inotify_main()
+{
+  struct json_object *inotify_obj, *paths_obj;
+  if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "inotify",
+                                &inotify_obj))
+  {
+    if (!json_object_object_get_ex(inotify_obj, "paths", &paths_obj))
+    {
+      fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve scan "
+                                         "configuration from JSON\n"));
+      exit(ERR_FAILURE);
+    }
+  }
+
+  const int    length = json_object_array_length(paths_obj);
+  const char **paths  = alloca(length * sizeof(const char *));
+  for (int i = 0; i < length; ++i)
+  {
+    struct json_object *element = json_object_array_get_idx(paths_obj, i);
+    paths[i] = (element != NULL) ? json_object_get_string(element) : NULL;
+  }
+
+  INOTIFY_CONFIG config =
+          (INOTIFY_CONFIG){.paths = paths, .quantity_fds = length};
+
+  if (IS_ERR_FAILURE(init_inotify(&DEFENDER_CONFIG.inotify, config)))
+  {
+    fprintf(stderr, LOG_MESSAGE_FORMAT("Error init inotify\n"));
+    exit(ERR_FAILURE);
+  }
+}
+
+void
 process_command_line_options(int argc, char **argv)
 {
   // Command-line options
   struct option long_options[] = {
-          /* arguments */
           {"help", no_argument, 0, 'h'},
           {"scan", required_argument, 0, 's'},
-          {"inotify", required_argument, 0, 'i'},
+          {"scan-inotify", required_argument, 0, 'y'},
           {"quick", no_argument, 0, 'q'},
           {"max-depth", required_argument, 0, 0},
           {"version", no_argument, 0, 'v'},
           {"verbose", no_argument, 0, 0},
           {"connect-telekinesis", no_argument, 0, 0},
-
-          /* null byte */
           {0, 0, 0, 0},
   };
 
-  while (1)
+  int option_index = 0;
+  int c;
+
+  while ((c = getopt_long(argc, argv, ":qs:d:vh", long_options,
+                          &option_index)) != -1)
   {
-    // clang-format off
-    int       option_index = 0;
-    const int c = getopt_long(argc, argv, ":qs:d:vh", long_options, &option_index);
-    // clang-format on
-
-    if (c < 0) break;
-
     switch (c)
     {
       case 0:
         // Scan Yara
         if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
         {
-          if (!strcmp(long_options[option_index].name, "max-depth"))
+          if (strcmp(long_options[option_index].name, "max-depth") == 0)
           {
             uint32_t max_depth = (uint32_t)atoi(optarg);
-            if (max_depth < 0) DEFENDER_CONFIG.scanner->config.max_depth = 0;
-            DEFENDER_CONFIG.scanner->config.max_depth = max_depth;
+            DEFENDER_CONFIG.scanner->config.max_depth =
+                    (max_depth < 0) ? 0 : max_depth;
           }
-          if (!strcmp(long_options[option_index].name, "verbose"))
+          if (strcmp(long_options[option_index].name, "verbose") == 0)
             DEFENDER_CONFIG.scanner->config.verbose = true;
         }
+
         // Driver telekinesis
-        if (!strcmp(long_options[option_index].name, "connect-telekinesis"))
+        if (strcmp(long_options[option_index].name, "connect-telekinesis") == 0)
         {
           init_telekinesis_main();
           connect_driver_telekinesis(DEFENDER_CONFIG.telekinesis);
           return;
         }
         break;
-
-      case 'h': help(argv[0]); break;
 
       case 's':
         init_scanner_main();
@@ -240,15 +268,24 @@ process_command_line_options(int argc, char **argv)
 
       case 'v': pr_version(); break;
 
-      default: break;
+      case 'y':
+        init_scanner_main();
+        init_inotify_main();
+        DEFENDER_CONFIG.inotify->config.time = atoi(optarg);
+        scan_listen(DEFENDER_CONFIG.scanner, DEFENDER_CONFIG.inotify);
+        break;
+
+      case 'h':
+      case ':':
+      case '?':
+      default: help(argv[0]); break;
     }
   }
 
-  if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
-  {
-    if (IS_ERR_FAILURE(scan(DEFENDER_CONFIG.scanner)))
-      ;
-  }
+  // Scan Yara
+  if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner) &&
+      IS_ERR_FAILURE(scan(DEFENDER_CONFIG.scanner)))
+    ;
 }
 
 void
@@ -256,19 +293,15 @@ cleanup_resources()
 {
   if (!IS_NULL_PTR(DEFENDER_CONFIG.config_json))
     exit_json(&DEFENDER_CONFIG.config_json);
-
   if (!IS_NULL_PTR(DEFENDER_CONFIG.logger))
     exit_logger(&DEFENDER_CONFIG.logger);
-
-  if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner))
-  {
-    if (IS_ERR_FAILURE(exit_scanner(&DEFENDER_CONFIG.scanner)))
-      ;
-  }
+  if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner) &&
+      IS_ERR_FAILURE(exit_scanner(&DEFENDER_CONFIG.scanner)))
+    ;
   if (!IS_NULL_PTR(DEFENDER_CONFIG.telekinesis))
-  {
     exit_driver_telekinesis(&DEFENDER_CONFIG.telekinesis);
-  }
+  if (!IS_NULL_PTR(DEFENDER_CONFIG.inotify))
+    exit_inotify(&DEFENDER_CONFIG.inotify);
 }
 
 void
@@ -280,7 +313,7 @@ help(char *prog_name)
          "  Scan :\n"
          "    -s, --scan <file>|<folder>    Scan a file or folder (default "
          "max-depth X)\n"
-         "    -i, --inotify <time>          Place the file scan in a "
+         "    -y, --scan-inotify <time>     Place the file scan in a "
          "monitoring system\n"
          "                                  if a file is created or changed it "
          "will scan the "
@@ -291,9 +324,11 @@ help(char *prog_name)
          "  Telekinesis Driver :\n"
          "    --connect-telekinesis         Connect driver Telekinesis shell\n"
          "\n\n"
-         "    -v, --version                 Display the version of Linux Defender \n"
-         "    -h, --help                    Display this help menu"
-         " Linux Defender\n",
+         "    -v, --version                 Display the version of Linux "
+         "Defender \n"
+         "    -h, --help                    Display this help menu Linux "
+         "Defender\n\n"
+         "  Inspector Inotify  :\n",
          prog_name);
 
   exit(ERR_SUCCESS);
@@ -302,7 +337,7 @@ help(char *prog_name)
 void
 pr_version()
 {
-  printf("Linux Defender Anti0Day ( Moblog Security Researchers ) %d.%d.%d\n",
+  printf("Linux Defender Anti0Day (Moblog Security Researchers) %d.%d.%d\n",
          LINUX_DEFENDER_VERSION_MAJOR, LINUX_DEFENDER_VERSION_PATCHLEVEL,
          LINUX_DEFENDER_VERSION_SUBLEVEL);
   exit(ERR_SUCCESS);

@@ -9,11 +9,14 @@
 
 #include "compiler/compiler_attribute.h"
 #include "err/err.h"
+#include "inotify/inotify.h"
 #include "scan/config.h"
 #include "scan/skip_dirs.h"
 
 #define DEFAULT_SCAN_CALLBACK \
   default_scan_callback /**< Default scan callback function. */
+
+#define DEFAULT_SCAN_INOTIFY default_scan_inotify /**< default scan inotify*/
 
 /**
  * @struct SCANNER
@@ -78,6 +81,15 @@ ERR
 scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback) warn_unused_result;
 
 /**
+ * @brief 
+ * 
+ * @param scanner 
+ * @param inotify 
+ */
+void
+scan_listen(SCANNER *scanner, INOTIFY *inotify);
+
+/**
  * @brief Scans a directory and its subdirectories using the specified YARA scanner and callback
  * function.
  *
@@ -102,3 +114,6 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback,
 int
 default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
                       void *user_data) warn_unused_result;
+
+void
+default_scan_inotify(INOTIFY *inotify, void *user_data);
