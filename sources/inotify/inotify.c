@@ -36,21 +36,24 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
     return retval;
   }
 
-  for (int i = 0; i < (*inotify)->config.quantity_fds; i++)
+  struct PATHS *paths = (*inotify)->config.paths;
+  for (int i = 0; i < (*inotify)->config.quantity_fds;
+       paths = paths->hh.next, i++)
   {
-    (*inotify)->wd[i] = inotify_add_watch(
-            (*inotify)->fd_inotify, (*inotify)->config.paths[i], IN_ALL_EVENTS);
+    (*inotify)->wd[i] = inotify_add_watch((*inotify)->fd_inotify, paths->path,
+                                          IN_ALL_EVENTS);
+
     if ((*inotify)->wd[i] == -1)
     {
-      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE  Cannot watch %d (%s)", errno,
-                                   strerror(errno)));
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE  Cannot watch '%s' %d (%s)",
+                                   paths->path, errno, strerror(errno)));
       return retval;
     }
   }
 
   (*inotify)->nfds = 1;
 
-  (*inotify)->fds[0].fd     = (*inotify)->fd_inotify; /* Inotify input */
+  (*inotify)->fds[0].fd     = (*inotify)->fd_inotify;
   (*inotify)->fds[0].events = POLLIN;
 
   retval = ERR_SUCCESS;
@@ -67,7 +70,6 @@ listen_to_events_inotify(INOTIFY **inotify, void *user_data,
     (*inotify)->poll_num = poll((*inotify)->fds, (*inotify)->nfds, -1);
     if ((*inotify)->poll_num == -1)
     {
-
       if (errno == EINTR) continue;
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE pool %d (%s)", errno,
                                    strerror(errno)));
@@ -88,10 +90,8 @@ exit_inotify(INOTIFY **inotify)
   {
     close((*inotify)->fd_inotify);
 
+    del_paths(&(*inotify)->config.paths);
     free((*inotify)->wd);
     free(*inotify);
-
-    NO_USE_AFTER_FREE((*inotify)->wd);
-    NO_USE_AFTER_FREE((*inotify));
   }
 }

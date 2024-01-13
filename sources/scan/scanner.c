@@ -42,9 +42,6 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 
       ALLOC_ERR_FAILURE(strings_match);
 
-      // initialize strings_match to an empty string
-      strings_match[0] = '\0';
-
       yr_rule_strings_foreach(rule, string)
       {
         yr_string_matches_foreach(context, string, match)
@@ -122,11 +119,13 @@ default_scan_inotify(INOTIFY *inotify, void *buff)
 
       /* Print the name of the watched directory. */
 
-      for (size_t i = 0; i < (*inotify).config.quantity_fds; ++i)
+      struct PATHS *paths = (*inotify).config.paths;
+      for (int i = 0; i < (*inotify).config.quantity_fds;
+           paths = paths->hh.next, i++)
       {
         if ((*inotify).wd[i] == event->wd)
         {
-          printf("%s/", (*inotify).config.paths[i]);
+          printf("%s/", paths->path);
           break;
         }
       }
@@ -137,6 +136,7 @@ default_scan_inotify(INOTIFY *inotify, void *buff)
       else
         printf(" [file]\n");
     }
+    exit(1);
   }
 }
 

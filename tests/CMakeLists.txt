@@ -21,6 +21,7 @@ file(GLOB_RECURSE sources
 	../sources/cjson/*.c
     ../sources/scan/*.c
     ../sources/logger/*.c
+	../sources/inotify/*.c
 )
 
 foreach(test IN LISTS tests)

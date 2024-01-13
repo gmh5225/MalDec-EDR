@@ -195,12 +195,15 @@ init_inotify_main()
   }
 
   const int    length = json_object_array_length(paths_obj);
-  const char **paths  = alloca(length * sizeof(const char *));
+  const char **path   = alloca(length * sizeof(const char *));
   for (int i = 0; i < length; ++i)
   {
     struct json_object *element = json_object_array_get_idx(paths_obj, i);
-    paths[i] = (element != NULL) ? json_object_get_string(element) : NULL;
+    path[i] = (element != NULL) ? json_object_get_string(element) : NULL;
   }
+
+  struct PATHS *paths = NULL;
+  add_paths(&paths, path, length);
 
   INOTIFY_CONFIG config =
           (INOTIFY_CONFIG){.paths = paths, .quantity_fds = length};
@@ -217,21 +220,21 @@ process_command_line_options(int argc, char **argv)
 {
   // Command-line options
   struct option long_options[] = {
-          {"help", no_argument, 0, 'h'},
           {"scan", required_argument, 0, 's'},
           {"scan-inotify", required_argument, 0, 'y'},
+          {"verbose", no_argument, 0, 0},
           {"quick", no_argument, 0, 'q'},
           {"max-depth", required_argument, 0, 0},
-          {"version", no_argument, 0, 'v'},
-          {"verbose", no_argument, 0, 0},
           {"connect-telekinesis", no_argument, 0, 0},
+          {"version", no_argument, 0, 'v'},
+          {"help", no_argument, 0, 'h'},
           {0, 0, 0, 0},
   };
 
   int option_index = 0;
   int c;
 
-  while ((c = getopt_long(argc, argv, ":qs:d:vh", long_options,
+  while ((c = getopt_long(argc, argv, ":qsy:d:vh", long_options,
                           &option_index)) != -1)
   {
     switch (c)
