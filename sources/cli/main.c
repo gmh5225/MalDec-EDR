@@ -287,8 +287,9 @@ process_command_line_options(int argc, char **argv)
 
   // Scan Yara
   if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner) &&
-      IS_ERR_FAILURE(scan(DEFENDER_CONFIG.scanner)))
-    ;
+      IS_NULL_PTR(DEFENDER_CONFIG.inotify))
+    if (IS_ERR_FAILURE(scan(DEFENDER_CONFIG.scanner)))
+      ;
 }
 
 void

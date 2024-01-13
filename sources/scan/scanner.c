@@ -57,7 +57,7 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 
             strings_match_size = new_size;
           }
-          snprintf(strings_match + strlen(strings_match),
+          LOG_INFO(strings_match + strlen(strings_match),
                    new_size - strlen(strings_match), "[%s:0x%lx]",
                    string->identifier, match->offset);
         }
@@ -80,63 +80,87 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
   return CALLBACK_CONTINUE;
 }
 
+static inline void
+log_event_type(const uint32_t mask)
+{
+  if (mask & IN_ACCESS) LOG_INFO("IN_ACCESS ");
+  if (mask & IN_MODIFY) LOG_INFO("IN_MODIFY ");
+  if (mask & IN_ATTRIB) LOG_INFO("IN_ATTRIB ");
+  if (mask & IN_CLOSE_WRITE) LOG_INFO("IN_CLOSE_WRITE ");
+  if (mask & IN_CLOSE_NOWRITE) LOG_INFO("IN_CLOSE_NOWRITE ");
+  if (mask & IN_OPEN) LOG_INFO("IN_OPEN ");
+  if (mask & IN_MOVED_FROM) LOG_INFO("IN_MOVED_FROM ");
+  if (mask & IN_MOVED_TO) LOG_INFO("IN_MOVED_TO ");
+  if (mask & IN_MOVE) LOG_INFO("IN_MOVE ");
+  if (mask & IN_CREATE) LOG_INFO("IN_CREATE ");
+  if (mask & IN_DELETE) LOG_INFO("IN_DELETE ");
+  if (mask & IN_DELETE_SELF) LOG_INFO("IN_DELETE_SELF ");
+  if (mask & IN_MOVE_SELF) LOG_INFO("IN_MOVE_SELF ");
+}
+
+inline static void
+log_event_name(const struct inotify_event *event)
+{
+  if (event->len) LOG_INFO("%s", event->name);
+}
+
+static inline void
+log_watched_directory(INOTIFY *inotify, const struct inotify_event *event)
+{
+  struct PATHS *paths = inotify->config.paths;
+  for (int i = 0; i < inotify->config.quantity_fds; paths = paths->hh.next, i++)
+  {
+    if (inotify->wd[i] == event->wd)
+    {
+      LOG_INFO("%s/", paths->path);
+      return;
+    }
+  }
+}
+
+static inline void
+process_inotify_events(INOTIFY *inotify, char *buf, ssize_t len)
+{
+  const struct inotify_event *event = NULL;
+
+  for (char *ptr = buf; ptr < buf + len;
+       ptr += sizeof(struct inotify_event) + event->len)
+  {
+    event = (const struct inotify_event *)ptr;
+
+    log_event_type(event->mask);
+    log_watched_directory(inotify, event);
+    log_event_name(event);
+
+    if (event->mask & IN_ISDIR)
+      LOG_INFO("[directory]\n");
+    else
+      LOG_INFO("[file]\n");
+  }
+}
+
+
 inline void
 default_scan_inotify(INOTIFY *inotify, void *buff)
 {
   SCANNER *scanner = (SCANNER *)buff;
 
   char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
-  const struct inotify_event *event;
+  const struct inotify_event *event = NULL;
   ssize_t                     len;
 
   for (;;)
   {
-    len = read((*inotify).fd_inotify, buf, sizeof(buf));
+    len = read(inotify->fd_inotify, buf, sizeof(buf));
     if (len == -1 && errno != EAGAIN)
     {
-      perror("read");
-      exit(EXIT_FAILURE);
+      LOG_ERROR(LOG_MESSAGE_FORMAT("Failed to read from inotify %d (%s) ",
+                                   errno, strerror(errno)));
     }
-
-    /* If the nonblocking read() found no events to read, then
-                  it returns -1 with errno set to EAGAIN. In that case,
-                  we exit the loop. */
 
     if (len <= 0) break;
 
-    /* Loop over all events in the buffer. */
-
-    for (char *ptr = buf; ptr < buf + len;
-         ptr += sizeof(struct inotify_event) + event->len)
-    {
-      event = (const struct inotify_event *)ptr;
-
-      /* Print event type. */
-
-      if (event->mask & IN_OPEN) printf("IN_OPEN: ");
-      if (event->mask & IN_CLOSE_NOWRITE) printf("IN_CLOSE_NOWRITE: ");
-      if (event->mask & IN_CLOSE_WRITE) printf("IN_CLOSE_WRITE: ");
-
-      /* Print the name of the watched directory. */
-
-      struct PATHS *paths = (*inotify).config.paths;
-      for (int i = 0; i < (*inotify).config.quantity_fds;
-           paths = paths->hh.next, i++)
-      {
-        if ((*inotify).wd[i] == event->wd)
-        {
-          printf("%s/", paths->path);
-          break;
-        }
-      }
-      if (event->len) printf("%s", event->name);
-
-      if (event->mask & IN_ISDIR)
-        printf(" [directory]\n");
-      else
-        printf(" [file]\n");
-    }
-    exit(1);
+    process_inotify_events(inotify, buf, len);
   }
 }
 
