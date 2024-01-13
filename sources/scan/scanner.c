@@ -83,19 +83,34 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 static inline void
 log_event_type(const uint32_t mask)
 {
-  if (mask & IN_ACCESS) LOG_INFO("IN_ACCESS ");
-  if (mask & IN_MODIFY) LOG_INFO("IN_MODIFY ");
-  if (mask & IN_ATTRIB) LOG_INFO("IN_ATTRIB ");
-  if (mask & IN_CLOSE_WRITE) LOG_INFO("IN_CLOSE_WRITE ");
-  if (mask & IN_CLOSE_NOWRITE) LOG_INFO("IN_CLOSE_NOWRITE ");
-  if (mask & IN_OPEN) LOG_INFO("IN_OPEN ");
-  if (mask & IN_MOVED_FROM) LOG_INFO("IN_MOVED_FROM ");
-  if (mask & IN_MOVED_TO) LOG_INFO("IN_MOVED_TO ");
-  if (mask & IN_MOVE) LOG_INFO("IN_MOVE ");
-  if (mask & IN_CREATE) LOG_INFO("IN_CREATE ");
-  if (mask & IN_DELETE) LOG_INFO("IN_DELETE ");
-  if (mask & IN_DELETE_SELF) LOG_INFO("IN_DELETE_SELF ");
-  if (mask & IN_MOVE_SELF) LOG_INFO("IN_MOVE_SELF ");
+  if (mask & IN_ACCESS) { LOG_INFO("IN_ACCESS "); }
+  else if (mask & IN_MODIFY) { LOG_INFO("IN_MODIFY "); }
+  else if (mask & IN_ATTRIB) { LOG_INFO("IN_ATTRIB "); }
+  else if (mask & IN_CLOSE_WRITE) { LOG_INFO("IN_CLOSE_WRITE "); }
+  else if (mask & IN_CLOSE_NOWRITE) { LOG_INFO("IN_CLOSE_NOWRITE "); }
+  else if (mask & IN_OPEN) { LOG_INFO("IN_OPEN "); }
+  else if (mask & IN_MOVED_FROM) { LOG_INFO("IN_MOVED_FROM "); }
+  else if (mask & IN_MOVED_TO) { LOG_INFO("IN_MOVED_TO "); }
+  else if (mask & IN_MOVE) { LOG_INFO("IN_MOVE "); }
+  else if (mask & IN_CREATE) { LOG_INFO("IN_CREATE "); }
+  else if (mask & IN_DELETE) { LOG_INFO("IN_DELETE "); }
+  else if (mask & IN_DELETE_SELF) { LOG_INFO("IN_DELETE_SELF "); }
+  else if (mask & IN_MOVE_SELF) { LOG_INFO("IN_MOVE_SELF "); }
+  else if (mask & IN_UNMOUNT) { LOG_INFO("IN_UNMOUNT "); }
+  else if (mask & IN_Q_OVERFLOW) { LOG_INFO("IN_Q_OVERFLOW "); }
+  else if (mask & IN_IGNORED) { LOG_INFO("IN_IGNORED "); }
+  else if (mask & IN_ONLYDIR) { LOG_INFO("IN_ONLYDIR "); }
+  else if (mask & IN_DONT_FOLLOW) { LOG_INFO("IN_DONT_FOLLOW "); }
+  else if (mask & IN_EXCL_UNLINK) { LOG_INFO("IN_EXCL_UNLINK "); }
+  else if (mask & IN_MASK_CREATE) { LOG_INFO("IN_MASK_CREATE "); }
+  else if (mask & IN_MASK_ADD) { LOG_INFO("IN_MASK_ADD "); }
+  else if (mask & IN_ISDIR) { LOG_INFO("IN_ISDIR "); }
+  else if (mask & IN_ONESHOT) { LOG_INFO("IN_ONESHOT "); }
+  else
+  {
+    LOG_ERROR("ERR_MASK");
+    // Handle the case when mask doesn't match any of the defined constants
+  }
 }
 
 inline static void
@@ -112,7 +127,7 @@ log_watched_directory(INOTIFY *inotify, const struct inotify_event *event)
   {
     if (inotify->wd[i] == event->wd)
     {
-      LOG_INFO("%s/", paths->path);
+      LOG_INFO("%s", paths->path);
       return;
     }
   }
@@ -138,7 +153,6 @@ process_inotify_events(INOTIFY *inotify, char *buf, ssize_t len)
       LOG_INFO("[file]\n");
   }
 }
-
 
 inline void
 default_scan_inotify(INOTIFY *inotify, void *buff)
