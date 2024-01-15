@@ -27,8 +27,7 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
       if (((SCANNER_CALLBACK_ARGS *)user_data)->verbose ||
           ((SCANNER_CALLBACK_ARGS *)user_data)->current_count)
         LOG_INFO("CALLBACK_MSG_SCAN_FINISHED : All rules were passed in this "
-                 "file "
-                 "'%s', the scan is over, rules matching %d",
+                 "file '%s', the scan is over, rules matching %d",
                  ((SCANNER_CALLBACK_ARGS *)user_data)->file_path,
                  ((SCANNER_CALLBACK_ARGS *)user_data)->current_count);
       break;
@@ -41,6 +40,9 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
       strings_match      = malloc(strings_match_size);
 
       ALLOC_ERR_FAILURE(strings_match);
+
+      // initialize strings_match to an empty string
+      strings_match[0] = '\0';
 
       yr_rule_strings_foreach(rule, string)
       {
@@ -57,15 +59,14 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 
             strings_match_size = new_size;
           }
-          LOG_INFO(strings_match + strlen(strings_match),
+          snprintf(strings_match + strlen(strings_match),
                    new_size - strlen(strings_match), "[%s:0x%lx]",
                    string->identifier, match->offset);
         }
       }
 
       LOG_FATAL("CALLBACK_MSG_RULE_MATCHING : The rule '%s' were identified in "
-                "this "
-                "file '%s', Strings match %s",
+                "this file '%s', Strings match %s",
                 rule->identifier,
                 ((SCANNER_CALLBACK_ARGS *)user_data)->file_path, strings_match);
 
@@ -84,7 +85,15 @@ static inline void
 decision_making_event_type(const struct inotify_event *event, SCANNER *scanner)
 {
   if (event->mask & IN_ACCESS) { LOG_INFO("IN_ACCESS "); }
-  else if (event->mask & IN_MODIFY) { LOG_INFO("IN_MODIFY "); }
+  else if (event->mask & IN_MODIFY)
+  {
+    LOG_INFO("IN_MODIFY ");
+    if (IS_ERR_FAILURE(scan(scanner)))
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the file modifyed '%s' ",
+                                   scanner->config.file_path));
+    }
+  }
   else if (event->mask & IN_ATTRIB) { LOG_INFO("IN_ATTRIB "); }
   else if (event->mask & IN_CLOSE_WRITE)
   {
@@ -140,10 +149,7 @@ log_watched_directory(INOTIFY *inotify, const struct inotify_event *event,
     {
       // TODO: add concat for scan file /<dir>/+<file>
       scanner->config.file_path = paths->path;
-      if (event->len)
-      {
-        LOG_INFO("%s/%s", paths->path, event->name);
-      }
+      if (event->len) { LOG_INFO("%s/%s", paths->path, event->name); }
       else
         LOG_INFO("%s", paths->path);
 
