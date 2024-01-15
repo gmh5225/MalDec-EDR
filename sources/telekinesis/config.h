@@ -1,3 +1,8 @@
+/**
+ * @file config.h
+ * @brief Header file for the config telekinesis driver.
+ */
+
 #pragma once
 
 #include "compiler/compiler_attribute.h"

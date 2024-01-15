@@ -1,5 +1,5 @@
 /**
- * @file telekinesis_driver.h
+ * @file telekinesis.h
  * @brief Header file for the Telekinesis driver.
  */
 
