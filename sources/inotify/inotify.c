@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 ERR
@@ -38,11 +39,12 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
 
   struct PATHS *paths = (*inotify)->config.paths;
   for (size_t i = 0; i < (*inotify)->config.quantity_fds;
-       paths = paths->hh.next, i++)
+       paths    = paths->hh.next, i++)
   {
     (*inotify)->wd[i] = inotify_add_watch((*inotify)->fd_inotify, paths->path,
                                           IN_ALL_EVENTS);
-    LOG_INFO(LOG_MESSAGE_FORMAT("inotify path '%s' IN_ALL_EVENTS", paths->path));
+    LOG_INFO(
+            LOG_MESSAGE_FORMAT("inotify path '%s' IN_ALL_EVENTS", paths->path));
 
     if ((*inotify)->wd[i] == -1)
     {
@@ -66,8 +68,16 @@ void
 listen_to_events_inotify(INOTIFY **inotify, void *user_data,
                          handles_events_t handles)
 {
-  while (true)
+  time_t          start   = time(NULL);
+  time_t          seconds = (*inotify)->config.time;
+  volatile time_t endwait = start + seconds;
+  
+  LOG_INFO(LOG_MESSAGE_FORMAT("time for exit %is", (*inotify)->config.time));
+
+  while (start < endwait)
   {
+    sleep(1);
+    start                = time(NULL);
     (*inotify)->poll_num = poll((*inotify)->fds, (*inotify)->nfds, -1);
     if ((*inotify)->poll_num == -1)
     {
