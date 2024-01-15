@@ -1,5 +1,5 @@
 /**
- * @file logger_config.h
+ * @file config.h
  * @brief Header file for the LOGGER_CONFIG structure.
  */
 

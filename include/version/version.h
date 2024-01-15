@@ -1,3 +1,8 @@
+/**
+ * @file version.h
+ * @brief Header file for the version LinuxDefender
+ */
+
 #pragma once
 
 #define LINUX_DEFENDER_VERSION_CODE 65536
