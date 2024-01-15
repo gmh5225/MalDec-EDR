@@ -71,12 +71,11 @@ listen_to_events_inotify(INOTIFY **inotify, void *user_data,
   time_t          start   = time(NULL);
   time_t          seconds = (*inotify)->config.time;
   volatile time_t endwait = start + seconds;
-  
+
   LOG_INFO(LOG_MESSAGE_FORMAT("time for exit %is", (*inotify)->config.time));
 
   while (start < endwait)
   {
-    sleep(1);
     start                = time(NULL);
     (*inotify)->poll_num = poll((*inotify)->fds, (*inotify)->nfds, -1);
     if ((*inotify)->poll_num == -1)
