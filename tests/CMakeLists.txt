@@ -8,6 +8,7 @@ set(tests
     yara_test
     yara_scanner_test
 	json_parser_config_test
+	inotify_test
 )
 
 include_directories(
