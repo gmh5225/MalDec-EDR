@@ -1,0 +1,26 @@
+
+/* Aplicar a fonte Lexend e tamanho de texto padrão */
+body {
+    font-family: 'Lexend', sans-serif;
+    font-size: 22px;
+    line-height: 1.6;
+    color: #333; /* Cor do texto padrão */
+}
+
+/* Estilo de link */
+a {
+    color: #007BFF; /* Cor padrão do link */
+    text-decoration: none; /* Remover sublinhado padrão */
+}
+
+a:hover {
+    text-decoration: underline; /* Adicionar sublinhado ao passar o mouse */
+}
+
+/* Estilo de fundo e cor do texto */
+body {
+    background-color: #f8f8f8; /* Cor de fundo do corpo */
+}
+
+/* Adicione outros estilos conforme necessário */
+

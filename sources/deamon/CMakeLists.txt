@@ -4,4 +4,33 @@ cmake_minimum_required(VERSION 3.0.2)
 # add executable and target libraries
 add_executable(defenderd main.c)
 
+set(FLAGS_OPTIMIZATIONS ON)
+set(FLAGS_DEBUG OFF)
+
 target_link_libraries(defenderd PUBLIC yara c-logger)
+
+target_sources(defenderd PRIVATE ${sources})
+target_link_libraries(defenderd PUBLIC yara c-logger json-c)
+
+if(FLAGS_OPTIMIZATIONS)
+    target_compile_options(defenderd PUBLIC
+        -O3            # Enable high-level optimization
+        -ftree-vectorize
+        -mavx
+        -fno-stack-protector
+        -march=native
+        -fdelete-null-pointer-checks
+        -fdelete-dead-exceptions
+    )
+elseif(FLAGS_DEBUG)
+    target_compile_options(defenderd PUBLIC
+        -ggdb3
+        -fms-extensions
+        --all-warnings
+        -DDEBUG
+        -g
+        -Warray-bounds
+        -Werror
+        --extra-warnings
+    )
+endif()

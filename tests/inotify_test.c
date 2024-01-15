@@ -2,34 +2,38 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "cmocka.h"
 
+#include "cmocka.h"
 #include "err/err.h"
+#include "inotify/inotify.h"
 #include "logger/logger.h"
-#include "scan/scan.h"
 
 static void
-yara_scanner(void **state)
+inotify(void **state)
 {
-  SCANNER *scanner;
+  INOTIFY *inotify;
 
-  SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path = "./",
-                                           .max_depth = -1,
-                                           .scan_type = 0,
-                                           .skip      = NULL,
-                                           .rules     = "../rules/"
-                                                        "YARA-Mindshield-Analysis"};
+  const int    length = 1;
+  const char **path   = alloca(length * sizeof(const char *));
+  for (int i = 0; i < length; ++i)
+  {
+    path[i] = "./";
+  }
 
-  assert_int_equal(init_scanner(&scanner, config), ERR_SUCCESS);
-  assert_int_equal(exit_scanner(&scanner), ERR_SUCCESS);
+  struct PATHS *paths = NULL;
+  add_paths(&paths, path, length);
+  INOTIFY_CONFIG config =
+          (INOTIFY_CONFIG){.paths = paths, .quantity_fds = 1, .time = 1};
 
+  assert_int_equal(init_inotify(&inotify, config), ERR_SUCCESS);
+  exit_inotify(&inotify);
   (void)state;
 }
 
 int
 main(void)
 {
-  LOGGER_CONFIG logger_config = (LOGGER_CONFIG){.filename = "testeyara.log",
+  LOGGER_CONFIG logger_config = (LOGGER_CONFIG){.filename = "testeinotify.log",
                                                 .level    = 0,
                                                 .max_backup_files = 0,
                                                 .max_file_size    = 0};
@@ -45,7 +49,7 @@ main(void)
   }
 
   const struct CMUnitTest tests[] = {
-          cmocka_unit_test(yara_scanner),
+          cmocka_unit_test(inotify),
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

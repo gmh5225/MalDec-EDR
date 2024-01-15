@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "compiler/compiler_attribute.h"
 #include "c-logger/src/logger.h"
+#include "compiler/compiler_attribute.h"
 #include "config.h"
 #include "err/err.h"
 
@@ -18,7 +18,7 @@
  */
 typedef struct LOGGER
 {
-    LOGGER_CONFIG config; /**< Configuration for the LOGGER module. */
+  LOGGER_CONFIG config; /**< Configuration for the LOGGER module. */
 } LOGGER;
 
 /**
@@ -29,9 +29,11 @@ typedef struct LOGGER
  * @param logger Pointer to a LOGGER pointer that will be set to the initialized LOGGER instance.
  * @param config Configuration for the LOGGER module.
  * @return Returns ERR_SUCCESS on success, or a ERROR value on failure.
- * @warning The caller is responsible for freeing the allocated memory for the LOGGER instance using @ref exit_logger.
+ * @warning The caller is responsible for freeing the allocated memory for the LOGGER instance using
+ * @ref exit_logger.
  */
-ERR init_logger(LOGGER** logger, LOGGER_CONFIG config) warn_unused_result;
+ERR
+init_logger(LOGGER **logger, LOGGER_CONFIG config) warn_unused_result;
 
 /**
  * @brief Exits the LOGGER module.
@@ -40,4 +42,5 @@ ERR init_logger(LOGGER** logger, LOGGER_CONFIG config) warn_unused_result;
  *
  * @param logger Pointer to a LOGGER pointer that will be set to NULL after freeing the resources.
  */
-void exit_logger(LOGGER** logger);
+void
+exit_logger(LOGGER **logger);
