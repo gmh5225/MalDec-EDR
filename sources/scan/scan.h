@@ -1,5 +1,5 @@
 /**
- * @file scanner.h
+ * @file scan.h
  * @brief Defines structures and functions for scanning files and directories using YARA rules.
  */
 

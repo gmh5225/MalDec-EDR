@@ -1,6 +1,6 @@
 /**
- * @struct SKIP_DIRS
- * @brief Structure representing a collection of directories to be skipped during scanning.
+ * @file skip_dirs.h
+ * @brief Defines structures and functions for skip dirs scan.
  */
 
 #pragma once

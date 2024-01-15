@@ -1,5 +1,5 @@
 /**
- * @file scanner_config.h
+ * @file config.h
  * @brief Defines the configuration structure for a file scanner.
  */
 

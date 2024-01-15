@@ -1,5 +1,5 @@
 /**
- * @file my_macros.h
+ * @file compiler_attribute.h
  * @brief Custom macros with Doxygen documentation.
  */
 
