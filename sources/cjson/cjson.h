@@ -1,5 +1,5 @@
 /**
- * @file json_handler.h
+ * @file cjson.h
  * @brief Header file for JSON handling functions.
  */
 
