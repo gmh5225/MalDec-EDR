@@ -234,7 +234,7 @@ process_command_line_options(int argc, char **argv)
   int option_index = 0;
   int c;
 
-  while ((c = getopt_long(argc, argv, ":qsy:d:vh", long_options,
+  while ((c = getopt_long(argc, argv, "qs:y:d:vh", long_options,
                           &option_index)) != -1)
   {
     switch (c)
