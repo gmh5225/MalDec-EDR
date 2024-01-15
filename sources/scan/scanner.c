@@ -41,9 +41,6 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 
       ALLOC_ERR_FAILURE(strings_match);
 
-      // initialize strings_match to an empty string
-      strings_match[0] = '\0';
-
       yr_rule_strings_foreach(rule, string)
       {
         yr_string_matches_foreach(context, string, match)
@@ -88,21 +85,13 @@ decision_making_event_type(const struct inotify_event *event, SCANNER *scanner)
   else if (event->mask & IN_MODIFY)
   {
     LOG_INFO("IN_MODIFY ");
-    if (IS_ERR_FAILURE(scan(scanner)))
-    {
-      LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the file modifyed '%s' ",
-                                   scanner->config.file_path));
-    }
+    goto scan;
   }
   else if (event->mask & IN_ATTRIB) { LOG_INFO("IN_ATTRIB "); }
   else if (event->mask & IN_CLOSE_WRITE)
   {
     LOG_INFO("IN_CLOSE_WRITE ");
-    if (IS_ERR_FAILURE(scan(scanner)))
-    {
-      LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the file modifyed '%s' ",
-                                   scanner->config.file_path));
-    }
+    goto scan;
   }
   else if (event->mask & IN_CLOSE_NOWRITE) { LOG_INFO("IN_CLOSE_NOWRITE "); }
   else if (event->mask & IN_OPEN) { LOG_INFO("IN_OPEN "); }
@@ -112,11 +101,7 @@ decision_making_event_type(const struct inotify_event *event, SCANNER *scanner)
   else if (event->mask & IN_CREATE)
   {
     LOG_INFO("IN_CREATE ");
-    if (IS_ERR_FAILURE(scan(scanner)))
-    {
-      LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the created file '%s' ",
-                                   scanner->config.file_path));
-    }
+    goto scan;
   }
   else if (event->mask & IN_DELETE) { LOG_INFO("IN_DELETE "); }
   else if (event->mask & IN_DELETE_SELF) { LOG_INFO("IN_DELETE_SELF "); }
@@ -136,6 +121,15 @@ decision_making_event_type(const struct inotify_event *event, SCANNER *scanner)
     LOG_ERROR("ERR_MASK");
     // Handle the case when mask doesn't match any of the defined constants
   }
+
+  return;
+
+scan:
+  if (IS_ERR_FAILURE(scan(scanner)))
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the created file '%s' ",
+                                 scanner->config.file_path));
+  }
 }
 
 static inline void
@@ -143,7 +137,7 @@ log_watched_directory(INOTIFY *inotify, const struct inotify_event *event,
                       SCANNER *scanner)
 {
   struct PATHS *paths = inotify->config.paths;
-  for (int i = 0; i < inotify->config.quantity_fds; paths = paths->hh.next, i++)
+  for (size_t i = 0; i < inotify->config.quantity_fds; paths = paths->hh.next, i++)
   {
     if (inotify->wd[i] == event->wd)
     {
@@ -185,7 +179,6 @@ default_scan_inotify(INOTIFY *inotify, void *buff)
   SCANNER *scanner = (SCANNER *)buff;
 
   char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
-  const struct inotify_event *event = NULL;
   ssize_t                     len;
 
   for (;;)
@@ -262,7 +255,7 @@ scanner_load_rules(SCANNER *scanner, const char *dir)
 
 ret:
   closedir(dd);
-  return 0;
+  return retval;
 }
 
 inline ERR

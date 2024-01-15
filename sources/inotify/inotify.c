@@ -37,7 +37,7 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
   }
 
   struct PATHS *paths = (*inotify)->config.paths;
-  for (int i = 0; i < (*inotify)->config.quantity_fds;
+  for (size_t i = 0; i < (*inotify)->config.quantity_fds;
        paths = paths->hh.next, i++)
   {
     (*inotify)->wd[i] = inotify_add_watch((*inotify)->fd_inotify, paths->path,

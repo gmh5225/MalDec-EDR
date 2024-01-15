@@ -11,7 +11,7 @@ prefix(const char *pre, const char *str)
 inline void
 add_skip_dirs(struct SKIP_DIRS **skip, const char *path[], size_t n)
 {
-  for (int i = 0; i < n; i++)
+  for (size_t i = 0; i < n; i++)
   {
     struct SKIP_DIRS *skp = malloc(sizeof(struct SKIP_DIRS));
     skp->dir              = strdup(path[i]);

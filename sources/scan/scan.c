@@ -85,7 +85,7 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
 
     if (entry->d_type == DT_REG)
     {
-      if (IS_ERR_FAILURE(scan_file(scanner, DEFAULT_SCAN_CALLBACK)))
+      if (IS_ERR_FAILURE(scan_file(scanner, callback)))
       {
         retval = ERR_FAILURE;
       }

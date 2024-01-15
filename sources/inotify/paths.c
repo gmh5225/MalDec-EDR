@@ -9,7 +9,7 @@ prefix(const char *pre, const char *str)
 inline void
 add_paths(struct PATHS **paths, const char *path[], size_t n)
 {
-  for (int i = 0; i < n; i++)
+  for (size_t i = 0; i < n; i++)
   {
     struct PATHS *_path = malloc(sizeof(struct PATHS));
     _path->path          = strdup(path[i]);

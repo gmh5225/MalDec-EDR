@@ -247,7 +247,7 @@ process_command_line_options(int argc, char **argv)
           {
             uint32_t max_depth = (uint32_t)atoi(optarg);
             DEFENDER_CONFIG.scanner->config.max_depth =
-                    (max_depth < 0) ? 0 : max_depth;
+                    (max_depth <= 0) ? 0 : max_depth;
           }
           if (strcmp(long_options[option_index].name, "verbose") == 0)
             DEFENDER_CONFIG.scanner->config.verbose = true;
@@ -289,7 +289,7 @@ process_command_line_options(int argc, char **argv)
   if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner) &&
       IS_NULL_PTR(DEFENDER_CONFIG.inotify))
     if (IS_ERR_FAILURE(scan(DEFENDER_CONFIG.scanner)))
-      ;
+      printf(LOG_MESSAGE_FORMAT("Error in scan"));
 }
 
 void
@@ -301,7 +301,7 @@ cleanup_resources()
     exit_logger(&DEFENDER_CONFIG.logger);
   if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner) &&
       IS_ERR_FAILURE(exit_scanner(&DEFENDER_CONFIG.scanner)))
-    ;
+        printf(LOG_MESSAGE_FORMAT("Error in exit scanner"));
   if (!IS_NULL_PTR(DEFENDER_CONFIG.telekinesis))
     exit_driver_telekinesis(&DEFENDER_CONFIG.telekinesis);
   if (!IS_NULL_PTR(DEFENDER_CONFIG.inotify))

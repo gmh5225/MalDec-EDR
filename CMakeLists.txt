@@ -8,9 +8,6 @@ set(LIB_MINOR_VERSION "0")
 set(LIB_PATCH_VERSION "0")
 
 
-# Information for builds
-set(FLAGS_DEBUG OFF )
-set(FLAGS_OPTIMIZATIONS ON)
 set(BUILD_TESTS ON )
 set(BUILD_BENCHMARK OFF )
 set(CMAKE_CXX_STANDARD 11)
@@ -30,14 +27,3 @@ endif()
 if(BUILD_BENCHMARK)
 	add_subdirectory( benchmark/ )
 endif()
-
-# set flags
-set(CMAKE_C_FLAGS "-O2 -Os") # default flags
-
-if(FLAGS_OPTIMIZATIONS)
-  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-ftree-vectorize -mavx -fno-stack-protector -march=native  -fdelete-null-pointer-checks -fdelete-dead-exceptions")
-elseif(FLAGS_DEBUG)
-  set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-ggdb3 -fsanitize=address -fms-extensions --all-warnings -DDEBUG -g  -Wvolatile  -Warray-bounds --extra-warnings")
-endif()
-
-add_compile_options(${CMAKE_C_FLAGS})
