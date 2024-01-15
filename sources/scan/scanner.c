@@ -81,31 +81,47 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 }
 
 static inline void
-log_event_type(const uint32_t mask)
+decision_making_event_type(const struct inotify_event *event, SCANNER *scanner)
 {
-  if (mask & IN_ACCESS) { LOG_INFO("IN_ACCESS "); }
-  else if (mask & IN_MODIFY) { LOG_INFO("IN_MODIFY "); }
-  else if (mask & IN_ATTRIB) { LOG_INFO("IN_ATTRIB "); }
-  else if (mask & IN_CLOSE_WRITE) { LOG_INFO("IN_CLOSE_WRITE "); }
-  else if (mask & IN_CLOSE_NOWRITE) { LOG_INFO("IN_CLOSE_NOWRITE "); }
-  else if (mask & IN_OPEN) { LOG_INFO("IN_OPEN "); }
-  else if (mask & IN_MOVED_FROM) { LOG_INFO("IN_MOVED_FROM "); }
-  else if (mask & IN_MOVED_TO) { LOG_INFO("IN_MOVED_TO "); }
-  else if (mask & IN_MOVE) { LOG_INFO("IN_MOVE "); }
-  else if (mask & IN_CREATE) { LOG_INFO("IN_CREATE "); }
-  else if (mask & IN_DELETE) { LOG_INFO("IN_DELETE "); }
-  else if (mask & IN_DELETE_SELF) { LOG_INFO("IN_DELETE_SELF "); }
-  else if (mask & IN_MOVE_SELF) { LOG_INFO("IN_MOVE_SELF "); }
-  else if (mask & IN_UNMOUNT) { LOG_INFO("IN_UNMOUNT "); }
-  else if (mask & IN_Q_OVERFLOW) { LOG_INFO("IN_Q_OVERFLOW "); }
-  else if (mask & IN_IGNORED) { LOG_INFO("IN_IGNORED "); }
-  else if (mask & IN_ONLYDIR) { LOG_INFO("IN_ONLYDIR "); }
-  else if (mask & IN_DONT_FOLLOW) { LOG_INFO("IN_DONT_FOLLOW "); }
-  else if (mask & IN_EXCL_UNLINK) { LOG_INFO("IN_EXCL_UNLINK "); }
-  else if (mask & IN_MASK_CREATE) { LOG_INFO("IN_MASK_CREATE "); }
-  else if (mask & IN_MASK_ADD) { LOG_INFO("IN_MASK_ADD "); }
-  else if (mask & IN_ISDIR) { LOG_INFO("IN_ISDIR "); }
-  else if (mask & IN_ONESHOT) { LOG_INFO("IN_ONESHOT "); }
+  if (event->mask & IN_ACCESS) { LOG_INFO("IN_ACCESS "); }
+  else if (event->mask & IN_MODIFY) { LOG_INFO("IN_MODIFY "); }
+  else if (event->mask & IN_ATTRIB) { LOG_INFO("IN_ATTRIB "); }
+  else if (event->mask & IN_CLOSE_WRITE)
+  {
+    LOG_INFO("IN_CLOSE_WRITE ");
+    if (IS_ERR_FAILURE(scan(scanner)))
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the file modifyed '%s' ",
+                                   scanner->config.file_path));
+    }
+  }
+  else if (event->mask & IN_CLOSE_NOWRITE) { LOG_INFO("IN_CLOSE_NOWRITE "); }
+  else if (event->mask & IN_OPEN) { LOG_INFO("IN_OPEN "); }
+  else if (event->mask & IN_MOVED_FROM) { LOG_INFO("IN_MOVED_FROM "); }
+  else if (event->mask & IN_MOVED_TO) { LOG_INFO("IN_MOVED_TO "); }
+  else if (event->mask & IN_MOVE) { LOG_INFO("IN_MOVE "); }
+  else if (event->mask & IN_CREATE)
+  {
+    LOG_INFO("IN_CREATE ");
+    if (IS_ERR_FAILURE(scan(scanner)))
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the created file '%s' ",
+                                   scanner->config.file_path));
+    }
+  }
+  else if (event->mask & IN_DELETE) { LOG_INFO("IN_DELETE "); }
+  else if (event->mask & IN_DELETE_SELF) { LOG_INFO("IN_DELETE_SELF "); }
+  else if (event->mask & IN_MOVE_SELF) { LOG_INFO("IN_MOVE_SELF "); }
+  else if (event->mask & IN_UNMOUNT) { LOG_INFO("IN_UNMOUNT "); }
+  else if (event->mask & IN_Q_OVERFLOW) { LOG_INFO("IN_Q_OVERFLOW "); }
+  else if (event->mask & IN_IGNORED) { LOG_INFO("IN_IGNORED "); }
+  else if (event->mask & IN_ONLYDIR) { LOG_INFO("IN_ONLYDIR "); }
+  else if (event->mask & IN_DONT_FOLLOW) { LOG_INFO("IN_DONT_FOLLOW "); }
+  else if (event->mask & IN_EXCL_UNLINK) { LOG_INFO("IN_EXCL_UNLINK "); }
+  else if (event->mask & IN_MASK_CREATE) { LOG_INFO("IN_MASK_CREATE "); }
+  else if (event->mask & IN_MASK_ADD) { LOG_INFO("IN_MASK_ADD "); }
+  else if (event->mask & IN_ISDIR) { LOG_INFO("IN_ISDIR "); }
+  else if (event->mask & IN_ONESHOT) { LOG_INFO("IN_ONESHOT "); }
   else
   {
     LOG_ERROR("ERR_MASK");
@@ -113,28 +129,32 @@ log_event_type(const uint32_t mask)
   }
 }
 
-inline static void
-log_event_name(const struct inotify_event *event)
-{
-  if (event->len) LOG_INFO("%s", event->name);
-}
-
 static inline void
-log_watched_directory(INOTIFY *inotify, const struct inotify_event *event)
+log_watched_directory(INOTIFY *inotify, const struct inotify_event *event,
+                      SCANNER *scanner)
 {
   struct PATHS *paths = inotify->config.paths;
   for (int i = 0; i < inotify->config.quantity_fds; paths = paths->hh.next, i++)
   {
     if (inotify->wd[i] == event->wd)
     {
-      LOG_INFO("%s", paths->path);
-      return;
+      // TODO: add concat for scan file /<dir>/+<file>
+      scanner->config.file_path = paths->path;
+      if (event->len)
+      {
+        LOG_INFO("%s/%s", paths->path, event->name);
+      }
+      else
+        LOG_INFO("%s", paths->path);
+
+      break;
     }
   }
 }
 
 static inline void
-process_inotify_events(INOTIFY *inotify, char *buf, ssize_t len)
+process_inotify_events(INOTIFY *inotify, char *buf, ssize_t len,
+                       SCANNER **scanner)
 {
   const struct inotify_event *event = NULL;
 
@@ -143,9 +163,8 @@ process_inotify_events(INOTIFY *inotify, char *buf, ssize_t len)
   {
     event = (const struct inotify_event *)ptr;
 
-    log_event_type(event->mask);
-    log_watched_directory(inotify, event);
-    log_event_name(event);
+    decision_making_event_type(event, *scanner);
+    log_watched_directory(inotify, event, *scanner);
 
     if (event->mask & IN_ISDIR)
       LOG_INFO("[directory]\n");
@@ -171,10 +190,9 @@ default_scan_inotify(INOTIFY *inotify, void *buff)
       LOG_ERROR(LOG_MESSAGE_FORMAT("Failed to read from inotify %d (%s) ",
                                    errno, strerror(errno)));
     }
-
     if (len <= 0) break;
 
-    process_inotify_events(inotify, buf, len);
+    process_inotify_events(inotify, buf, len, &scanner);
   }
 }
 

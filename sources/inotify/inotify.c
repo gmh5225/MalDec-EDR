@@ -42,6 +42,7 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
   {
     (*inotify)->wd[i] = inotify_add_watch((*inotify)->fd_inotify, paths->path,
                                           IN_ALL_EVENTS);
+    LOG_INFO(LOG_MESSAGE_FORMAT("inotify path '%s' IN_ALL_EVENTS", paths->path));
 
     if ((*inotify)->wd[i] == -1)
     {
