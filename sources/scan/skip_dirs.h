@@ -8,6 +8,10 @@
 #include "compiler/compiler_attribute.h"
 #include "uthash/include/uthash.h"
 
+/**
+ * @brief Struct for skip dirs in scan
+ * 
+ */
 struct SKIP_DIRS
 {
   char          *dir; /**< Directory path to be skipped. */

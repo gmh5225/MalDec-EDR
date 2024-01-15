@@ -13,7 +13,7 @@ PROJECT_NAME="LinuxDefender"
 PROJECT_VERSION="1.0.0"
 
 # Specify the paths
-SOURCES="include/inotify include/err include/version sources/telekinesis include/compiler sources/cjson include/logger sources/scan"
+SOURCES="include/inotify include/err include/version sources/cli sources/telekinesis include/compiler sources/cjson include/logger sources/scan"
 OUTPUT_DIR="documentation/doxygen"
 STYLE="customdoxygen.css"
 PROJECT_BRIEF="Linux Defender revolutionizes security for Linux servers by taking an advanced approach focusing on 0day threats"

@@ -1,6 +1,6 @@
 /**
- * @struct DEFENDER_CONFIG
- * @brief Structure representing the configuration for the defender application.
+ * @file config.h
+ * @brief Header file for the main configuration
  */
 #pragma once
 
