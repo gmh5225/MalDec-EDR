@@ -72,27 +72,35 @@ listen_to_events_inotify(INOTIFY **inotify, void *user_data,
   time_t          seconds = (*inotify)->config.time;
   volatile time_t endwait = start + seconds;
 
-  LOG_INFO(LOG_MESSAGE_FORMAT("time for exit %is", (*inotify)->config.time));
+  if (seconds <= 0)
+  {
+    seconds = -1;
+    start   = -1;
+  }
+
+  LOG_INFO(LOG_MESSAGE_FORMAT("time for exit %lds", (*inotify)->config.time));
 
   while (start < endwait)
   {
-    start                = time(NULL);
+    if (seconds > 0) start = time(NULL);
+
     (*inotify)->poll_num = poll((*inotify)->fds, (*inotify)->nfds, seconds);
+
     if ((*inotify)->poll_num == -1)
     {
       if (errno == EINTR) continue;
-      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE pool %d (%s)", errno,
+
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE poll %d (%s)", errno,
                                    strerror(errno)));
       exit(EXIT_FAILURE);
     }
 
-    if ((*inotify)->poll_num > 0)
+    if ((*inotify)->poll_num > 0 && ((*inotify)->fds[0].revents & POLLIN))
     {
-      if ((*inotify)->fds[0].revents & POLLIN) { handles(*inotify, user_data); }
+      handles(*inotify, user_data);
     }
   }
 }
-
 void
 exit_inotify(INOTIFY **inotify)
 {
