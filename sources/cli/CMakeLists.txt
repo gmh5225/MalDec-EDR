@@ -1,25 +1,41 @@
-# Information cmake
 cmake_minimum_required(VERSION 3.0.2)
 
-# add executable and target libraries
+# Add executable and target libraries
 add_executable(defender main.c)
 
-target_include_directories (defender PRIVATE 
-		../../include/
-		../../packages/
-		../../interfaces/
-		../../libraries/uthash/include/
-		../../libraries/c-logger/
+set(FLAGS_OPTIMIZATIONS OFF)
+set(FLAGS_DEBUG ON)
+
+file(GLOB_RECURSE sources
+    ../scan/*.c
+    ../logger/*.c
+    ../cjson/*.c
+    ../telekinesis/*.c
+    ../inotify/*.c
 )
 
-file(GLOB_RECURSE SOURCES
-        ../scan/*.c
-		../inotify/*.c
-		../logger/*.c
-)
+target_sources(defender PRIVATE ${sources})
+target_link_libraries(defender PUBLIC yara c-logger json-c)
 
-target_sources(defender PRIVATE 
-		${SOURCES}
-)
-
-target_link_libraries(defender PRIVATE yara "logger")
+if(FLAGS_OPTIMIZATIONS)
+    target_compile_options(defender PUBLIC
+        -O3            # Enable high-level optimization
+        -ftree-vectorize
+        -mavx
+        -fno-stack-protector
+        -march=native
+        -fdelete-null-pointer-checks
+        -fdelete-dead-exceptions
+    )
+elseif(FLAGS_DEBUG)
+    target_compile_options(defender PUBLIC
+        -ggdb3
+        -fms-extensions
+        --all-warnings
+        -DDEBUG
+        -g
+        -Warray-bounds
+        -Werror
+        --extra-warnings
+    )
+endif()

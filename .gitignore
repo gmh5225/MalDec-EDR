@@ -1,2 +1,6 @@
 .vscode
 build
+*.log
+__pycache__
+.doxyfile*
+documentation/doxygen/*
