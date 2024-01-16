@@ -16,12 +16,15 @@ PROJECT_VERSION="1.0.0"
 SOURCES="include/inotify include/err include/version sources/cli sources/telekinesis include/compiler sources/cjson include/logger sources/scan"
 OUTPUT_DIR="documentation/doxygen"
 STYLE="customdoxygen.css"
+HEADER="customheader.html"
+FOOTER="customfooter.html"
+ICON="icon.png"
 PROJECT_BRIEF="Linux Defender revolutionizes security for Linux servers by taking an advanced approach focusing on 0day threats"
 
 # Step 1: Generate Doxygen configuration file
 echo -e "${GREEN}[*] Generating Doxygen configuration file...${NC}"
 mkdir -p $OUTPUT_DIR
-cp scripts/doxygen/customdoxygen.css "$OUTPUT_DIR/html/"
+cp scripts/doxygen/$STYLE scripts/doxygen/$ICON scripts/doxygen/$HEADER scripts/doxygen/$FOOTER "$OUTPUT_DIR/html/"
 doxygen -g .doxyfile
 
 # Step 2: Edit Doxygen configuration file
@@ -32,8 +35,8 @@ sed -i "s|PROJECT_NUMBER.*=.*|PROJECT_NUMBER        = $PROJECT_VERSION|" .doxyfi
 sed -i "s|OUTPUT_DIRECTORY.*=.*|OUTPUT_DIRECTORY    = $OUTPUT_DIR|" .doxyfile
 sed -i "s|INPUT.*=.*|INPUT                          = $SOURCES |" .doxyfile
 sed -i "s|HTML_EXTRA.*=.*|HTML_EXTRA_STYLESHEET     = $OUTPUT_DIR/html/$STYLE |" .doxyfile
-
-
+sed -i "s|HTML_HEADER.*=.*|HTML_HEADER              = $OUTPUT_DIR/html/$HEADER|" .doxyfile
+sed -i "s|HTML_FOOTER.*=.*|HTML_FOOTER              = $OUTPUT_DIR/html/$FOOTER|" .doxyfile
 
 # Step 3: Generate documentation
 echo -e "${GREEN}[*] Generating documentation...${NC}"

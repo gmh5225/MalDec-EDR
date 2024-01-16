@@ -22,5 +22,10 @@ body {
     background-color: #f8f8f8; /* Cor de fundo do corpo */
 }
 
+section
+{
+    font-size: small;
+}
+
 /* Adicione outros estilos conforme necessário */
 
