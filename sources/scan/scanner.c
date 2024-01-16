@@ -39,6 +39,9 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
       strings_match_size = 1028;
       strings_match      = malloc(strings_match_size);
 
+      // initialize strings_match to an empty string
+      strings_match[0] = '\0';
+      
       ALLOC_ERR_FAILURE(strings_match);
 
       yr_rule_strings_foreach(rule, string)
