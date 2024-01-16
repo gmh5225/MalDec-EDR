@@ -410,8 +410,7 @@ help(char *prog_name)
          "    -v, --version                 Display the version of Linux "
          "Defender \n"
          "    -h, --help                    Display this help menu Linux "
-         "Defender\n\n"
-         "  Inspector Inotify  :\n",
+         "Defender\n",
          prog_name);
 
   exit(ERR_SUCCESS);
