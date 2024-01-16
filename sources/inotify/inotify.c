@@ -77,7 +77,7 @@ listen_to_events_inotify(INOTIFY **inotify, void *user_data,
   while (start < endwait)
   {
     start                = time(NULL);
-    (*inotify)->poll_num = poll((*inotify)->fds, (*inotify)->nfds, -1);
+    (*inotify)->poll_num = poll((*inotify)->fds, (*inotify)->nfds, seconds);
     if ((*inotify)->poll_num == -1)
     {
       if (errno == EINTR) continue;
