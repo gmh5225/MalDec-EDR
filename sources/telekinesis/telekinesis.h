@@ -17,6 +17,7 @@
 typedef struct packed(8) TELEKINESIS
 {
   TELEKINESIS_CONFIG config; /**< Configuration for the Telekinesis driver. */
+  int                fd_telekinesis;
 }
 TELEKINESIS;
 

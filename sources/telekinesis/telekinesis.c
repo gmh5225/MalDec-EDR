@@ -1,6 +1,8 @@
 #include "telekinesis.h"
 
 #include "logger/logger.h"
+#include <errno.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 inline bool
@@ -23,6 +25,15 @@ init_driver_telekinesis(TELEKINESIS **telekinesis, TELEKINESIS_CONFIG config)
     return ERR_FAILURE;
   };
 
+  if (((*telekinesis)->fd_telekinesis =
+               open((*telekinesis)->config.driver_path, O_RDWR)) < 0)
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("Error in open driver %s : %ld (%s)",
+                                 (*telekinesis)->config.driver_name, errno,
+                                 strerror(errno)));
+    return ERR_FAILURE;
+  }
+
   return ERR_SUCCESS;
 }
 
@@ -40,6 +51,7 @@ connect_driver_telekinesis(TELEKINESIS *telekinesis)
 void
 exit_driver_telekinesis(TELEKINESIS **telekinesis)
 {
+  close((*telekinesis)->fd_telekinesis);
   free(*telekinesis);
   NO_USE_AFTER_FREE(*telekinesis);
 }

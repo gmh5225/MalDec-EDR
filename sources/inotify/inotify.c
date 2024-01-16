@@ -8,7 +8,7 @@
 #include <time.h>
 #include <unistd.h>
 
-ERR
+inline ERR
 init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
 {
   ERR retval = ERR_FAILURE;
@@ -64,7 +64,7 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
   return retval;
 }
 
-void
+inline void
 listen_to_events_inotify(INOTIFY **inotify, void *user_data,
                          handles_events_t handles)
 {
@@ -78,7 +78,7 @@ listen_to_events_inotify(INOTIFY **inotify, void *user_data,
     start   = -1;
   }
 
-  LOG_INFO(LOG_MESSAGE_FORMAT("Time for exit %lds", (*inotify)->config.time));
+  LOG_INFO(LOG_MESSAGE_FORMAT("Time for exit %lds", seconds));
 
   while (start < endwait)
   {

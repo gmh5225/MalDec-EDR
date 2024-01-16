@@ -1,3 +1,8 @@
+/**
+ * @file main.c
+ * @brief Linux Defender Anti0Day main program.
+ */
+
 #include <getopt.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -9,24 +14,98 @@
 #include "err/err.h"
 #include "version/version.h"
 
-inline void
-init_logger_main(void);
-inline void
-init_scanner_main(void);
-inline void
-process_command_line_options(int argc, char **argv);
-inline void
-cleanup_resources(void);
-inline void
-help(char *prog_name) no_return;
-inline void
-pr_version(void) no_return;
-inline void
-init_telekinesis_main(void);
-inline void
-init_inotify_main(void);
-
+// Configuration file path
 #define CONFIG_JSON_PATH "../../../config/appsettings.json"
+
+/**
+ * @brief Main function of the Linux Defender Anti0Day program.
+ *
+ * This function initializes the program, processes command-line options,
+ * and executes the corresponding actions based on the provided options.
+ *
+ * @param argc Number of command-line arguments.
+ * @param argv Array of command-line argument strings.
+ * @return ERR_SUCCESS on success, ERR_FAILURE on failure.
+ */
+int
+main(int argc, char **argv);
+
+/**
+ * @brief Initializes the main logger configuration based on a JSON object.
+ *
+ * This function retrieves logger configuration parameters from a JSON object
+ * and initializes the main logger accordingly.
+ */
+void
+init_logger_main();
+
+/**
+ * @brief Initializes the Telekinesis driver configuration based on a JSON object.
+ *
+ * This function retrieves Telekinesis driver configuration parameters from a
+ * JSON object and initializes the Telekinesis driver accordingly.
+ */
+void
+init_telekinesis_main();
+
+/**
+ * @brief Initializes the main scanner configuration based on a JSON object.
+ *
+ * This function retrieves scanner configuration parameters from a JSON object
+ * and initializes the main scanner accordingly.
+ */
+void
+init_scanner_main();
+
+/**
+ * @brief Initializes the Inotify configuration based on a JSON object.
+ *
+ * This function retrieves Inotify configuration parameters from a JSON object
+ * and initializes Inotify accordingly.
+ */
+void
+init_inotify_main();
+
+/**
+ * @brief Processes command-line options and executes corresponding actions.
+ *
+ * This function parses command-line options using getopt_long and executes
+ * actions based on the provided options.
+ *
+ * @param argc Number of command-line arguments.
+ * @param argv Array of command-line argument strings.
+ */
+void
+process_command_line_options(int argc, char **argv);
+
+/**
+ * @brief Cleans up allocated resources and exits the program.
+ *
+ * This function is registered using atexit to perform cleanup tasks when the
+ * program exits. It releases memory and resources allocated during program
+ * execution.
+ */
+void
+cleanup_resources();
+
+/**
+ * @brief Displays the help menu with usage information.
+ *
+ * This function prints the help menu, explaining the usage and available
+ * options of the Linux Defender Anti0Day program.
+ *
+ * @param prog_name Name of the program (argv[0]).
+ */
+void
+help(char *prog_name);
+
+/**
+ * @brief Displays the version information of Linux Defender Anti0Day.
+ *
+ * This function prints the version information of the Linux Defender Anti0Day program.
+ */
+void
+pr_version();
 
 int
 main(int argc, char **argv)
@@ -44,7 +123,7 @@ main(int argc, char **argv)
 
   if (IS_ERR_FAILURE(init_json(&DEFENDER_CONFIG.config_json, CONFIG_JSON_PATH)))
   {
-    fprintf(stderr, LOG_MESSAGE_FORMAT(" Error in parser json config '%s'\n",
+    fprintf(stderr, LOG_MESSAGE_FORMAT("Error in parser json config '%s'\n",
                                        CONFIG_JSON_PATH));
     retval = ERR_FAILURE;
     goto ret;

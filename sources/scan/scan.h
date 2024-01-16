@@ -81,10 +81,13 @@ ERR
 scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback) warn_unused_result;
 
 /**
- * @brief 
- * 
- * @param scanner 
- * @param inotify 
+ * @brief Initiates scanning and listening for events using a scanner and inotify.
+ *
+ * This function initiates the scanning process using the provided scanner and listens for
+ * events using the specified inotify instance.
+ *
+ * @param scanner A pointer to the SCANNER struct representing the scanning module.
+ * @param inotify A pointer to the INOTIFY struct representing the inotify module.
  */
 void
 scan_listen(SCANNER *scanner, INOTIFY *inotify);
