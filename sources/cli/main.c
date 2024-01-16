@@ -301,7 +301,7 @@ cleanup_resources()
     exit_logger(&DEFENDER_CONFIG.logger);
   if (!IS_NULL_PTR(DEFENDER_CONFIG.scanner) &&
       IS_ERR_FAILURE(exit_scanner(&DEFENDER_CONFIG.scanner)))
-        printf(LOG_MESSAGE_FORMAT("Error in exit scanner"));
+    printf(LOG_MESSAGE_FORMAT("Error in exit scanner"));
   if (!IS_NULL_PTR(DEFENDER_CONFIG.telekinesis))
     exit_driver_telekinesis(&DEFENDER_CONFIG.telekinesis);
   if (!IS_NULL_PTR(DEFENDER_CONFIG.inotify))

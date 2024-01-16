@@ -12,7 +12,7 @@ add_paths(struct PATHS **paths, const char *path[], size_t n)
   for (size_t i = 0; i < n; i++)
   {
     struct PATHS *_path = malloc(sizeof(struct PATHS));
-    _path->path          = strdup(path[i]);
+    _path->path         = strdup(path[i]);
     HASH_ADD_STR(*paths, path, _path);
   }
 }

@@ -15,7 +15,7 @@
  */
 typedef struct INOTIFY_CONFIG
 {
-  struct PATHS *paths; /**< Pointer to the PATHS structure. */
+  struct PATHS *paths;        /**< Pointer to the PATHS structure. */
   size_t        quantity_fds; /**< Quantity of file descriptors. */
-  time_t        time; /**< Time configuration. */
+  time_t        time;         /**< Time configuration. */
 } INOTIFY_CONFIG;

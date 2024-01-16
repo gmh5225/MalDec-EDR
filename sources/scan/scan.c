@@ -10,8 +10,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "inotify/inotify.h"
 #include "err/err.h"
+#include "inotify/inotify.h"
 #include "logger/logger.h"
 #include "scan/skip_dirs.h"
 

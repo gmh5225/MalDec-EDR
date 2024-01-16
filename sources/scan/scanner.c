@@ -137,7 +137,8 @@ log_watched_directory(INOTIFY *inotify, const struct inotify_event *event,
                       SCANNER *scanner)
 {
   struct PATHS *paths = inotify->config.paths;
-  for (size_t i = 0; i < inotify->config.quantity_fds; paths = paths->hh.next, i++)
+  for (size_t i = 0; i < inotify->config.quantity_fds;
+       paths    = paths->hh.next, i++)
   {
     if (inotify->wd[i] == event->wd)
     {
@@ -178,8 +179,8 @@ default_scan_inotify(INOTIFY *inotify, void *buff)
 {
   SCANNER *scanner = (SCANNER *)buff;
 
-  char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
-  ssize_t                     len;
+  char    buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
+  ssize_t len;
 
   for (;;)
   {
