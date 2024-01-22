@@ -6,7 +6,8 @@
 #include <unistd.h>
 
 static inline void
-decision_making_event_type(const struct inotify_event **event, SCANNER **scanner)
+decision_making_event_type(const struct inotify_event **event,
+                           SCANNER                    **scanner)
 {
   if ((*event)->mask & IN_ACCESS) { LOG_INFO("IN_ACCESS "); }
   else if ((*event)->mask & IN_MODIFY)
@@ -14,39 +15,15 @@ decision_making_event_type(const struct inotify_event **event, SCANNER **scanner
     LOG_WARN("IN_MODIFY ");
     goto scan;
   }
-  else if ((*event)->mask & IN_ATTRIB) { LOG_INFO("IN_ATTRIB "); }
   else if ((*event)->mask & IN_CLOSE_WRITE)
   {
     LOG_WARN("IN_CLOSE_WRITE ");
     goto scan;
   }
-  else if ((*event)->mask & IN_CLOSE_NOWRITE) { LOG_INFO("IN_CLOSE_NOWRITE "); }
-  else if ((*event)->mask & IN_OPEN) { LOG_INFO("IN_OPEN "); }
-  else if ((*event)->mask & IN_MOVED_FROM) { LOG_INFO("IN_MOVED_FROM "); }
-  else if ((*event)->mask & IN_MOVED_TO) { LOG_INFO("IN_MOVED_TO "); }
-  else if ((*event)->mask & IN_MOVE) { LOG_INFO("IN_MOVE "); }
   else if ((*event)->mask & IN_CREATE)
   {
     LOG_WARN("IN_CREATE ");
     goto scan;
-  }
-  else if ((*event)->mask & IN_DELETE) { LOG_INFO("IN_DELETE "); }
-  else if ((*event)->mask & IN_DELETE_SELF) { LOG_INFO("IN_DELETE_SELF "); }
-  else if ((*event)->mask & IN_MOVE_SELF) { LOG_INFO("IN_MOVE_SELF "); }
-  else if ((*event)->mask & IN_UNMOUNT) { LOG_INFO("IN_UNMOUNT "); }
-  else if ((*event)->mask & IN_Q_OVERFLOW) { LOG_INFO("IN_Q_OVERFLOW "); }
-  else if ((*event)->mask & IN_IGNORED) { LOG_INFO("IN_IGNORED "); }
-  else if ((*event)->mask & IN_ONLYDIR) { LOG_INFO("IN_ONLYDIR "); }
-  else if ((*event)->mask & IN_DONT_FOLLOW) { LOG_INFO("IN_DONT_FOLLOW "); }
-  else if ((*event)->mask & IN_EXCL_UNLINK) { LOG_INFO("IN_EXCL_UNLINK "); }
-  else if ((*event)->mask & IN_MASK_CREATE) { LOG_INFO("IN_MASK_CREATE "); }
-  else if ((*event)->mask & IN_MASK_ADD) { LOG_INFO("IN_MASK_ADD "); }
-  else if ((*event)->mask & IN_ISDIR) { LOG_INFO("IN_ISDIR "); }
-  else if ((*event)->mask & IN_ONESHOT) { LOG_INFO("IN_ONESHOT "); }
-  else
-  {
-    // Handle the case when mask doesn't match any of the defined constants
-    LOG_ERROR("ERR_MASK");
   }
 
   return;
@@ -128,20 +105,21 @@ process_inotify_events(INOTIFY *inotify, char *buf, ssize_t len,
 inline void
 default_scan_inotify(INOTIFY *inotify, void *buff)
 {
-  SCANNER *scanner = (SCANNER *)buff;
-
-  char    buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
-  ssize_t len;
+  SCANNER                                         *scanner = (SCANNER *)buff;
+  _Alignas(__alignof__(struct inotify_event)) char buf[4096];
 
   for (;;)
   {
+    ssize_t len;
     len = read(inotify->fd_inotify, buf, sizeof(buf));
+
     if (len == -1 && errno != EAGAIN)
     {
       LOG_ERROR(LOG_MESSAGE_FORMAT("Failed to read from inotify %d (%s) ",
                                    errno, strerror(errno)));
     }
-    if (len <= 0) break;
+
+    if (len <= 0) { break; }
 
     process_inotify_events(inotify, buf, len, &scanner);
   }
@@ -174,11 +152,10 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
       // allocate initial memory for strings_match
       strings_match_size = 1028;
       strings_match      = malloc(strings_match_size);
+      ALLOC_ERR_FAILURE(strings_match);
 
       // initialize strings_match to an empty string
       strings_match[0] = '\0';
-
-      ALLOC_ERR_FAILURE(strings_match);
 
       yr_rule_strings_foreach(rule, string)
       {
@@ -189,10 +166,7 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 
           if (new_size > strings_match_size)
           {
-            strings_match = realloc(strings_match, new_size);
-
-            ALLOC_ERR_FAILURE(strings_match);
-
+            strings_match      = realloc(strings_match, new_size);
             strings_match_size = new_size;
           }
           snprintf(strings_match + strlen(strings_match),

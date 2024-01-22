@@ -100,6 +100,7 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
         retval = ERR_FAILURE;
       }
     }
+    usleep(6*10000); // 60 milissegundos
   }
 
   closedir(dd);

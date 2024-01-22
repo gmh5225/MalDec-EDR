@@ -353,7 +353,10 @@ process_command_line_options(int argc, char **argv)
       case 'y':
         init_scanner_main();
         init_inotify_main();
+        DEFENDER_CONFIG.inotify->config.mask =
+                (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
         DEFENDER_CONFIG.inotify->config.time = atoi(optarg);
+        set_watch_paths(DEFENDER_CONFIG.inotify);
         scan_listen(DEFENDER_CONFIG.scanner, DEFENDER_CONFIG.inotify);
         break;
 
