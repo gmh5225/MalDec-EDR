@@ -33,8 +33,10 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
   LOG_INFO(LOG_MESSAGE_FORMAT("Scanning '%s' ...", user_data->file_path));
 
   int code = yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path,
-                                SCAN_FLAGS_REPORT_RULES_MATCHING, callback,
-                                user_data, 0);
+                                (scanner->config.scan_type == QUICK_SCAN)
+                                        ? SCAN_FLAGS_FAST_MODE
+                                        : (SCAN_FLAGS_REPORT_RULES_MATCHING),
+                                callback, user_data, 0);
 
   if (code != ERROR_SUCCESS || code == ERROR_INSUFFICIENT_MEMORY ||
       code == ERROR_COULD_NOT_MAP_FILE || code == ERROR_TOO_MANY_SCAN_THREADS ||
@@ -100,7 +102,9 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
         retval = ERR_FAILURE;
       }
     }
-    usleep(6*10000); // 60 milissegundos
+    (scanner->config.scan_type == QUICK_SCAN)
+            ? usleep(2 * 10000)  // 20 milissegundos
+            : usleep(6 * 10000); // 60 milissegundos
   }
 
   closedir(dd);

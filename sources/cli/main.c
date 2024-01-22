@@ -1,6 +1,7 @@
 /**
  * @file main.c
  * @brief Linux Defender Anti0Day main program.
+ * @note Main does not use LOG, only fprintf, without dependence on LOG, all components except json and logger do not use log to save to the file.
  */
 
 #include <getopt.h>

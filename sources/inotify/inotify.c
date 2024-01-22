@@ -57,7 +57,7 @@ set_watch_paths(INOTIFY *inotify)
     inotify->wd[i] = inotify_add_watch(inotify->fd_inotify, paths->path,
                                           inotify->config.mask);
     LOG_INFO(
-            LOG_MESSAGE_FORMAT("Inotify path '%s' %i", paths->path, inotify->config.mask));
+            LOG_MESSAGE_FORMAT("Inotify path '%s', mask %i", paths->path, inotify->config.mask));
 
     if (inotify->wd[i] == -1)
     {
