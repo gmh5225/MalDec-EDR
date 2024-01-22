@@ -12,10 +12,11 @@ file(GLOB_RECURSE sources
     ../cjson/*.c
     ../telekinesis/*.c
     ../inotify/*.c
+    ../inspector/*.c
 )
 
 target_sources(defender PRIVATE ${sources})
-target_link_libraries(defender PUBLIC yara c-logger json-c)
+target_link_libraries(defender PUBLIC yara c-logger json-c zlib)
 
 if(FLAGS_OPTIMIZATIONS)
     target_compile_options(defender PUBLIC

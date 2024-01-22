@@ -30,6 +30,8 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
   user_data->current_count = 0;
   user_data->verbose       = scanner->config.verbose;
 
+  LOG_INFO(LOG_MESSAGE_FORMAT("Scanning '%s' ...", user_data->file_path));
+
   int code = yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path,
                                 SCAN_FLAGS_REPORT_RULES_MATCHING, callback,
                                 user_data, 0);

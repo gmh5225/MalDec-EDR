@@ -22,3 +22,6 @@
 [submodule "libraries/yara"]
 	path = libraries/yara
 	url = https://github.com/VirusTotal/yara.git
+[submodule "libraries/zlib"]
+	path = libraries/zlib
+	url = https://github.com/madler/zlib.git
