@@ -40,11 +40,7 @@ init_zlib(ZLIB **zlib, CONFIG_ZLIB config)
 ERR
 decompress_file(ZLIB **zlib)
 {
-  (*zlib)->stream.zalloc   = Z_NULL;
-  (*zlib)->stream.zfree    = Z_NULL;
-  (*zlib)->stream.opaque   = Z_NULL;
-  (*zlib)->stream.avail_in = 0;
-  (*zlib)->stream.next_in  = Z_NULL;
+  memset(&(*zlib)->stream, 0, sizeof((*zlib)->stream));
 
   int ret;
   if ((ret = inflateInit(&(*zlib)->stream)) != Z_OK)
@@ -62,6 +58,7 @@ decompress_file(ZLIB **zlib)
     bytes_read = read((*zlib)->fd_in, in, CHUNK);
     if (bytes_read == EOF)
     {
+      inflateEnd(&(*zlib)->stream);
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                    strerror(errno), (*zlib)->config.file_in));
       return ERR_FAILURE;
@@ -76,7 +73,9 @@ decompress_file(ZLIB **zlib)
       (*zlib)->stream.avail_out = CHUNK;
       (*zlib)->stream.next_out  = out;
 
-      if ((ret = inflate(&(*zlib)->stream, Z_NO_FLUSH)) == Z_STREAM_ERROR)
+      ret = inflate(&(*zlib)->stream, Z_NO_FLUSH);
+      if (ret == Z_ERRNO || ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR ||
+          ret == Z_MEM_ERROR || ret == Z_BUF_ERROR)
       {
         inflateEnd(&(*zlib)->stream);
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", ret, zError(ret)));
@@ -105,9 +104,7 @@ decompress_file(ZLIB **zlib)
 ERR
 compress_file(ZLIB **zlib)
 {
-  (*zlib)->stream.zalloc = Z_NULL;
-  (*zlib)->stream.zfree  = Z_NULL;
-  (*zlib)->stream.opaque = Z_NULL;
+  memset(&(*zlib)->stream, 0, sizeof((*zlib)->stream));
 
   int ret;
   if ((ret = deflateInit(&(*zlib)->stream, Z_DEFAULT_COMPRESSION)) != Z_OK)
@@ -125,6 +122,7 @@ compress_file(ZLIB **zlib)
     bytes_read = read((*zlib)->fd_in, in, CHUNK);
     if (bytes_read == EOF)
     {
+      deflateEnd(&(*zlib)->stream);
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                    strerror(errno), (*zlib)->config.file_in));
       return ERR_FAILURE;
@@ -137,29 +135,28 @@ compress_file(ZLIB **zlib)
       (*zlib)->stream.avail_out = CHUNK;
       (*zlib)->stream.next_out  = out;
 
-      if (deflate(&(*zlib)->stream, Z_FINISH) == Z_STREAM_ERROR)
+      ret = deflate(&(*zlib)->stream, Z_FINISH);
+      if (ret == Z_ERRNO || ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR ||
+          ret == Z_MEM_ERROR || ret == Z_BUF_ERROR)
       {
-        close((*zlib)->fd_in);
         deflateEnd(&(*zlib)->stream);
-        fprintf(stderr, "Erro durante a compressão\n");
-        return 1;
+        LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", ret, zError(ret)));
+        return ERR_FAILURE;
       }
 
       bytes_written =
               write((*zlib)->fd_out, out, CHUNK - (*zlib)->stream.avail_out);
       if (bytes_written == -1)
       {
-        perror("Erro ao gravar no arquivo de destino");
-        close((*zlib)->fd_in);
-        deflateEnd(&(*zlib)->stream);
-        return 1;
+        LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
+                                     strerror(errno),
+                                     (*zlib)->config.file_out));
+        return ERR_FAILURE;
       }
 
     } while ((*zlib)->stream.avail_out == 0);
 
   } while (bytes_read > 0);
-
-  close((*zlib)->fd_in);
 
   deflateEnd(&(*zlib)->stream);
 
