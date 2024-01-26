@@ -15,7 +15,7 @@ yara_scan(void **state)
 
   SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path = "./",
                                            .max_depth = -1,
-                                           .scan_type = 0,
+                                           .scan_type = QUICK_SCAN,
                                            .skip      = NULL,
                                            .rules     = "../rules/"
                                                         "YARA-Mindshield-Analysis"};
@@ -35,7 +35,7 @@ yara_scan_ignored(void **state)
 
   SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path = "./",
                                            .max_depth = -1,
-                                           .scan_type = 0,
+                                           .scan_type = QUICK_SCAN,
                                            .rules     = "../rules/"
                                                         "YARA-Mindshield-Analysis"};
 

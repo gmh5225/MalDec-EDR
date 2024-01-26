@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "compiler/compiler_attribute.h"
+#include "compression/zlib.h"
 #include "config.h"
 #include "err/err.h"
 #include "version/version.h"
@@ -129,11 +130,9 @@ main(int argc, char **argv)
     retval = ERR_FAILURE;
     goto ret;
   }
-  else
-  {
-    init_logger_main();
-    process_command_line_options(argc, argv);
-  }
+
+  init_logger_main();
+  process_command_line_options(argc, argv);
 
 ret:
   return retval;
@@ -398,22 +397,34 @@ help(char *prog_name)
          "Usage: %s [OPTIONS]\n\n"
          "Options:\n\n"
          "  Scan :\n"
-         "    -s, --scan <file>|<folder>    Scan a file or folder (default "
-         "max-depth X)\n"
-         "    -y, --scan-inotify <time>     Place the file scan in a "
-         "monitoring system\n"
-         "                                  if a file is created or changed it "
-         "will scan the "
-         "file\n"
-         "    -q, --quick                   Enable quick scan\n"
-         "    --max-depth <depth>           Set max-depth for folder scan\n"
-         "    --verbose                     Enable verbose mode for scan\n\n"
+         "    -s, --scan <file>|<folder>    Scan a specific file or folder "
+         "(default "
+         "max-depth: X)\n"
+         "    -y, --scan-inotify <time>     Enable real-time monitoring using "
+         "inotify. "
+         "If a file is created or changed, it will trigger a scan.\n"
+         "    -q, --quick                   Perform a quick scan for faster "
+         "results\n"
+         "    --max-depth <depth>           Set the maximum depth for folder "
+         "scans\n"
+         "    --verbose                     Enable verbose mode to display "
+         "detailed scan information\n\n"
+         "  Quarantine Management:\n"
+         "    --view-quarantine            View a list of files currently in "
+         "quarantine\n"
+         "    --move-from-quarantine <source> <destination>\n"
+         "                                 Move a file from quarantine to "
+         "another location\n"
+         "    --delete-from-quarantine <filename>\n"
+         "                                 Delete a file from quarantine\n\n"
          "  Telekinesis Driver :\n"
-         "    --connect-telekinesis         Connect driver Telekinesis shell\n"
+         "    --connect-telekinesis         Connect to the Telekinesis driver "
+         "shell\n"
          "\n\n"
+         "  General Options:\n"
          "    -v, --version                 Display the version of Linux "
          "Defender \n"
-         "    -h, --help                    Display this help menu Linux "
+         "    -h, --help                    Display this help menu for Linux "
          "Defender\n",
          prog_name);
 

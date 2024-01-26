@@ -167,6 +167,8 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
           if (new_size > strings_match_size)
           {
             strings_match      = realloc(strings_match, new_size);
+            ALLOC_ERR_FAILURE(strings_match);
+
             strings_match_size = new_size;
           }
           snprintf(strings_match + strlen(strings_match),

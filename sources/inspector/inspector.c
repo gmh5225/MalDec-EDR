@@ -1,9 +1,11 @@
 #include "inspector/inspector.h"
 
 ERR
-init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG *config)
+init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG config)
 {
-  *inspector           = malloc(sizeof(struct INSPECTOR));
+  *inspector = malloc(sizeof(struct INSPECTOR));
+  ALLOC_ERR_FAILURE(*inspector);
+
   (*inspector)->config = config;
 
   return ERR_SUCCESS;
