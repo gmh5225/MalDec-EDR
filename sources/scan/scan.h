@@ -26,7 +26,7 @@ typedef struct SCANNER
 {
   YR_RULES    *yr_rules;    /**< Pointer to YARA rules. */
   YR_COMPILER *yr_compiler; /**< Pointer to YARA compiler. */
-  SCAN_CONFIG  config; /**< Scanner configuration. */
+  SCAN_CONFIG  config;      /**< Scanner configuration. */
 } SCANNER;
 
 /**
@@ -35,9 +35,8 @@ typedef struct SCANNER
  */
 typedef struct SCANNER_CALLBACK_ARGS
 {
-  const char *file_path;     /**< Path of the file being scanned. */
   int         current_count; /**< Current count during scanning. */
-  bool        verbose;       /**< Verbose mode flag. */
+  SCAN_CONFIG config;        /**< Scanner configuration. */
 } SCANNER_CALLBACK_ARGS;
 
 /**

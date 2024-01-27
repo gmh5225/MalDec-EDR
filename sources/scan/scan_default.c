@@ -138,11 +138,11 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
   switch (message)
   {
     case CALLBACK_MSG_SCAN_FINISHED:
-      if (((SCANNER_CALLBACK_ARGS *)user_data)->verbose ||
+      if (((SCANNER_CALLBACK_ARGS *)user_data)->config.verbose ||
           ((SCANNER_CALLBACK_ARGS *)user_data)->current_count)
         LOG_INFO("All rules were passed in this "
                  "file '%s', the scan is over, rules matching %d",
-                 ((SCANNER_CALLBACK_ARGS *)user_data)->file_path,
+                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.file_path,
                  ((SCANNER_CALLBACK_ARGS *)user_data)->current_count);
       break;
 
@@ -180,7 +180,7 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
       LOG_FATAL("The rule '%s' were identified in "
                 "this file '%s', Strings match %s",
                 rule->identifier,
-                ((SCANNER_CALLBACK_ARGS *)user_data)->file_path, strings_match);
+                ((SCANNER_CALLBACK_ARGS *)user_data)->config.file_path, strings_match);
       
       
 

@@ -26,11 +26,10 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 
   ALLOC_ERR_FAILURE(user_data);
 
-  user_data->file_path     = scanner->config.file_path;
+  user_data->config        = scanner->config;
   user_data->current_count = 0;
-  user_data->verbose       = scanner->config.verbose;
 
-  LOG_INFO(LOG_MESSAGE_FORMAT("Scanning '%s' ...", user_data->file_path));
+  LOG_INFO(LOG_MESSAGE_FORMAT("Scanning '%s' ...", user_data->config.file_path));
 
   int code = yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path,
                                 (scanner->config.scan_type == QUICK_SCAN)

@@ -17,20 +17,21 @@ init_zlib(ZLIB **zlib, CONFIG_ZLIB config)
 
   (*zlib)->config = config;
 
-  (*zlib)->fd_in = open((*zlib)->config.file_in, O_RDONLY);
+  (*zlib)->fd_in = open((*zlib)->config.file_name_in, O_RDONLY);
   if ((*zlib)->fd_in < 0)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                 strerror(errno), (*zlib)->config.file_in));
+                                 strerror(errno), (*zlib)->config.file_name_in));
     return ERR_FAILURE;
   }
 
-  (*zlib)->fd_out =
-          open((*zlib)->config.file_out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  (*zlib)->fd_out = openat((*zlib)->config.dirfd_out, (*zlib)->config.file_name_out,
+                           O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
   if ((*zlib)->fd_out < 0)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                 strerror(errno), (*zlib)->config.file_out));
+                                 strerror(errno), (*zlib)->config.file_name_out));
     return ERR_FAILURE;
   }
 
@@ -60,7 +61,7 @@ decompress_file(ZLIB **zlib)
     {
       inflateEnd(&(*zlib)->stream);
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                   strerror(errno), (*zlib)->config.file_in));
+                                   strerror(errno), (*zlib)->config.file_name_in));
       return ERR_FAILURE;
     }
 
@@ -88,7 +89,7 @@ decompress_file(ZLIB **zlib)
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                      strerror(errno),
-                                     (*zlib)->config.file_out));
+                                     (*zlib)->config.file_name_out));
         return ERR_FAILURE;
       }
 
@@ -124,7 +125,7 @@ compress_file(ZLIB **zlib)
     {
       deflateEnd(&(*zlib)->stream);
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                   strerror(errno), (*zlib)->config.file_in));
+                                   strerror(errno), (*zlib)->config.file_name_in));
       return ERR_FAILURE;
     }
 
@@ -150,7 +151,7 @@ compress_file(ZLIB **zlib)
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                      strerror(errno),
-                                     (*zlib)->config.file_out));
+                                     (*zlib)->config.file_name_out));
         return ERR_FAILURE;
       }
 
