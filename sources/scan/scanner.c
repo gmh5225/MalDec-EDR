@@ -75,7 +75,7 @@ ret:
 }
 
 inline ERR
-init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
+init_scanner(SCANNER **scanner, SCAN_CONFIG config)
 {
   ERR retval         = ERR_SUCCESS;
   *scanner           = malloc(sizeof(struct SCANNER));
@@ -97,7 +97,8 @@ init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
     goto ret;
   }
 
-  if (IS_ERR_FAILURE(scanner_load_rules(*scanner, (*scanner)->config.rules)))
+  if (IS_ERR_FAILURE(
+              scanner_load_rules(*scanner, (*scanner)->config.yara.rules)))
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE"));
     retval = ERR_FAILURE;
@@ -137,7 +138,8 @@ exit_scanner(SCANNER **scanner)
   yr_compiler_destroy((*scanner)->yr_compiler);
   yr_rules_destroy((*scanner)->yr_rules);
 
-  if ((*scanner)->config.skip) del_skip_dirs(&(*scanner)->config.skip);
+  if ((*scanner)->config.skip_dirs)
+    del_skip_dirs(&(*scanner)->config.skip_dirs);
 
   free(*scanner);
   NO_USE_AFTER_FREE(*scanner);

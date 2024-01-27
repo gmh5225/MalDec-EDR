@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+
 #include "cmocka.h"
 
 #include "err/err.h"
@@ -13,12 +14,12 @@ yara_scanner(void **state)
 {
   SCANNER *scanner;
 
-  SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path = "./",
-                                           .max_depth = -1,
-                                           .scan_type = 0,
-                                           .skip      = NULL,
-                                           .rules     = "../rules/"
-                                                        "YARA-Mindshield-Analysis"};
+  SCAN_CONFIG config = (SCAN_CONFIG){.file_path = "./",
+                                     .max_depth = -1,
+                                     .scan_type = 0,
+                                     .skip_dirs = NULL};
+  config.yara.rules  = "../rules/"
+                       "YARA-Mindshield-Analysis";
 
   assert_int_equal(init_scanner(&scanner, config), ERR_SUCCESS);
   assert_int_equal(exit_scanner(&scanner), ERR_SUCCESS);

@@ -181,6 +181,8 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 "this file '%s', Strings match %s",
                 rule->identifier,
                 ((SCANNER_CALLBACK_ARGS *)user_data)->file_path, strings_match);
+      
+      
 
       free(strings_match);
       NO_USE_AFTER_FREE(strings_match);

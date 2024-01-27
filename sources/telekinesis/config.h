@@ -8,7 +8,7 @@
 #include "compiler/compiler_attribute.h"
 
 /**
- * @struct SCANNER_CONFIG
+ * @struct SCAN_CONFIG
  * @brief Configuration structure for the file telekinesis driver.
  */
 typedef struct packed(8) TELEKINESIS_CONFIG

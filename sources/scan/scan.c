@@ -55,9 +55,9 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 inline ERR
 scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
 {
-  int               retval = ERR_SUCCESS;
-  SCANNER_CONFIG    config = scanner->config;
-  struct SKIP_DIRS *skip   = config.skip;
+  int               retval    = ERR_SUCCESS;
+  SCAN_CONFIG       config    = scanner->config;
+  struct SKIP_DIRS *skip_dirs = config.skip_dirs;
   struct dirent    *entry;
   const char       *dir      = config.file_path;
   DIR              *dd       = opendir(dir);
@@ -78,7 +78,8 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
     const char *name = entry->d_name;
     size_t      size = dir_size + strlen(name) + 2;
 
-    if (!strcmp(name, ".") || !strcmp(name, "..") || get_skipped(&skip, dir))
+    if (!strcmp(name, ".") || !strcmp(name, "..") ||
+        get_skipped(&skip_dirs, dir))
     {
       continue;
     }
@@ -116,8 +117,8 @@ ret:
 inline ERR
 scan(SCANNER *scanner)
 {
-  int            retval = ERR_SUCCESS;
-  SCANNER_CONFIG config = scanner->config;
+  int         retval = ERR_SUCCESS;
+  SCAN_CONFIG config = scanner->config;
 
   struct stat st;
   int         fd = open(config.file_path, O_RDONLY);
@@ -154,11 +155,16 @@ ret:
   return retval;
 }
 
-void
-scan_listen(SCANNER *scanner, INOTIFY *inotify)
+ERR
+scan_listen_inotify(SCANNER *scanner)
 {
-  if (!IS_NULL_PTR(scanner) && !IS_NULL_PTR(inotify))
+  ERR retval = ERR_FAILURE;
+  if (!IS_NULL_PTR(scanner) && !IS_NULL_PTR(scanner->config.inotify))
   {
-    listen_to_events_inotify(&inotify, scanner, DEFAULT_SCAN_INOTIFY);
+    retval = ERR_SUCCESS;
+    listen_to_events_inotify(&scanner->config.inotify, scanner,
+                             DEFAULT_SCAN_INOTIFY);
   }
+
+  return retval;
 }

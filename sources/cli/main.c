@@ -14,6 +14,7 @@
 #include "compression/zlib.h"
 #include "config.h"
 #include "err/err.h"
+#include "inspector/inspector.h"
 #include "version/version.h"
 
 // Configuration file path
@@ -184,15 +185,12 @@ init_logger_main()
 void
 init_telekinesis_main()
 {
-  struct json_object *drivers_obj, *telekinesis_obj, *driver_path_obj,
-          *driver_name_obj;
+  struct json_object *telekinesis_obj, *driver_path_obj, *driver_name_obj;
 
-  if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "drivers",
-                                &drivers_obj))
+  if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "telekinesis",
+                                &telekinesis_obj))
   {
-    if (!json_object_object_get_ex(drivers_obj, "telekinesis",
-                                   &telekinesis_obj) ||
-        !json_object_object_get_ex(telekinesis_obj, "driver_path",
+    if (!json_object_object_get_ex(telekinesis_obj, "driver_path",
                                    &driver_path_obj) ||
         !json_object_object_get_ex(telekinesis_obj, "driver_name",
                                    &driver_name_obj))
@@ -223,8 +221,8 @@ init_scanner_main()
   if (json_object_object_get_ex(DEFENDER_CONFIG.config_json, "scan", &scan_obj))
   {
     if (!json_object_object_get_ex(scan_obj, "yara", &yara_obj) ||
-        !json_object_object_get_ex(yara_obj, "rules", &rules_obj) ||
-        !json_object_object_get_ex(yara_obj, "skip_dirs", &skip_dir_objs))
+        !json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs) ||
+        !json_object_object_get_ex(yara_obj, "rules", &rules_obj))
     {
       fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve scan "
                                          "configuration from JSON\n"));
@@ -243,13 +241,13 @@ init_scanner_main()
   struct SKIP_DIRS *skip = NULL;
   add_skip_dirs(&skip, skip_dir, length);
 
-  SCANNER_CONFIG config =
-          (SCANNER_CONFIG){.file_path = NULL,
-                           .max_depth = -1,
-                           .scan_type = 0,
-                           .verbose   = false,
-                           .rules     = json_object_get_string(rules_obj),
-                           .skip      = skip};
+  SCAN_CONFIG config = (SCAN_CONFIG){.file_path = NULL,
+                                     .max_depth = -1,
+                                     .scan_type = 0,
+                                     .verbose   = false,
+                                     .inotify   = NULL,
+                                     .skip_dirs = skip};
+  config.yara.rules  = json_object_get_string(rules_obj);
 
   if (IS_ERR_FAILURE(init_scanner(&DEFENDER_CONFIG.scanner, config)))
   {
@@ -355,9 +353,13 @@ process_command_line_options(int argc, char **argv)
         init_inotify_main();
         DEFENDER_CONFIG.inotify->config.mask =
                 (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
-        DEFENDER_CONFIG.inotify->config.time = atoi(optarg);
+        DEFENDER_CONFIG.inotify->config.time    = atoi(optarg);
+        DEFENDER_CONFIG.scanner->config.inotify = DEFENDER_CONFIG.inotify;
         set_watch_paths(DEFENDER_CONFIG.inotify);
-        scan_listen(DEFENDER_CONFIG.scanner, DEFENDER_CONFIG.inotify);
+        if (IS_ERR_FAILURE(scan_listen_inotify(DEFENDER_CONFIG.scanner)))
+        {
+          fprintf(stderr, LOG_MESSAGE_FORMAT("Error scan inotify\n"));
+        }
         break;
 
       case 'h':

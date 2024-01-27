@@ -24,9 +24,9 @@
  */
 typedef struct SCANNER
 {
-  YR_RULES      *yr_rules;    /**< Pointer to YARA rules. */
-  YR_COMPILER   *yr_compiler; /**< Pointer to YARA compiler. */
-  SCANNER_CONFIG config;      /**< Scanner configuration. */
+  YR_RULES    *yr_rules;    /**< Pointer to YARA rules. */
+  YR_COMPILER *yr_compiler; /**< Pointer to YARA compiler. */
+  SCAN_CONFIG  config; /**< Scanner configuration. */
 } SCANNER;
 
 /**
@@ -59,7 +59,7 @@ scan(SCANNER *scanner) warn_unused_result;
  * @return Returns ERR_SUCCESS on success, ERR_FAILURE on failure.
  */
 ERR
-init_scanner(SCANNER **scanner, SCANNER_CONFIG config) warn_unused_result;
+init_scanner(SCANNER **scanner, SCAN_CONFIG config) warn_unused_result;
 
 /**
  * @brief Exits and frees resources associated with a YARA scanner.
@@ -86,11 +86,13 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback) warn_unused_result;
  * This function initiates the scanning process using the provided scanner and listens for
  * events using the specified inotify instance.
  *
+ * if inotify == NULL return ERR_ERR_FAILURE
+ * 
  * @param scanner A pointer to the SCANNER struct representing the scanning module.
- * @param inotify A pointer to the INOTIFY struct representing the inotify module.
+ * @return Returns ERR_SUCCESS on success, ERR_FAILURE on failure.
  */
-void
-scan_listen(SCANNER *scanner, INOTIFY *inotify);
+ERR
+scan_listen_inotify(SCANNER *scanner);
 
 /**
  * @brief Scans a directory and its subdirectories using the specified YARA scanner and callback

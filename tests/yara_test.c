@@ -13,12 +13,11 @@ yara_scan(void **state)
 {
   SCANNER *scanner;
 
-  SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path = "./",
-                                           .max_depth = -1,
-                                           .scan_type = QUICK_SCAN,
-                                           .skip      = NULL,
-                                           .rules     = "../rules/"
-                                                        "YARA-Mindshield-Analysis"};
+  SCAN_CONFIG config =
+          (SCAN_CONFIG){.file_path = "./", .max_depth = -1, .scan_type = 0, .skip_dirs = NULL
+          };
+  config.yara.rules     = "../rules/"
+                          "YARA-Mindshield-Analysis";
 
   if (!IS_ERR_FAILURE(init_scanner(&scanner, config)))
   {
@@ -33,11 +32,12 @@ yara_scan_ignored(void **state)
 {
   SCANNER *scanner;
 
-  SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path = "./",
-                                           .max_depth = -1,
-                                           .scan_type = QUICK_SCAN,
-                                           .rules     = "../rules/"
-                                                        "YARA-Mindshield-Analysis"};
+  SCAN_CONFIG config = (SCAN_CONFIG){.file_path  = "./",
+                                     .max_depth  = -1,
+                                     .scan_type  = QUICK_SCAN,
+                                     .yara.rules = "../rules/"
+                                                   "YARA-Mindshield-"
+                                                   "Analysis"};
 
   if (!IS_ERR_FAILURE(init_scanner(&scanner, config)))
   {
@@ -45,7 +45,7 @@ yara_scan_ignored(void **state)
     const char       *skip_list[] = {"/tmp/test"};
     add_skip_dirs(&skip, skip_list, 1);
 
-    scanner->config.skip = skip;
+    scanner->config.skip_dirs = skip;
 
     assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), ERR_SUCCESS);
     assert_int_equal(exit_scanner(&scanner), ERR_SUCCESS);
