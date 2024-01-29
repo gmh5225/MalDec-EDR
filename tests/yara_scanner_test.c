@@ -14,7 +14,7 @@ yara_scanner(void **state)
 {
   SCANNER *scanner;
 
-  SCAN_CONFIG config = (SCAN_CONFIG){.file_path = "./",
+  SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path = "./",
                                      .max_depth = -1,
                                      .scan_type = 0,
                                      .skip_dirs = NULL};

@@ -13,11 +13,12 @@ yara_scan(void **state)
 {
   SCANNER *scanner;
 
-  SCAN_CONFIG config =
-          (SCAN_CONFIG){.file_path = "./", .max_depth = -1, .scan_type = 0, .skip_dirs = NULL
-          };
-  config.yara.rules     = "../rules/"
-                          "YARA-Mindshield-Analysis";
+  SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path  = "./",
+                                     .max_depth  = -1,
+                                     .scan_type  = 0,
+                                     .skip_dirs  = NULL,
+                                     .yara.rules = "../rules/"
+                                                   "YARA-Mindshield-Analysis"};
 
   if (!IS_ERR_FAILURE(init_scanner(&scanner, config)))
   {
@@ -32,7 +33,7 @@ yara_scan_ignored(void **state)
 {
   SCANNER *scanner;
 
-  SCAN_CONFIG config = (SCAN_CONFIG){.file_path  = "./",
+  SCANNER_CONFIG config = (SCANNER_CONFIG){.file_path  = "./",
                                      .max_depth  = -1,
                                      .scan_type  = QUICK_SCAN,
                                      .yara.rules = "../rules/"

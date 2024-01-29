@@ -73,7 +73,7 @@ ret:
 }
 
 inline ERR
-init_scanner(SCANNER **scanner, SCAN_CONFIG config)
+init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
 {
   ERR retval         = ERR_SUCCESS;
   *scanner           = malloc(sizeof(struct SCANNER));

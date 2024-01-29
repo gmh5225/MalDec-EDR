@@ -22,16 +22,13 @@ typedef struct ZLIB
 } ZLIB;
 
 ERR
-save_file_zlib(ZLIB **zlib);
+init_zlib(ZLIB **zlib, CONFIG_ZLIB config) warn_unused_result;
 
 ERR
-init_zlib(ZLIB **zlib, CONFIG_ZLIB config);
+decompress_file(ZLIB **zlib) warn_unused_result;
 
 ERR
-decompress_file(ZLIB **zlib);
-
-ERR
-compress_file(ZLIB **zlib);
+compress_file(ZLIB **zlib) warn_unused_result;
 
 void
 exit_zlib(ZLIB **zlib);

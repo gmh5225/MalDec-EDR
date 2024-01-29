@@ -19,10 +19,10 @@ typedef struct YARA_CONFIG
 } YARA_CONFIG;
 
 /**
- * @struct SCAN_CONFIG
+ * @struct SCANNER_CONFIG
  * @brief Configuration structure for the file scanner.
  */
-typedef struct SCAN_CONFIG
+typedef struct SCANNER_CONFIG
 {
   YARA_CONFIG yara;
   uint8_t     scan_type; /**< Type of scan (e.g., QUICK_SCAN). */
@@ -33,4 +33,4 @@ typedef struct SCAN_CONFIG
   struct SKIP_DIRS *
           skip_dirs; /**< Pointer to a structure specifying directories to skip. */
   INSPECTOR *inspector;
-} SCAN_CONFIG;
+} SCANNER_CONFIG;

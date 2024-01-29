@@ -26,7 +26,7 @@ typedef struct SCANNER
 {
   YR_RULES    *yr_rules;    /**< Pointer to YARA rules. */
   YR_COMPILER *yr_compiler; /**< Pointer to YARA compiler. */
-  SCAN_CONFIG  config;      /**< Scanner configuration. */
+  SCANNER_CONFIG  config;      /**< Scanner configuration. */
 } SCANNER;
 
 /**
@@ -36,7 +36,7 @@ typedef struct SCANNER
 typedef struct SCANNER_CALLBACK_ARGS
 {
   int         current_count; /**< Current count during scanning. */
-  SCAN_CONFIG config;        /**< Scanner configuration. */
+  SCANNER_CONFIG config;        /**< Scanner configuration. */
 } SCANNER_CALLBACK_ARGS;
 
 /**
@@ -58,7 +58,7 @@ scan(SCANNER *scanner) warn_unused_result;
  * @return Returns ERR_SUCCESS on success, ERR_FAILURE on failure.
  */
 ERR
-init_scanner(SCANNER **scanner, SCAN_CONFIG config) warn_unused_result;
+init_scanner(SCANNER **scanner, SCANNER_CONFIG config) warn_unused_result;
 
 /**
  * @brief Exits and frees resources associated with a YARA scanner.

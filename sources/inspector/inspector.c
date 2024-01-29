@@ -9,7 +9,7 @@
 #define INSPECTOR_PERMISSIONS 0775
 #define QUARANTINE_PERMISSIONS (S_IRUSR | S_IWUSR | S_IXUSR)
 
-ERR
+inline ERR
 init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG config)
 {
   *inspector = malloc(sizeof(struct INSPECTOR));
@@ -57,35 +57,35 @@ init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG config)
   return ERR_SUCCESS;
 }
 
-ERR
+inline ERR
 add_quarentine_inspector(INSPECTOR *inspector)
 {
   printf("%s\n", inspector->config.path);
   return ERR_SUCCESS;
 }
 
-ERR
+inline ERR
 del_quarentine_inspector(INSPECTOR *inspector)
 {
   printf("%s\n", inspector->config.path);
   return ERR_SUCCESS;
 }
 
-ERR
+inline ERR
 mov_quarentine_inspector(INSPECTOR *inspector)
 {
   printf("%s\n", inspector->config.path);
   return ERR_SUCCESS;
 }
 
-ERR
+inline ERR
 view_quarentine_inspector(INSPECTOR *inspector)
 {
   printf("%s\n", inspector->config.path);
   return ERR_SUCCESS;
 }
 
-void
+inline void
 exit_inspector(INSPECTOR **inspector)
 {
   close((*inspector)->ins_fd_dir);

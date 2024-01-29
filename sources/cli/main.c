@@ -44,10 +44,10 @@ help(char *prog_name)
           "    --view-quarantine            View a list of files currently "
           "in "
           "quarantine\n"
-          "    --move-from-quarantine <source> <destination>\n"
+          "    --move-from-quarantine <hash>/<destination>\n"
           "                                 Move a file from quarantine to "
           "another location\n"
-          "    --delete-from-quarantine <filename>\n"
+          "    --delete-from-quarantine <hash>\n"
           "                                 Delete a file from quarantine\n\n"
           "  Telekinesis Driver :\n"
           "    --connect-telekinesis         Connect to the Telekinesis "
@@ -110,6 +110,9 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           {"connect-telekinesis", no_argument, 0, 0},
           {"version", no_argument, 0, 'v'},
           {"help", no_argument, 0, 'h'},
+          {"view-quarantine", no_argument, 0, 0},
+          {"move-from-quarantine", required_argument, 0, 0},
+          {"delete-from-quarantine", required_argument, 0, 0},
           {0, 0, 0, 0},
   };
 
@@ -142,6 +145,14 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           connect_driver_telekinesis((*defender)->telekinesis);
           return;
         }
+
+        if (strcmp(long_options[option_index].name, "view-quarantine") == 0)
+        {
+          init_telekinesis_main(defender);
+          connect_driver_telekinesis((*defender)->telekinesis);
+          return;
+        }
+
         break;
 
       case 's':
@@ -199,6 +210,7 @@ main(int argc, char **argv)
   init_defender(&defender, config);
   init_cjson_main(&defender);
   init_logger_main(&defender);
+  init_inspector_main(&defender);
 
   process_command_line_options(&defender, argc, argv);
 

@@ -56,7 +56,7 @@ inline ERR
 scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
 {
   int               retval    = ERR_SUCCESS;
-  SCAN_CONFIG       config    = scanner->config;
+  SCANNER_CONFIG       config    = scanner->config;
   struct SKIP_DIRS *skip_dirs = config.skip_dirs;
   struct dirent    *entry;
   const char       *dir      = config.file_path;
@@ -109,7 +109,7 @@ inline ERR
 scan(SCANNER *scanner)
 {
   int         retval = ERR_SUCCESS;
-  SCAN_CONFIG config = scanner->config;
+  SCANNER_CONFIG config = scanner->config;
 
   struct stat st;
   int         fd = open(config.file_path, O_RDONLY);
