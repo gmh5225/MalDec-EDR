@@ -3,11 +3,12 @@ cmake_minimum_required(VERSION 3.0.2)
 # Add executable and target libraries
 add_executable(defender main.c)
 
-set(FLAGS_OPTIMIZATIONS ON)
-set(FLAGS_DEBUG OFF)
+set(FLAGS_OPTIMIZATIONS OFF)
+set(FLAGS_DEBUG ON)
 
 file(GLOB_RECURSE sources
-    ../scan/*.c
+    defender/*.c
+    ../scanner/*.c
     ../logger/*.c
     ../cjson/*.c
     ../telekinesis/*.c
@@ -21,7 +22,7 @@ target_link_libraries(defender PUBLIC yara c-logger json-c zlib)
 
 if(FLAGS_OPTIMIZATIONS)
     target_compile_options(defender PUBLIC
-        -O2            # Enable high-level optimization
+        -O2           
         -ftree-vectorize
         -mavx
         -fno-stack-protector

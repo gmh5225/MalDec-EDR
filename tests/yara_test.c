@@ -6,7 +6,7 @@
 #include "cmocka.h"
 #include "err/err.h"
 #include "logger/logger.h"
-#include "scan/scan.h"
+#include "scanner/scanner.h"
 
 static void
 yara_scan(void **state)

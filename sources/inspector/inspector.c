@@ -60,22 +60,29 @@ init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG config)
 ERR
 add_quarentine_inspector(INSPECTOR *inspector)
 {
-  
+  printf("%s\n", inspector->config.path);
+  return ERR_SUCCESS;
 }
 
 ERR
 del_quarentine_inspector(INSPECTOR *inspector)
 {
+  printf("%s\n", inspector->config.path);
+  return ERR_SUCCESS;
 }
 
 ERR
 mov_quarentine_inspector(INSPECTOR *inspector)
 {
+  printf("%s\n", inspector->config.path);
+  return ERR_SUCCESS;
 }
 
 ERR
 view_quarentine_inspector(INSPECTOR *inspector)
 {
+  printf("%s\n", inspector->config.path);
+  return ERR_SUCCESS;
 }
 
 void

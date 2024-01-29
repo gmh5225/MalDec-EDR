@@ -10,8 +10,8 @@
 #include "compiler/compiler_attribute.h"
 #include "err/err.h"
 #include "inotify/inotify.h"
-#include "scan/config.h"
-#include "scan/skip_dirs.h"
+#include "scanner/config.h"
+#include "scanner/skip_dirs.h"
 
 #define DEFAULT_SCAN_CALLBACK \
   default_scan_callback /**< Default scan callback function. */

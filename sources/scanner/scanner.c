@@ -1,5 +1,3 @@
-#define _GNU_SOURCE /* DT_DIR */
-
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -9,7 +7,7 @@
 
 #include "err/err.h"
 #include "logger/logger.h"
-#include "scan.h"
+#include "scanner.h"
 
 inline static ERR
 scanner_set_rule(SCANNER *scanner, const char *path, const char *yara_file_name)
@@ -136,7 +134,7 @@ exit_scanner(SCANNER **scanner)
   }
 
   yr_compiler_destroy((*scanner)->yr_compiler);
-  yr_rules_destroy((*scanner)->yr_rules);
+  if ((*scanner)->yr_rules) yr_rules_destroy((*scanner)->yr_rules);
 
   if ((*scanner)->config.skip_dirs)
     del_skip_dirs(&(*scanner)->config.skip_dirs);

@@ -1,6 +1,6 @@
 #define _GNU_SOURCE /* DT_DIR, DT_REG */
 
-#include "scan/scan.h"
+#include "scanner/scanner.h"
 
 #include <dirent.h>
 #include <errno.h>
@@ -13,7 +13,7 @@
 #include "err/err.h"
 #include "inotify/inotify.h"
 #include "logger/logger.h"
-#include "scan/skip_dirs.h"
+#include "scanner/skip_dirs.h"
 
 #define ROOT "/"
 
@@ -29,7 +29,8 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
   user_data->config        = scanner->config;
   user_data->current_count = 0;
 
-  LOG_INFO(LOG_MESSAGE_FORMAT("Scanning '%s' ...", user_data->config.file_path));
+  LOG_INFO(
+          LOG_MESSAGE_FORMAT("Scanning '%s' ...", user_data->config.file_path));
 
   int code = yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path,
                                 (scanner->config.scan_type == QUICK_SCAN)
@@ -87,21 +88,12 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
     snprintf(full_path, size, fmt, dir, name);
     scanner->config.file_path = full_path;
 
-    if (entry->d_type == DT_REG)
-    {
-      if (IS_ERR_FAILURE(scan_file(scanner, callback)))
-      {
-        retval = ERR_FAILURE;
-      }
-    }
+    if (entry->d_type == DT_REG) { retval = scan_file(scanner, callback); }
     else if (entry->d_type == DT_DIR)
     {
-      if (IS_ERR_FAILURE(
-                  scan_dir(scanner, DEFAULT_SCAN_CALLBACK, current_depth + 1)))
-      {
-        retval = ERR_FAILURE;
-      }
+      retval = scan_dir(scanner, DEFAULT_SCAN_CALLBACK, current_depth + 1);
     }
+
     (scanner->config.scan_type == QUICK_SCAN)
             ? usleep(2 * 10000)  // 20 milissegundos
             : usleep(6 * 10000); // 60 milissegundos

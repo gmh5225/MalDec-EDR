@@ -7,7 +7,7 @@
 
 #include "err/err.h"
 #include "logger/logger.h"
-#include "scan/scan.h"
+#include "scanner/scanner.h"
 
 static void
 yara_scanner(void **state)

@@ -7,7 +7,7 @@
 #include "cjson/cjson.h"
 #include "err/err.h"
 #include "logger/logger.h"
-#include "scan/scan.h"
+#include "scanner/scanner.h"
 
 #define CONFIG_JSON_PATH "../config/appsettings.json"
 

@@ -16,6 +16,8 @@ typedef struct ZLIB
   CONFIG_ZLIB config;
   int         fd_in;
   int         fd_out;
+  int         fd_dir_out;
+  int         fd_dir_in;
   z_stream    stream;
 } ZLIB;
 

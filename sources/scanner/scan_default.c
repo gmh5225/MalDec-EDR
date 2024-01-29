@@ -1,6 +1,6 @@
 #include "err/err.h"
 #include "logger/logger.h"
-#include "scan.h"
+#include "scanner.h"
 
 #include <errno.h>
 #include <unistd.h>

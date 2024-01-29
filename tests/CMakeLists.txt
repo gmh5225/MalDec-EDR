@@ -20,7 +20,7 @@ include_directories(
 
 file(GLOB_RECURSE sources
 	../sources/cjson/*.c
-    ../sources/scan/*.c
+    ../sources/scanner/*.c
     ../sources/logger/*.c
 	../sources/inotify/*.c
 )
