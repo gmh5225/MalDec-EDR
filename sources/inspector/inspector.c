@@ -29,7 +29,7 @@ init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG config)
     }
   }
 
-  (*inspector)->ins_fd_dir = open((*inspector)->config.dir, O_RDONLY);
+  (*inspector)->ins_fd_dir = open((*inspector)->config.dir, O_RDWR);
   if ((*inspector)->ins_fd_dir < 0)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
@@ -54,6 +54,18 @@ init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG config)
     }
   }
 
+  (*inspector)->qua_fd_dir = openat((*inspector)->ins_fd_dir,
+                                    (*inspector)->config.quarantine.dir,
+                                    O_RDWR);
+
+  if ((*inspector)->qua_fd_dir < 0)
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
+                                 strerror(errno),
+                                 (*inspector)->config.quarantine.dir));
+    return ERR_FAILURE;
+  }
+
   return ERR_SUCCESS;
 }
 
@@ -67,7 +79,7 @@ add_quarentine_inspector(INSPECTOR *inspector)
 inline ERR
 del_quarentine_inspector(INSPECTOR *inspector)
 {
-  printf("%s\n", inspector->config.path);
+  unlinkat(inspector->qua_fd_dir, inspector->config.path, 0);
   return ERR_SUCCESS;
 }
 
