@@ -18,13 +18,14 @@ init_defender(DEFENDER **defender, DEFENDER_CONFIG config)
 inline void
 init_inspector_main(DEFENDER **defender)
 {
-  struct json_object *inspector_obj, *inspector_dir_obj, *quarantine_obj,
+  struct json_object *inspector_obj, *dir_obj, *database_obj, *quarantine_obj,
           *quarantine_dir_obj;
 
   if (json_object_object_get_ex((*defender)->config_json, "inspector",
                                 &inspector_obj))
   {
-    if (!json_object_object_get_ex(inspector_obj, "dir", &inspector_dir_obj) ||
+    if (!json_object_object_get_ex(inspector_obj, "dir", &dir_obj) ||
+        !json_object_object_get_ex(inspector_obj, "database", &database_obj) ||
         !json_object_object_get_ex(inspector_obj, "quarantine",
                                    &quarantine_obj) ||
         !json_object_object_get_ex(quarantine_obj, "dir", &quarantine_dir_obj))
@@ -36,16 +37,18 @@ init_inspector_main(DEFENDER **defender)
   }
 
   INSPECTOR_CONFIG config = (INSPECTOR_CONFIG){
-          .dir            = json_object_get_string(inspector_dir_obj),
-          .quarantine.dir = json_object_get_string(quarantine_dir_obj)};
+          .dir            = json_object_get_string(dir_obj),
+          .quarantine.dir = json_object_get_string(quarantine_dir_obj), 
+          .database = json_object_get_string(database_obj)};
 
 #ifdef DEBUG
   LOG_DEBUG(LOG_MESSAGE_FORMAT("inspector.config.dir = '%s', "
-                               "inspector.config.quarantine.dir = '%s'",
-                               config.dir, config.quarantine.dir));
+                               "inspector.config.quarantine.dir = '%s'"
+                               " inspector.config.database = '%s'",
+                               config.dir, config.quarantine.dir, config.database));
 
 #endif
-
+  
   if (IS_ERR_FAILURE(init_inspector(&(*defender)->inspector, config)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error init inspector\n"));
@@ -230,7 +233,7 @@ init_scanner_main(DEFENDER **defender)
   add_skip_dirs(&skip, skip_dir, length);
 
   SCANNER_CONFIG config =
-          (SCANNER_CONFIG){.file_path  = NULL,
+          (SCANNER_CONFIG){.filepath  = NULL,
                            .max_depth  = -1,
                            .scan_type  = 0,
                            .verbose    = false,
@@ -239,12 +242,12 @@ init_scanner_main(DEFENDER **defender)
                            .yara.rules = json_object_get_string(rules_obj)};
 
 #ifdef DEBUG
-  LOG_DEBUG(LOG_MESSAGE_FORMAT("scanner.config.file_path = '%s', "
+  LOG_DEBUG(LOG_MESSAGE_FORMAT("scanner.config.filepath = '%s', "
                                "scanner.config.max_depth = '%i', "
                                "scanner.config.verbose = '%i', "
                                "scanner.config.yara.rules = '%s', "
                                "scanner.config.scan_type = '%i'",
-                               config.file_path, config.max_depth,
+                               config.filepath, config.max_depth,
                                config.verbose, config.yara.rules,
                                config.scan_type));
 

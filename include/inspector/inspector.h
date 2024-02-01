@@ -3,12 +3,16 @@
 #include "compression/zlib.h"
 #include "config.h"
 #include "err/err.h"
+#include <sqlite3.h>
 
 typedef struct INSPECTOR
 {
   INSPECTOR_CONFIG config;
+  ZLIB            *zlib;
   int              ins_fd_dir;
   int              qua_fd_dir;
+  sqlite3         *db;
+  sqlite3_stmt    *stmt;
 } INSPECTOR;
 
 ERR
@@ -16,16 +20,19 @@ init_inspector(INSPECTOR      **inspector,
                INSPECTOR_CONFIG config) warn_unused_result;
 
 ERR
-add_quarentine_inspector(INSPECTOR *inspector) warn_unused_result;
+add_quarantine_inspector(INSPECTOR        *inspector,
+                         QUARANTINE_FILES *file) warn_unused_result;
 
 ERR
-del_quarentine_inspector(INSPECTOR *inspector) warn_unused_result;
+del_quarantine_inspector(INSPECTOR        *inspector,
+                         QUARANTINE_FILES *file) warn_unused_result;
 
 ERR
-mov_quarentine_inspector(INSPECTOR *inspector) warn_unused_result;
+restore_quarantine_inspector(INSPECTOR        *inspector,
+                             QUARANTINE_FILES *file) warn_unused_result;
 
 ERR
-view_quarentine_inspector(INSPECTOR *inspector) warn_unused_result;
+view_quarantine_inspector(INSPECTOR *inspector) warn_unused_result;
 
 void
 exit_inspector(INSPECTOR **inspector);

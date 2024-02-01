@@ -27,9 +27,10 @@ typedef struct SCANNER_CONFIG
   YARA_CONFIG yara;
   uint8_t     scan_type; /**< Type of scan (e.g., QUICK_SCAN). */
   int32_t     max_depth; /**< Maximum depth for scanning directories. */
-  char       *file_path; /**< Path to the file or directory to be scanned. */
-  bool        verbose;   /**< Verbose mode flag. */
-  INOTIFY    *inotify;   /** < Pointer for inotify STRUCT */
+  char       *filepath;  /**< Path to the file or directory to be scanned. */
+  const char *filename;
+  bool        verbose; /**< Verbose mode flag. */
+  INOTIFY    *inotify; /** < Pointer for inotify STRUCT */
   struct SKIP_DIRS *
           skip_dirs; /**< Pointer to a structure specifying directories to skip. */
   INSPECTOR *inspector;

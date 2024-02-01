@@ -24,9 +24,9 @@
  */
 typedef struct SCANNER
 {
-  YR_RULES    *yr_rules;    /**< Pointer to YARA rules. */
-  YR_COMPILER *yr_compiler; /**< Pointer to YARA compiler. */
-  SCANNER_CONFIG  config;      /**< Scanner configuration. */
+  YR_RULES      *yr_rules;    /**< Pointer to YARA rules. */
+  YR_COMPILER   *yr_compiler; /**< Pointer to YARA compiler. */
+  SCANNER_CONFIG config;      /**< Scanner configuration. */
 } SCANNER;
 
 /**
@@ -35,7 +35,7 @@ typedef struct SCANNER
  */
 typedef struct SCANNER_CALLBACK_ARGS
 {
-  int         current_count; /**< Current count during scanning. */
+  int            current_count; /**< Current count during scanning. */
   SCANNER_CONFIG config;        /**< Scanner configuration. */
 } SCANNER_CALLBACK_ARGS;
 

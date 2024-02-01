@@ -7,7 +7,7 @@ set(FLAGS_OPTIMIZATIONS OFF)
 set(FLAGS_DEBUG ON)
 
 file(GLOB_RECURSE sources
-    defender/*.c
+    ../defender/*.c
     ../scanner/*.c
     ../logger/*.c
     ../cjson/*.c
@@ -18,7 +18,7 @@ file(GLOB_RECURSE sources
 )
 
 target_sources(defender PRIVATE ${sources})
-target_link_libraries(defender PUBLIC yara c-logger json-c zlib)
+target_link_libraries(defender PUBLIC yara c-logger json-c sqlite3 zlib)
 
 if(FLAGS_OPTIMIZATIONS)
     target_compile_options(defender PUBLIC

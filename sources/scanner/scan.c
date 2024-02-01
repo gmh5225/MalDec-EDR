@@ -20,6 +20,12 @@
 inline ERR
 scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 {
+#if DEBUG
+  ALLOC_ERR_FAILURE(scanner->config.inspector);
+  ALLOC_ERR_FAILURE(scanner->yr_compiler);
+  ALLOC_ERR_FAILURE(scanner->yr_rules);
+#endif
+
   ERR                    retval    = ERR_SUCCESS;
   SCANNER_CALLBACK_ARGS *user_data = (struct SCANNER_CALLBACK_ARGS *)malloc(
           sizeof(struct SCANNER_CALLBACK_ARGS));
@@ -29,10 +35,9 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
   user_data->config        = scanner->config;
   user_data->current_count = 0;
 
-  LOG_INFO(
-          LOG_MESSAGE_FORMAT("Scanning '%s' ...", user_data->config.file_path));
+  LOG_INFO(LOG_MESSAGE_FORMAT("Scanning '%s' ...", user_data->config.filepath));
 
-  int code = yr_rules_scan_file(scanner->yr_rules, scanner->config.file_path,
+  int code = yr_rules_scan_file(scanner->yr_rules, scanner->config.filepath,
                                 (scanner->config.scan_type == QUICK_SCAN)
                                         ? SCAN_FLAGS_FAST_MODE
                                         : (SCAN_FLAGS_REPORT_RULES_MATCHING),
@@ -56,10 +61,10 @@ inline ERR
 scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
 {
   int               retval    = ERR_SUCCESS;
-  SCANNER_CONFIG       config    = scanner->config;
+  SCANNER_CONFIG    config    = scanner->config;
   struct SKIP_DIRS *skip_dirs = config.skip_dirs;
   struct dirent    *entry;
-  const char       *dir      = config.file_path;
+  const char       *dir      = config.filepath;
   DIR              *dd       = opendir(dir);
   const size_t      dir_size = strlen(dir);
   const char       *fmt      = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
@@ -84,9 +89,10 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
       continue;
     }
 
-    char full_path[size];
-    snprintf(full_path, size, fmt, dir, name);
-    scanner->config.file_path = full_path;
+    char fullpath[size];
+    snprintf(fullpath, size, fmt, dir, name);
+    scanner->config.filepath = fullpath;
+    scanner->config.filename = name;
 
     if (entry->d_type == DT_REG) { retval = scan_file(scanner, callback); }
     else if (entry->d_type == DT_DIR)
@@ -108,15 +114,21 @@ ret:
 inline ERR
 scan(SCANNER *scanner)
 {
-  int         retval = ERR_SUCCESS;
+#if DEBUG
+  ALLOC_ERR_FAILURE(scanner->config.inspector);
+  ALLOC_ERR_FAILURE(scanner->yr_compiler);
+  ALLOC_ERR_FAILURE(scanner->yr_rules);
+#endif
+
+  int            retval = ERR_SUCCESS;
   SCANNER_CONFIG config = scanner->config;
 
   struct stat st;
-  int         fd = open(config.file_path, O_RDONLY);
+  int         fd = open(config.filepath, O_RDONLY);
 
   if (fstat(fd, &st) < 0)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE  %s : (%s)", config.file_path,
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE  %s : (%s)", config.filepath,
                                  strerror(errno)));
     retval = ERR_FAILURE;
     goto ret;
@@ -149,6 +161,13 @@ ret:
 ERR
 scan_listen_inotify(SCANNER *scanner)
 {
+#if DEBUG
+  ALLOC_ERR_FAILURE(scanner->config.inotify);
+  ALLOC_ERR_FAILURE(scanner->config.inspector);
+  ALLOC_ERR_FAILURE(scanner->yr_compiler);
+  ALLOC_ERR_FAILURE(scanner->yr_rules);
+#endif
+
   ERR retval = ERR_FAILURE;
   if (!IS_NULL_PTR(scanner) && !IS_NULL_PTR(scanner->config.inotify))
   {

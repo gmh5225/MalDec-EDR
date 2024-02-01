@@ -20,7 +20,7 @@ init_driver_telekinesis(TELEKINESIS **telekinesis, TELEKINESIS_CONFIG config)
 
   if (!check_driver_telekinesis_alive(*telekinesis))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("Driver %s not alive",
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Driver %s not alive",
                                  (*telekinesis)->config.driver_name));
     return ERR_FAILURE;
   };
@@ -28,7 +28,7 @@ init_driver_telekinesis(TELEKINESIS **telekinesis, TELEKINESIS_CONFIG config)
   if (((*telekinesis)->fd_telekinesis =
                open((*telekinesis)->config.driver_path, O_RDWR)) < 0)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("Error in open driver %s : %ld (%s)",
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Error in open driver %s : %ld (%s)",
                                  (*telekinesis)->config.driver_name, errno,
                                  strerror(errno)));
     return ERR_FAILURE;
@@ -42,7 +42,7 @@ connect_driver_telekinesis(TELEKINESIS *telekinesis)
 {
   if (!check_driver_telekinesis_alive(telekinesis))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("Driver %s not alive",
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Driver %s not alive",
                                  telekinesis->config.driver_name));
     return;
   }

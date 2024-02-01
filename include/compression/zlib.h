@@ -13,16 +13,14 @@
 
 typedef struct ZLIB
 {
-  CONFIG_ZLIB config;
+  ZLIB_CONFIG config;
   int         fd_in;
   int         fd_out;
-  int         fd_dir_out;
-  int         fd_dir_in;
   z_stream    stream;
 } ZLIB;
 
 ERR
-init_zlib(ZLIB **zlib, CONFIG_ZLIB config) warn_unused_result;
+init_zlib(ZLIB **zlib, ZLIB_CONFIG config) warn_unused_result;
 
 ERR
 decompress_file(ZLIB **zlib) warn_unused_result;

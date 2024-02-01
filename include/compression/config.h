@@ -2,11 +2,11 @@
 
 #include <zlib.h>
 
-typedef struct CONFIG_ZLIB
+typedef struct ZLIB_CONFIG
 {
-  const char *file_name_in;
-  const char *file_name_out;
-  const char *dir_out;
-  const char *dir_in;
+  const char *filename_in;
+  const char *filename_out;
+  int         fd_dir_out;
+  int         chunk;
 
-} CONFIG_ZLIB;
+} ZLIB_CONFIG;

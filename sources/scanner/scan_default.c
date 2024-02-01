@@ -29,17 +29,17 @@ decision_making_event_type(const struct inotify_event **event,
   return;
 
 scan:
-  if ((*scanner)->config.file_path)
+  if ((*scanner)->config.filepath)
   {
     if (IS_ERR_FAILURE(scan(*scanner)))
     {
       LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the created file '%s' ",
-                                   (*scanner)->config.file_path));
+                                   (*scanner)->config.filepath));
     }
   }
 
-  free((*scanner)->config.file_path);
-  NO_USE_AFTER_FREE((*scanner)->config.file_path);
+  free((*scanner)->config.filepath);
+  NO_USE_AFTER_FREE((*scanner)->config.filepath);
 }
 
 static inline void
@@ -58,11 +58,11 @@ watched_directory_event(INOTIFY **inotify, const struct inotify_event *event,
 
         size_t path_size =
                 snprintf(NULL, 0, "%s/%s", paths->path, event->name) + 1;
-        scanner->config.file_path = malloc(path_size);
+        scanner->config.filepath = malloc(path_size);
 
-        ALLOC_ERR_FAILURE(scanner->config.file_path);
+        ALLOC_ERR_FAILURE(scanner->config.filepath);
 
-        snprintf(scanner->config.file_path, path_size, "%s/%s", paths->path,
+        snprintf(scanner->config.filepath, path_size, "%s/%s", paths->path,
                  event->name);
       }
       else
@@ -142,7 +142,7 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
           ((SCANNER_CALLBACK_ARGS *)user_data)->current_count)
         LOG_INFO("All rules were passed in this "
                  "file '%s', the scan is over, rules matching %d",
-                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.file_path,
+                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath,
                  ((SCANNER_CALLBACK_ARGS *)user_data)->current_count);
       break;
 
@@ -166,7 +166,7 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
 
           if (new_size > strings_match_size)
           {
-            strings_match      = realloc(strings_match, new_size);
+            strings_match = realloc(strings_match, new_size);
             ALLOC_ERR_FAILURE(strings_match);
 
             strings_match_size = new_size;
@@ -180,9 +180,27 @@ default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
       LOG_FATAL("The rule '%s' were identified in "
                 "this file '%s', Strings match %s",
                 rule->identifier,
-                ((SCANNER_CALLBACK_ARGS *)user_data)->config.file_path, strings_match);
-      
-      
+                ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath,
+                strings_match);
+
+      // add quarantine using inspector
+      time_t           datatime = time(NULL);
+      QUARANTINE_FILES file     = (QUARANTINE_FILES){
+                  .filepath = ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath,
+                  .detected = rule->identifier,
+                  .filename = ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename,
+                  .datatime = ctime(&datatime)};
+
+      if (IS_ERR_FAILURE(add_quarantine_inspector(
+                  ((SCANNER_CALLBACK_ARGS *)user_data)->config.inspector,
+                  &file)))
+      {
+        LOG_ERROR(LOG_MESSAGE_FORMAT(
+                "ERR_FAILURE Failed to add file '%s' to quarantine. Inspector: "
+                "%s",
+                ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename,
+                ((SCANNER_CALLBACK_ARGS *)user_data)->config.inspector));
+      }
 
       free(strings_match);
       NO_USE_AFTER_FREE(strings_match);

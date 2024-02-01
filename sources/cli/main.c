@@ -44,7 +44,7 @@ help(char *prog_name)
           "    --view-quarantine            View a list of files currently "
           "in "
           "quarantine\n"
-          "    --move-from-quarantine <hash>/<destination>\n"
+          "    --restore-from-quarantine <file>\n"
           "                                 Move a file from quarantine to "
           "another location\n"
           "    --delete-from-quarantine <hash>\n"
@@ -78,20 +78,24 @@ pr_version()
 static inline void
 cleanup_resources(DEFENDER **defender)
 {
-  if (*defender == NULL) exit(EXIT_SUCCESS);
+  if (IS_NULL_PTR(*defender)) exit(EXIT_SUCCESS);
 
-  if ((*defender)->config_json != NULL) exit_json(&(*defender)->config_json);
+  if (!IS_NULL_PTR((*defender)->config_json))
+    exit_json(&(*defender)->config_json);
 
-  if ((*defender)->logger != NULL) exit_logger(&(*defender)->logger);
+  if (!IS_NULL_PTR((*defender)->logger)) exit_logger(&(*defender)->logger);
 
-  if ((*defender)->scanner != NULL)
+  if (!IS_NULL_PTR((*defender)->scanner))
     if (IS_ERR_FAILURE(exit_scanner(&(*defender)->scanner)))
       printf(LOG_MESSAGE_FORMAT("Error in exit scanner"));
 
-  if ((*defender)->telekinesis != NULL)
+  if (!IS_NULL_PTR((*defender)->telekinesis))
     exit_driver_telekinesis(&(*defender)->telekinesis);
 
-  if ((*defender)->inotify != NULL) exit_inotify(&(*defender)->inotify);
+  if (!IS_NULL_PTR((*defender)->inotify)) exit_inotify(&(*defender)->inotify);
+
+  if (!IS_NULL_PTR((*defender)->inspector))
+    exit_inspector(&(*defender)->inspector);
 
   exit_defender(defender);
   exit(EXIT_SUCCESS);
@@ -148,16 +152,24 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
 
         if (strcmp(long_options[option_index].name, "view-quarantine") == 0)
         {
-          init_telekinesis_main(defender);
-          connect_driver_telekinesis((*defender)->telekinesis);
+          init_cjson_main(defender);
+          init_logger_main(defender);
+          init_inspector_main(defender);
+          if (IS_ERR_FAILURE(view_quarantine_inspector((*defender)->inspector)))
+          {
+          };
           return;
         }
 
         break;
 
       case 's':
+        init_cjson_main(defender);
+        init_logger_main(defender);
+        init_inspector_main(defender);
         init_scanner_main(defender);
-        (*defender)->scanner->config.file_path = optarg;
+        (*defender)->scanner->config.filepath  = optarg;
+        (*defender)->scanner->config.inspector = (*defender)->inspector;
         break;
 
       case 'q': (*defender)->scanner->config.scan_type |= QUICK_SCAN; break;
@@ -165,12 +177,16 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
       case 'v': pr_version(); break;
 
       case 'y':
+        init_cjson_main(defender);
+        init_logger_main(defender);
+        init_inspector_main(defender);
         init_scanner_main(defender);
         init_inotify_main(defender);
         (*defender)->inotify->config.mask =
                 (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
-        (*defender)->inotify->config.time    = atoi(optarg);
-        (*defender)->scanner->config.inotify = (*defender)->inotify;
+        (*defender)->inotify->config.time      = atoi(optarg);
+        (*defender)->scanner->config.inotify   = (*defender)->inotify;
+        (*defender)->scanner->config.inspector = (*defender)->inspector;
         set_watch_paths((*defender)->inotify);
         if (IS_ERR_FAILURE(scan_listen_inotify((*defender)->scanner)))
         {
@@ -208,9 +224,6 @@ main(int argc, char **argv)
   };
 
   init_defender(&defender, config);
-  init_cjson_main(&defender);
-  init_logger_main(&defender);
-  init_inspector_main(&defender);
 
   process_command_line_options(&defender, argc, argv);
 

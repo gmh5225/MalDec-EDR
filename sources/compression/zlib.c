@@ -6,50 +6,39 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-// Block size for read/write
-#define CHUNK 16384
-
 ERR
-init_zlib(ZLIB **zlib, CONFIG_ZLIB config)
+init_zlib(ZLIB **zlib, ZLIB_CONFIG config)
 {
   *zlib = malloc(sizeof(struct ZLIB));
   ALLOC_ERR_FAILURE(*zlib);
 
   (*zlib)->config = config;
 
-  (*zlib)->fd_dir_in = open((*zlib)->config.dir_in, O_RDONLY);
-  if ((*zlib)->fd_dir_in < 0)
-  {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                 strerror(errno), (*zlib)->config.dir_in));
-    return ERR_FAILURE;
-  }
-  (*zlib)->fd_in =
-          openat((*zlib)->fd_dir_in, (*zlib)->config.file_name_in, O_RDONLY);
+  (*zlib)->fd_in = open((*zlib)->config.filename_in, O_RDONLY);
   if ((*zlib)->fd_in < 0)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                  strerror(errno),
-                                 (*zlib)->config.file_name_in));
+                                 (*zlib)->config.filename_in));
     return ERR_FAILURE;
   }
 
-  (*zlib)->fd_dir_out = open((*zlib)->config.dir_out, O_RDONLY);
-  if ((*zlib)->fd_dir_out < 0)
+  if ((*zlib)->config.fd_dir_out < 0)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                 strerror(errno), (*zlib)->config.dir_out));
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE fd '%i' it is not valid",
+                                 (*zlib)->config.fd_dir_out));
     return ERR_FAILURE;
   }
 
-  (*zlib)->fd_out = openat((*zlib)->fd_dir_out, (*zlib)->config.file_name_out,
+  (*zlib)->fd_out = openat((*zlib)->config.fd_dir_out,
+                           (*zlib)->config.filename_out,
                            O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
   if ((*zlib)->fd_out < 0)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                  strerror(errno),
-                                 (*zlib)->config.file_name_out));
+                                 (*zlib)->config.filename_out));
     return ERR_FAILURE;
   }
 
@@ -68,19 +57,19 @@ decompress_file(ZLIB **zlib)
     return ERR_FAILURE;
   }
 
-  void *in  = alloca(CHUNK);
-  void *out = alloca(CHUNK);
+  void *in  = alloca((*zlib)->config.chunk);
+  void *out = alloca((*zlib)->config.chunk);
 
   ssize_t bytes_read, bytes_written;
 
   do {
-    bytes_read = read((*zlib)->fd_in, in, CHUNK);
+    bytes_read = read((*zlib)->fd_in, in, (*zlib)->config.chunk);
     if (bytes_read == EOF)
     {
       inflateEnd(&(*zlib)->stream);
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                    strerror(errno),
-                                   (*zlib)->config.file_name_in));
+                                   (*zlib)->config.filename_in));
       return ERR_FAILURE;
     }
 
@@ -90,7 +79,7 @@ decompress_file(ZLIB **zlib)
     (*zlib)->stream.next_in  = in;
 
     do {
-      (*zlib)->stream.avail_out = CHUNK;
+      (*zlib)->stream.avail_out = (*zlib)->config.chunk;
       (*zlib)->stream.next_out  = out;
 
       ret = inflate(&(*zlib)->stream, Z_NO_FLUSH);
@@ -103,12 +92,12 @@ decompress_file(ZLIB **zlib)
       }
 
       bytes_written =
-              write((*zlib)->fd_out, out, CHUNK - (*zlib)->stream.avail_out);
+              write((*zlib)->fd_out, out, (*zlib)->config.chunk - (*zlib)->stream.avail_out);
       if (bytes_written == -1)
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                      strerror(errno),
-                                     (*zlib)->config.file_name_out));
+                                     (*zlib)->config.filename_out));
         return ERR_FAILURE;
       }
 
@@ -133,19 +122,19 @@ compress_file(ZLIB **zlib)
     return ERR_FAILURE;
   }
 
-  void *in  = alloca(CHUNK);
-  void *out = alloca(CHUNK);
+  void *in  = alloca((*zlib)->config.chunk);
+  void *out = alloca((*zlib)->config.chunk);
 
   ssize_t bytes_read, bytes_written;
 
   do {
-    bytes_read = read((*zlib)->fd_in, in, CHUNK);
+    bytes_read = read((*zlib)->fd_in, in, (*zlib)->config.chunk);
     if (bytes_read == EOF)
     {
       deflateEnd(&(*zlib)->stream);
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                    strerror(errno),
-                                   (*zlib)->config.file_name_in));
+                                   (*zlib)->config.filename_in));
       return ERR_FAILURE;
     }
 
@@ -153,12 +142,11 @@ compress_file(ZLIB **zlib)
     (*zlib)->stream.next_in  = in;
 
     do {
-      (*zlib)->stream.avail_out = CHUNK;
+      (*zlib)->stream.avail_out = (*zlib)->config.chunk;
       (*zlib)->stream.next_out  = out;
 
       ret = deflate(&(*zlib)->stream, Z_FINISH);
-      if (ret == Z_ERRNO || ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR ||
-          ret == Z_MEM_ERROR || ret == Z_BUF_ERROR)
+      if (ret == Z_STREAM_ERROR)
       {
         deflateEnd(&(*zlib)->stream);
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", ret, zError(ret)));
@@ -166,12 +154,12 @@ compress_file(ZLIB **zlib)
       }
 
       bytes_written =
-              write((*zlib)->fd_out, out, CHUNK - (*zlib)->stream.avail_out);
+              write((*zlib)->fd_out, out, (*zlib)->config.chunk - (*zlib)->stream.avail_out);
       if (bytes_written == -1)
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
                                      strerror(errno),
-                                     (*zlib)->config.file_name_out));
+                                     (*zlib)->config.filename_out));
         return ERR_FAILURE;
       }
 
@@ -189,8 +177,7 @@ exit_zlib(ZLIB **zlib)
 {
   close((*zlib)->fd_in);
   close((*zlib)->fd_out);
-  close((*zlib)->fd_dir_in);
-  close((*zlib)->fd_dir_out);
+  close((*zlib)->config.fd_dir_out);
   free(*zlib);
   NO_USE_AFTER_FREE(*zlib);
 }
