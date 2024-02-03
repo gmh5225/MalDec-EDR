@@ -16,12 +16,18 @@
 static inline void
 create_database_inspector(INSPECTOR **inspector)
 {
-  size_t size_dir      = strlen((*inspector)->config.dir);
-  size_t size_database = strlen((*inspector)->config.database);
-  char  *database_path = malloc(size_dir + size_database);
+  INSPECTOR_CONFIG config = (*inspector)->config;
 
-  strncpy(database_path, (*inspector)->config.dir, size_dir);
-  strncat(database_path, (*inspector)->config.database, size_database);
+  const char *dir      = config.dir;
+  const char *database = config.database;
+
+  size_t size_dir      = strlen(dir);
+  size_t size_database = strlen(database);
+
+  char *database_path = calloc(size_dir + size_database + 1, sizeof(char));
+
+  strncpy(database_path, dir, size_dir);
+  strncat(database_path, database, size_database);
 
   int rc = sqlite3_open_v2(database_path, &(*inspector)->db,
                            SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE, NULL);
