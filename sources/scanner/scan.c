@@ -1,10 +1,9 @@
-#define _GNU_SOURCE /* DT_DIR, DT_REG */
-
 #include "scanner/scanner.h"
 
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -14,8 +13,6 @@
 #include "inotify/inotify.h"
 #include "logger/logger.h"
 #include "scanner/skip_dirs.h"
-
-#define ROOT "/"
 
 inline ERR
 scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
@@ -67,7 +64,7 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
   const char       *dir      = config.filepath;
   DIR              *dd       = opendir(dir);
   const size_t      dir_size = strlen(dir);
-  const char       *fmt      = (!strcmp(dir, ROOT)) ? "%s%s" : "%s/%s";
+  const char       *fmt      = (!strcmp(dir, "/")) ? "%s%s" : "%s/%s";
 
   if (config.max_depth >= 0 && current_depth > config.max_depth) { goto ret; }
   else if (IS_NULL_PTR((dd)))
@@ -97,7 +94,7 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
     if (entry->d_type == DT_REG) { retval = scan_file(scanner, callback); }
     else if (entry->d_type == DT_DIR)
     {
-      retval = scan_dir(scanner, DEFAULT_SCAN_CALLBACK, current_depth + 1);
+      retval = scan_dir(scanner, DEFAULT_SCAN_FILE, current_depth + 1);
     }
 
     (scanner->config.scan_type == QUICK_SCAN)
@@ -111,7 +108,7 @@ ret:
   return retval;
 }
 
-inline ERR
+ERR
 scan(SCANNER *scanner)
 {
 #if DEBUG
@@ -120,41 +117,75 @@ scan(SCANNER *scanner)
   ALLOC_ERR_FAILURE(scanner->yr_rules);
 #endif
 
-  int            retval = ERR_SUCCESS;
+  ERR            retval = ERR_SUCCESS;
   SCANNER_CONFIG config = scanner->config;
 
-  struct stat st;
-  int         fd = open(config.filepath, O_RDONLY);
-
-  if (fstat(fd, &st) < 0)
+  int fd = open(config.filepath, O_RDONLY);
+  if (fd == -1)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE  %s : (%s)", config.filepath,
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (open) %s (%s)", config.filepath,
                                  strerror(errno)));
     retval = ERR_FAILURE;
     goto ret;
+  }
+
+  struct stat st;
+  if (fstat(fd, &st) < 0)
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (fstat) %s (%s)", config.filepath,
+                                 strerror(errno)));
+    retval = ERR_FAILURE;
+    goto close_fd;
   }
 
   mode_t mode = st.st_mode & S_IFMT;
 
   if (mode == S_IFDIR)
   {
-    if (IS_ERR_FAILURE(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0)))
+    if (fchdir(fd) != 0)
     {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (fchdir) error in set chdir "
+                                   "pwd %i (%s)",
+                                   errno, strerror(errno)));
       retval = ERR_FAILURE;
-      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE"));
+      goto close_fd;
+    }
+
+    // Remove '/' if passed argument contains '/'
+    size_t size_filepath = strlen(config.filepath);
+    if (size_filepath > 0 && config.filepath[size_filepath - 1] == '/')
+      config.filepath[size_filepath - 1] = '\0';
+
+    if (IS_ERR_FAILURE(scan_dir(scanner, DEFAULT_SCAN_FILE, 0)))
+    {
+      // Log error
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (scan_dir)"));
+      retval = ERR_FAILURE;
     }
   }
   else if (mode == S_IFREG)
   {
-    if (IS_ERR_FAILURE(scan_file(scanner, DEFAULT_SCAN_CALLBACK)))
+    // Adjust scanner config filename
+    char *filename           = strrchr(config.filepath, '/');
+    scanner->config.filename = (filename == NULL) ? config.filepath
+                                                  : (filename + 1);
+
+    if (IS_ERR_FAILURE(scan_file(scanner, DEFAULT_SCAN_FILE)))
     {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (scan_file)"));
       retval = ERR_FAILURE;
-      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE"));
     }
   }
 
+close_fd:
+  if (close(fd) == -1)
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (close) %s (%s)", config.filepath,
+                                 strerror(errno)));
+    retval = ERR_FAILURE;
+  }
+
 ret:
-  if (fd) close(fd);
   return retval;
 }
 

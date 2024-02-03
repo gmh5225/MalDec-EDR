@@ -15,8 +15,8 @@ scanner_set_rule(SCANNER *scanner, const char *path, const char *yara_filename)
   ERR                retval   = ERR_SUCCESS;
   YR_FILE_DESCRIPTOR rules_fd = open(path, O_RDONLY);
 
-  if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL,
-                         yara_filename) != ERROR_SUCCESS)
+  if (yr_compiler_add_fd(scanner->yr_compiler, rules_fd, NULL, yara_filename) !=
+      ERROR_SUCCESS)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE"));
     retval = ERR_FAILURE;
@@ -78,7 +78,7 @@ init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
   ERR retval         = ERR_SUCCESS;
   *scanner           = malloc(sizeof(struct SCANNER));
   (*scanner)->config = config;
-  
+
   ALLOC_ERR_FAILURE(*scanner);
 
   if (yr_initialize() != ERROR_SUCCESS)

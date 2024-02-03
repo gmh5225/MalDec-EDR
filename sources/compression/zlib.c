@@ -18,8 +18,7 @@ init_zlib(ZLIB **zlib, ZLIB_CONFIG config)
   if ((*zlib)->fd_in < 0)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                 strerror(errno),
-                                 (*zlib)->config.filename_in));
+                                 strerror(errno), (*zlib)->config.filename_in));
     return ERR_FAILURE;
   }
 
@@ -91,8 +90,8 @@ decompress_file(ZLIB **zlib)
         return ERR_FAILURE;
       }
 
-      bytes_written =
-              write((*zlib)->fd_out, out, (*zlib)->config.chunk - (*zlib)->stream.avail_out);
+      bytes_written = write((*zlib)->fd_out, out,
+                            (*zlib)->config.chunk - (*zlib)->stream.avail_out);
       if (bytes_written == -1)
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
@@ -153,8 +152,8 @@ compress_file(ZLIB **zlib)
         return ERR_FAILURE;
       }
 
-      bytes_written =
-              write((*zlib)->fd_out, out, (*zlib)->config.chunk - (*zlib)->stream.avail_out);
+      bytes_written = write((*zlib)->fd_out, out,
+                            (*zlib)->config.chunk - (*zlib)->stream.avail_out);
       if (bytes_written == -1)
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,

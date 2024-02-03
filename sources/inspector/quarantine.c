@@ -2,12 +2,6 @@
 #include "logger/logger.h"
 #include <errno.h>
 
-#define SQL_INSERT_QUARANTINE                                                  \
-  "INSERT OR IGNORE INTO quarantine (filename, filepath, datatime, detected) " \
-  "VALUES (?, ?, ?, ?)"
-
-#define SQL_VIEW_QUARANTINE "SELECT * FROM quarantine"
-
 inline ERR
 add_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 {
@@ -18,36 +12,25 @@ add_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 
   if (IS_ERR_FAILURE(init_zlib(&inspector->zlib, config)))
   {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Error init zlib %s",
+                                 file->filename));
     return ERR_FAILURE;
   }
 
-  if (IS_ERR_FAILURE(compress_file(&inspector->zlib))) { return ERR_FAILURE; }
-
-  int rc = sqlite3_prepare(inspector->db, SQL_INSERT_QUARANTINE, -1,
-                           &inspector->stmt, NULL);
-  if (rc != SQLITE_OK)
+  if (IS_ERR_FAILURE(compress_file(&inspector->zlib)))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", rc,
-                                 sqlite3_errmsg(inspector->db)));
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not compress file %s",
+                                 file->filename));
     return ERR_FAILURE;
   }
-  // Bind dos parâmetros
-  sqlite3_bind_text(inspector->stmt, 1, file->filename, -1, SQLITE_STATIC);
-  sqlite3_bind_text(inspector->stmt, 2, file->filepath, -1, SQLITE_STATIC);
-  sqlite3_bind_text(inspector->stmt, 3, file->datatime, -1, SQLITE_STATIC);
-  sqlite3_bind_text(inspector->stmt, 4, file->detected, -1, SQLITE_STATIC);
 
-  // Executa a inserção
-  if ((rc = sqlite3_step(inspector->stmt)) != SQLITE_DONE)
+  if (IS_ERR_FAILURE(insert_quarantine_db(&inspector, &file)))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", rc,
-                                 sqlite3_errmsg(inspector->db)));
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not insert file in quarantine"));
     return ERR_FAILURE;
   }
 
-  // Finaliza a consulta
-  sqlite3_finalize(inspector->stmt);
-
+  exit_zlib(&inspector->zlib);
   return ERR_SUCCESS;
 }
 
@@ -60,6 +43,7 @@ del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
                                  strerror(errno), file->filename));
     return ERR_FAILURE;
   }
+
   return ERR_SUCCESS;
 }
 
@@ -70,58 +54,15 @@ restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
   return ERR_SUCCESS;
 }
 
-static inline void
-print_line(const int count, const int width)
-{
-  for (int i = 0; i < count; i++)
-  {
-    fprintf(stdout, "+%*s", width, "---------------------------");
-  }
-  fprintf(stdout, "+\n");
-}
-
-static inline int
-view_callback_quarantine(void *unused, const int count, char **data,
-                         char **columns)
-{
-  unused = unused;
-
-  const int column_width = 25;
-
-  // Imprime cabeçalho da tabela
-  print_line(count, column_width);
-  for (int idx = 0; idx < count; idx++)
-  {
-    fprintf(stdout, "| %-*s", column_width, columns[idx]);
-  }
-  fprintf(stdout, "|\n");
-
-  // Imprime separador entre cabeçalho e dados
-  print_line(count, column_width);
-
-  // Imprime os dados
-  for (int i = 0; i < count; i++)
-  {
-    fprintf(stdout, "| %-*s", column_width, data[i]);
-  }
-  fprintf(stdout, "|\n");
-
-  // Imprime rodapé da tabela
-  print_line(count, column_width);
-
-  return 0;
-}
-
 inline ERR
-view_quarantine_inspector(INSPECTOR *inspector)
+view_quarantine_inspector(INSPECTOR *inspector,
+                          int (*callback)(void *, int, char **, char **))
 {
-  char *sqlite_err_msg = NULL;
-  int   rc             = sqlite3_exec(inspector->db, SQL_VIEW_QUARANTINE,
-                                      view_callback_quarantine, NULL, &sqlite_err_msg);
-  if (rc != SQLITE_OK)
+  if (IS_ERR_FAILURE(select_quarantine_db(&inspector, callback)))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", rc, sqlite_err_msg));
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select table quarantine"));
     return ERR_FAILURE;
   }
+
   return ERR_SUCCESS;
 }

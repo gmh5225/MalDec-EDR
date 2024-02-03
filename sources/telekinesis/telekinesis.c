@@ -28,7 +28,8 @@ init_driver_telekinesis(TELEKINESIS **telekinesis, TELEKINESIS_CONFIG config)
   if (((*telekinesis)->fd_telekinesis =
                open((*telekinesis)->config.driver_path, O_RDWR)) < 0)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Error in open driver %s : %ld (%s)",
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Error in open driver %s : %ld "
+                                 "(%s)",
                                  (*telekinesis)->config.driver_name, errno,
                                  strerror(errno)));
     return ERR_FAILURE;

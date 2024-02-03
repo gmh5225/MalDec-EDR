@@ -42,12 +42,13 @@ help(char *prog_name)
           "detailed scan information\n\n"
           "  Quarantine Management:\n"
           "    --view-quarantine            View a list of files currently "
-          "in "
-          "quarantine\n"
-          "    --restore-from-quarantine <file>\n"
-          "                                 Move a file from quarantine to "
-          "another location\n"
-          "    --delete-from-quarantine <hash>\n"
+          "in quarantine\n"
+          "    --sync-quarantine            Sync files in quarantine and "
+          "database\n"
+          "    --restore-from-quarantine <filename>\n"
+          "                                 Restore a file from quarantine to "
+          "another path original\n"
+          "    --delete-from-quarantine <filename>\n"
           "                                 Delete a file from quarantine\n\n"
           "  Telekinesis Driver :\n"
           "    --connect-telekinesis         Connect to the Telekinesis "
@@ -80,8 +81,8 @@ cleanup_resources(DEFENDER **defender)
 {
   if (IS_NULL_PTR(*defender)) exit(EXIT_SUCCESS);
 
-  if (!IS_NULL_PTR((*defender)->config_json))
-    exit_json(&(*defender)->config_json);
+  if (!IS_NULL_PTR((*defender)->cjson))
+    exit_json(&(*defender)->cjson);
 
   if (!IS_NULL_PTR((*defender)->logger)) exit_logger(&(*defender)->logger);
 
@@ -147,7 +148,6 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
         {
           init_telekinesis_main(defender);
           connect_driver_telekinesis((*defender)->telekinesis);
-          return;
         }
 
         if (strcmp(long_options[option_index].name, "view-quarantine") == 0)
@@ -155,12 +155,12 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           init_cjson_main(defender);
           init_logger_main(defender);
           init_inspector_main(defender);
-          if (IS_ERR_FAILURE(view_quarantine_inspector((*defender)->inspector)))
+          if (IS_ERR_FAILURE(view_quarantine_inspector(
+                      (*defender)->inspector, DEFAULT_VIEW_QUARANTINE)))
           {
+            fprintf(stderr, LOG_MESSAGE_FORMAT("Error view quarantine\n"));
           };
-          return;
         }
-
         break;
 
       case 's':

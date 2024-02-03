@@ -22,7 +22,7 @@ yara_scan(void **state)
 
   if (!IS_ERR_FAILURE(init_scanner(&scanner, config)))
   {
-    assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), ERR_SUCCESS);
+    assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_FILE, 0), ERR_SUCCESS);
     assert_int_equal(exit_scanner(&scanner), ERR_SUCCESS);
     (void)state;
   }
@@ -48,7 +48,7 @@ yara_scan_ignored(void **state)
 
     scanner->config.skip_dirs = skip;
 
-    assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_CALLBACK, 0), ERR_SUCCESS);
+    assert_int_equal(scan_dir(scanner, DEFAULT_SCAN_FILE, 0), ERR_SUCCESS);
     assert_int_equal(exit_scanner(&scanner), ERR_SUCCESS);
 
     (void)state;

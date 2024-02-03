@@ -13,8 +13,8 @@
 #include "scanner/config.h"
 #include "scanner/skip_dirs.h"
 
-#define DEFAULT_SCAN_CALLBACK \
-  default_scan_callback /**< Default scan callback function. */
+#define DEFAULT_SCAN_FILE \
+  default_scan_file /**< Default scan callback function. */
 
 #define DEFAULT_SCAN_INOTIFY default_scan_inotify /**< default scan inotify*/
 
@@ -116,8 +116,8 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback,
  * @return Returns yara call_back_macros.
  */
 int
-default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
-                      void *user_data) warn_unused_result;
+default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
+                  void *user_data) warn_unused_result;
 
 void
 default_scan_inotify(INOTIFY *inotify, void *user_data);

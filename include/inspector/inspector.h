@@ -5,6 +5,8 @@
 #include "err/err.h"
 #include <sqlite3.h>
 
+#define DEFAULT_VIEW_QUARANTINE default_view_quarantine
+
 typedef struct INSPECTOR
 {
   INSPECTOR_CONFIG config;
@@ -32,7 +34,20 @@ restore_quarantine_inspector(INSPECTOR        *inspector,
                              QUARANTINE_FILES *file) warn_unused_result;
 
 ERR
-view_quarantine_inspector(INSPECTOR *inspector) warn_unused_result;
+view_quarantine_inspector(INSPECTOR *inspector,
+                          int (*callback)(void *, int, char **,
+                                          char **)) warn_unused_result;
 
 void
 exit_inspector(INSPECTOR **inspector);
+
+int
+default_view_quarantine(void *unused, const int count, char **data,
+                        char **columns);
+
+ERR
+insert_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILES **file);
+
+ERR
+select_quarantine_db(INSPECTOR **inspector,
+                     int (*callback)(void *, int, char **, char **));

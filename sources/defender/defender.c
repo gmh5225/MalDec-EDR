@@ -8,7 +8,7 @@ init_defender(DEFENDER **defender, DEFENDER_CONFIG config)
   (*defender)->inotify     = NULL;
   (*defender)->scanner     = NULL;
   (*defender)->telekinesis = NULL;
-  (*defender)->config_json = NULL;
+  (*defender)->cjson = NULL;
   (*defender)->logger      = NULL;
   (*defender)->inspector   = NULL;
 
@@ -21,7 +21,7 @@ init_inspector_main(DEFENDER **defender)
   struct json_object *inspector_obj, *dir_obj, *database_obj, *quarantine_obj,
           *quarantine_dir_obj;
 
-  if (json_object_object_get_ex((*defender)->config_json, "inspector",
+  if (json_object_object_get_ex((*defender)->cjson, "inspector",
                                 &inspector_obj))
   {
     if (!json_object_object_get_ex(inspector_obj, "dir", &dir_obj) ||
@@ -38,17 +38,18 @@ init_inspector_main(DEFENDER **defender)
 
   INSPECTOR_CONFIG config = (INSPECTOR_CONFIG){
           .dir            = json_object_get_string(dir_obj),
-          .quarantine.dir = json_object_get_string(quarantine_dir_obj), 
-          .database = json_object_get_string(database_obj)};
+          .quarantine.dir = json_object_get_string(quarantine_dir_obj),
+          .database       = json_object_get_string(database_obj)};
 
 #ifdef DEBUG
   LOG_DEBUG(LOG_MESSAGE_FORMAT("inspector.config.dir = '%s', "
-                               "inspector.config.quarantine.dir = '%s'"
-                               " inspector.config.database = '%s'",
-                               config.dir, config.quarantine.dir, config.database));
+                               "inspector.config.quarantine.dir = '%s' "
+                               "inspector.config.database = '%s'",
+                               config.dir, config.quarantine.dir,
+                               config.database));
 
 #endif
-  
+
   if (IS_ERR_FAILURE(init_inspector(&(*defender)->inspector, config)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error init inspector\n"));
@@ -59,7 +60,7 @@ init_inspector_main(DEFENDER **defender)
 inline void
 init_cjson_main(DEFENDER **defender)
 {
-  if (IS_ERR_FAILURE(init_json(&(*defender)->config_json,
+  if (IS_ERR_FAILURE(init_json(&(*defender)->cjson,
                                (*defender)->config.settings_json_path)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error in parser json config '%s'\n",
@@ -72,7 +73,7 @@ inline void
 init_inotify_main(DEFENDER **defender)
 {
   struct json_object *inotify_obj, *paths_obj;
-  if (json_object_object_get_ex((*defender)->config_json, "inotify",
+  if (json_object_object_get_ex((*defender)->cjson, "inotify",
                                 &inotify_obj))
   {
     if (!json_object_object_get_ex(inotify_obj, "paths", &paths_obj))
@@ -116,7 +117,7 @@ init_logger_main(DEFENDER **defender)
   struct json_object *logger_obj, *filename_obj, *max_file_size_obj,
           *max_backup_files_obj, *level_obj, *console_obj;
 
-  if (json_object_object_get_ex((*defender)->config_json, "logger",
+  if (json_object_object_get_ex((*defender)->cjson, "logger",
                                 &logger_obj))
   {
     if (!json_object_object_get_ex(logger_obj, "filename", &filename_obj) ||
@@ -170,7 +171,7 @@ init_telekinesis_main(DEFENDER **defender)
 {
   struct json_object *telekinesis_obj, *driver_path_obj, *driver_name_obj;
 
-  if (json_object_object_get_ex((*defender)->config_json, "driver_telekinesis",
+  if (json_object_object_get_ex((*defender)->cjson, "driver_telekinesis",
                                 &telekinesis_obj))
   {
     if (!json_object_object_get_ex(telekinesis_obj, "driver_path",
@@ -209,7 +210,7 @@ inline void
 init_scanner_main(DEFENDER **defender)
 {
   struct json_object *scan_obj, *yara_obj, *rules_obj, *skip_dir_objs;
-  if (json_object_object_get_ex((*defender)->config_json, "scanner", &scan_obj))
+  if (json_object_object_get_ex((*defender)->cjson, "scanner", &scan_obj))
   {
     if (!json_object_object_get_ex(scan_obj, "yara", &yara_obj) ||
         !json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs) ||
@@ -233,7 +234,7 @@ init_scanner_main(DEFENDER **defender)
   add_skip_dirs(&skip, skip_dir, length);
 
   SCANNER_CONFIG config =
-          (SCANNER_CONFIG){.filepath  = NULL,
+          (SCANNER_CONFIG){.filepath   = NULL,
                            .max_depth  = -1,
                            .scan_type  = 0,
                            .verbose    = false,
