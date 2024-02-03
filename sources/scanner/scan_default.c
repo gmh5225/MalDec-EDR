@@ -192,10 +192,8 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                   ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath, path)))
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT(
-                "ERR_FAILURE Failed to resolve path '%s'. Inspector: "
-                "%s",
-                ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath,
-                ((SCANNER_CALLBACK_ARGS *)user_data)->config.inspector));
+                "ERR_FAILURE Failed to resolve path '%s'.\n",
+                ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath));
       }
 
       time_t           datatime = time(NULL);
@@ -210,10 +208,8 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                   &file)))
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT(
-                "ERR_FAILURE Failed to add file '%s' to quarantine. Inspector: "
-                "%s",
-                ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename,
-                ((SCANNER_CALLBACK_ARGS *)user_data)->config.inspector));
+                "ERR_FAILURE Failed to add file '%s' to quarantine.\n",
+                ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename));
       }
 
       free(strings_match);
