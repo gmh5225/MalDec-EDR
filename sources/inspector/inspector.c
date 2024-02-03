@@ -14,9 +14,9 @@
   "varchar(255) UNIQUE, datatime DATETIME, detected varchar(255));"
 
 static inline void
-create_database_inspector(INSPECTOR **inspector)
+create_database_inspector(INSPECTOR *inspector)
 {
-  INSPECTOR_CONFIG config = (*inspector)->config;
+  INSPECTOR_CONFIG config = inspector->config;
 
   const char *dir      = config.dir;
   const char *database = config.database;
@@ -29,18 +29,17 @@ create_database_inspector(INSPECTOR **inspector)
   strncpy(database_path, dir, size_dir);
   strncat(database_path, database, size_database);
 
-  int rc = sqlite3_open_v2(database_path, &(*inspector)->db,
+  int rc = sqlite3_open_v2(database_path, &(inspector->db),
                            SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE, NULL);
   if (rc)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", rc,
-                                 sqlite3_errmsg((*inspector)->db),
-                                 database_path));
+                                 sqlite3_errmsg(inspector->db), database_path));
     return;
   }
 
   char *sqlite_err_msg = NULL;
-  rc = sqlite3_exec((*inspector)->db, SQL_CREATE_TABLE_QUARANTINE, NULL, NULL,
+  rc = sqlite3_exec(inspector->db, SQL_CREATE_TABLE_QUARANTINE, NULL, NULL,
                     &sqlite_err_msg);
   if (rc != SQLITE_OK)
   {
@@ -105,7 +104,7 @@ init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG config)
     return ERR_FAILURE;
   }
 
-  create_database_inspector(inspector);
+  create_database_inspector(*inspector);
 
   return ERR_SUCCESS;
 }
