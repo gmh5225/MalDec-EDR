@@ -4,6 +4,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 static inline void
@@ -185,22 +186,21 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 strings_match);
 
       // add quarantine using inspector
-      char cwd[PATH_MAX];
-      if (IS_NULL_PTR(getcwd(cwd, sizeof(cwd))))
+      char path[PATH_MAX];
+
+      if (IS_NULL_PTR(realpath(
+                  ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath, path)))
       {
-        LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE error in get pwd %i (%s)",
-                                     errno, strerror(errno)));
+        LOG_ERROR(LOG_MESSAGE_FORMAT(
+                "ERR_FAILURE Failed to resolve path '%s'. Inspector: "
+                "%s",
+                ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath,
+                ((SCANNER_CALLBACK_ARGS *)user_data)->config.inspector));
       }
-
-      strcat(cwd, "/");
-      strcat(cwd, ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename);
-
-      // program aborts, file has exceeded the allowed buffer PATH_MAX.
-      assert(strlen(cwd) <= PATH_MAX);
 
       time_t           datatime = time(NULL);
       QUARANTINE_FILES file     = (QUARANTINE_FILES){
-                  .filepath = cwd,
+                  .filepath = path,
                   .detected = rule->identifier,
                   .filename = ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename,
                   .datatime = ctime(&datatime)};
