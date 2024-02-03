@@ -60,7 +60,7 @@ init_inspector_main(DEFENDER **defender)
 inline void
 init_cjson_main(DEFENDER **defender)
 {
-  if (IS_ERR_FAILURE(init_json(&(*defender)->cjson,
+  if (IS_ERR_FAILURE(init_cjson(&(*defender)->cjson,
                                (*defender)->config.settings_json_path)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error in parser json config '%s'\n",

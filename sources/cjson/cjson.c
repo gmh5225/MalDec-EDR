@@ -13,7 +13,7 @@
 #include "logger/logger.h"
 
 inline ERR
-init_json(struct json_object **json_obj, const char *filename)
+init_cjson(struct json_object **json_obj, const char *filename)
 {
   int   fd          = open(filename, O_RDONLY);
   int   retval      = ERR_SUCCESS;
