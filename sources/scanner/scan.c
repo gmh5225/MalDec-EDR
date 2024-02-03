@@ -142,6 +142,15 @@ scan(SCANNER *scanner)
 
   if (mode == S_IFDIR)
   {
+    if (fchdir(fd) != 0)
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (fchdir) error in set chdir "
+                                   "pwd %i (%s)",
+                                   errno, strerror(errno)));
+      retval = ERR_FAILURE;
+      goto close_fd;
+    }
+
     // Remove '/' if passed argument contains '/'
     size_t size_filepath = strlen(config.filepath);
     if (size_filepath > 0 && config.filepath[size_filepath - 1] == '/')
