@@ -20,10 +20,9 @@
  */
 typedef struct packed(8) DEFENDER
 {
-  LOGGER  *logger;  /**< Pointer to the LOGGER instance. */
-  SCANNER *scanner; /**< Pointer to the SCANNER instance. */
-  struct json_object
-              *cjson; /**< Pointer to the configuration JSON object. */
+  LOGGER             *logger;  /**< Pointer to the LOGGER instance. */
+  SCANNER            *scanner; /**< Pointer to the SCANNER instance. */
+  struct json_object *cjson;   /**< Pointer to the configuration JSON object. */
   TELEKINESIS *telekinesis; /**< Pointer to the TELEKINESIS Driver instance. */
   INOTIFY     *inotify;     /**< Pointer to the INOTIFY instance. */
   INSPECTOR   *inspector;

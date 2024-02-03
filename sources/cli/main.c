@@ -81,8 +81,7 @@ cleanup_resources(DEFENDER **defender)
 {
   if (IS_NULL_PTR(*defender)) exit(EXIT_SUCCESS);
 
-  if (!IS_NULL_PTR((*defender)->cjson))
-    exit_json(&(*defender)->cjson);
+  if (!IS_NULL_PTR((*defender)->cjson)) exit_json(&(*defender)->cjson);
 
   if (!IS_NULL_PTR((*defender)->logger)) exit_logger(&(*defender)->logger);
 

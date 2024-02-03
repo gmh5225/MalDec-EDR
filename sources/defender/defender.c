@@ -8,7 +8,7 @@ init_defender(DEFENDER **defender, DEFENDER_CONFIG config)
   (*defender)->inotify     = NULL;
   (*defender)->scanner     = NULL;
   (*defender)->telekinesis = NULL;
-  (*defender)->cjson = NULL;
+  (*defender)->cjson       = NULL;
   (*defender)->logger      = NULL;
   (*defender)->inspector   = NULL;
 
@@ -61,7 +61,7 @@ inline void
 init_cjson_main(DEFENDER **defender)
 {
   if (IS_ERR_FAILURE(init_cjson(&(*defender)->cjson,
-                               (*defender)->config.settings_json_path)))
+                                (*defender)->config.settings_json_path)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error in parser json config '%s'\n",
                                        (*defender)->config.settings_json_path));
@@ -73,8 +73,7 @@ inline void
 init_inotify_main(DEFENDER **defender)
 {
   struct json_object *inotify_obj, *paths_obj;
-  if (json_object_object_get_ex((*defender)->cjson, "inotify",
-                                &inotify_obj))
+  if (json_object_object_get_ex((*defender)->cjson, "inotify", &inotify_obj))
   {
     if (!json_object_object_get_ex(inotify_obj, "paths", &paths_obj))
     {
@@ -117,8 +116,7 @@ init_logger_main(DEFENDER **defender)
   struct json_object *logger_obj, *filename_obj, *max_file_size_obj,
           *max_backup_files_obj, *level_obj, *console_obj;
 
-  if (json_object_object_get_ex((*defender)->cjson, "logger",
-                                &logger_obj))
+  if (json_object_object_get_ex((*defender)->cjson, "logger", &logger_obj))
   {
     if (!json_object_object_get_ex(logger_obj, "filename", &filename_obj) ||
         !json_object_object_get_ex(logger_obj, "max_file_size",
