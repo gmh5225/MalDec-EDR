@@ -50,7 +50,32 @@ del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 inline ERR
 restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 {
-  printf("%s %s\n", file->filename, inspector->config.database);
+  if (select_where_quarantine_db(&inspector, &file))
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select where file '%s' table "
+                                 "quarantine",
+                                 file->filepath));
+    return ERR_FAILURE;
+  }
+
+  ZLIB_CONFIG config = (ZLIB_CONFIG){.filename_in  = file->filepath,
+                                     .filename_out = file->filename,
+                                     .fd_dir_out   = inspector->qua_fd_dir,
+                                     .chunk        = 16384};
+  if (IS_ERR_FAILURE(init_zlib(&inspector->zlib, config)))
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Error init zlib %s",
+                                 file->filename));
+    return ERR_FAILURE;
+  }
+
+  if (IS_ERR_FAILURE(decompress_file(&inspector->zlib)))
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not decompress file %s",
+                                 file->filename));
+    return ERR_FAILURE;
+  }
+
   return ERR_SUCCESS;
 }
 

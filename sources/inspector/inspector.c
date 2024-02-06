@@ -11,7 +11,7 @@
 #define QUARANTINE_PERMISSIONS (S_IRUSR | S_IWUSR | S_IXUSR)
 #define SQL_CREATE_TABLE_QUARANTINE                                            \
   "CREATE TABLE IF NOT EXISTS quarantine ( filename varchar(255),   filepath " \
-  "varchar(255) UNIQUE, detected varchar(255), datatime DATETIME);"
+  "varchar(255) UNIQUE, detected varchar(255), datetime DATETIME);"
 
 static inline void
 create_database_inspector(INSPECTOR *inspector)

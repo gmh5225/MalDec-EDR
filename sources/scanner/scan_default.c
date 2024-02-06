@@ -75,11 +75,7 @@ process_inotify_events(INOTIFY *inotify, char *buf, ssize_t len,
        ptr += sizeof(struct inotify_event) + event->len)
   {
     event = (const struct inotify_event *)ptr;
-
-    if (event->mask & IN_ISDIR)
-      LOG_INFO("in_directory");
-    else
-      LOG_INFO("in_file");
+    (event->mask & IN_ISDIR) ? LOG_INFO("in_directory") : LOG_INFO("in_file");
 
     watched_directory_event(&inotify, event, scanner);
     decision_making_event_type(&event, scanner);
@@ -199,12 +195,12 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath));
       }
 
-      time_t           datatime = time(NULL);
+      time_t           datetime = time(NULL);
       QUARANTINE_FILES file     = (QUARANTINE_FILES){
                   .filepath = path,
                   .detected = rule->identifier,
                   .filename = ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename,
-                  .datatime = ctime(&datatime)};
+                  .datetime = ctime(&datetime)};
 
       if (IS_ERR_FAILURE(add_quarantine_inspector(
                   ((SCANNER_CALLBACK_ARGS *)user_data)->config.inspector,

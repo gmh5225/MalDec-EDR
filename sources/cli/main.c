@@ -45,7 +45,7 @@ help(char *prog_name)
           "in quarantine\n"
           "    --sync-quarantine            Sync files in quarantine and "
           "database\n"
-          "    --restore-from-quarantine <filename>\n"
+          "    --restore-quarantine <filepath>\n"
           "                                 Restore a file from quarantine to "
           "another path original\n"
           "    --delete-from-quarantine <filename>\n"
@@ -117,6 +117,7 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           {"view-quarantine", no_argument, 0, 0},
           {"move-from-quarantine", required_argument, 0, 0},
           {"delete-from-quarantine", required_argument, 0, 0},
+          {"restore-quarantine", required_argument, 0, 0},
           {0, 0, 0, 0},
   };
 
@@ -129,7 +130,7 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
     switch (c)
     {
       case 0:
-        // Scan Yara
+        // Scan 
         if (!IS_NULL_PTR((*defender)->scanner))
         {
           if (strcmp(long_options[option_index].name, "max-depth") == 0)
@@ -160,6 +161,22 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
             fprintf(stderr, LOG_MESSAGE_FORMAT("Error view quarantine\n"));
           };
         }
+
+        if (strcmp(long_options[option_index].name, "restore-"
+                                                    "quarantine") == 0)
+        {
+          init_cjson_main(defender);
+          init_logger_main(defender);
+          init_inspector_main(defender);
+
+          QUARANTINE_FILES file = (QUARANTINE_FILES){.filepath = optarg};
+          if (IS_ERR_FAILURE(restore_quarantine_inspector(
+                      (*defender)->inspector, &file)))
+          {
+            fprintf(stderr, LOG_MESSAGE_FORMAT("Error in restore file in quarantine\n"));
+          };
+        }
+
         break;
 
       case 's':

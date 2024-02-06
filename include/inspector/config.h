@@ -4,7 +4,7 @@ typedef struct QUARANTINE_FILES
 {
   const char *filename;
   const char *filepath;
-  const char *datatime;
+  const char *datetime;
   const char *detected;
 } QUARANTINE_FILES;
 
