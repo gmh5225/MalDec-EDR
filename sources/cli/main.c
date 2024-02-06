@@ -178,9 +178,9 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
       case 'y':
         init_cjson_main(defender);
         init_logger_main(defender);
-        init_inspector_main(defender);
         init_scanner_main(defender);
         init_inotify_main(defender);
+        init_inspector_main(defender);
         (*defender)->inotify->config.mask =
                 (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
         (*defender)->inotify->config.time      = atoi(optarg);
@@ -217,6 +217,7 @@ main(int argc, char **argv)
 #ifdef DEBUG
           .settings_json_path = "../../../config/"
                                 "appsettings.development.json",
+
 #else
           .settings_json_path = "../../../config/appsettings.json",
 #endif

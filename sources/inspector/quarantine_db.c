@@ -2,7 +2,7 @@
 #include "logger/logger.h"
 
 #define SQL_INSERT_QUARANTINE                                                  \
-  "INSERT OR IGNORE INTO quarantine (filename, filepath, datatime, detected) " \
+  "INSERT OR IGNORE INTO quarantine (filename, filepath, detected, datatime) " \
   "VALUES (?, ?, ?, ?)"
 
 #define SQL_SELECT_QUARANTINE "SELECT * FROM quarantine"
@@ -23,9 +23,9 @@ insert_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILES **file)
                     SQLITE_STATIC);
   sqlite3_bind_text((*inspector)->stmt, 2, (*file)->filepath, -1,
                     SQLITE_STATIC);
-  sqlite3_bind_text((*inspector)->stmt, 3, (*file)->datatime, -1,
+  sqlite3_bind_text((*inspector)->stmt, 3, (*file)->detected, -1,
                     SQLITE_STATIC);
-  sqlite3_bind_text((*inspector)->stmt, 4, (*file)->detected, -1,
+  sqlite3_bind_text((*inspector)->stmt, 4, (*file)->datatime, -1,
                     SQLITE_STATIC);
 
   if ((rc = sqlite3_step((*inspector)->stmt)) != SQLITE_DONE)

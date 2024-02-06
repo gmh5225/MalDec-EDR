@@ -43,11 +43,13 @@ exit_inspector(INSPECTOR **inspector);
 
 int
 default_view_quarantine(void *unused, const int count, char **data,
-                        char **columns);
+                        char **columns) warn_unused_result;
 
 ERR
-insert_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILES **file);
+insert_quarantine_db(INSPECTOR        **inspector,
+                     QUARANTINE_FILES **file) warn_unused_result;
 
 ERR
 select_quarantine_db(INSPECTOR **inspector,
-                     int (*callback)(void *, int, char **, char **));
+                     int (*callback)(void *, int, char **,
+                                     char **)) warn_unused_result;

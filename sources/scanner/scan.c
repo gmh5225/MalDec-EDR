@@ -57,20 +57,18 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
 inline ERR
 scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
 {
-  int               retval    = ERR_SUCCESS;
-  SCANNER_CONFIG    config    = scanner->config;
-  struct SKIP_DIRS *skip_dirs = config.skip_dirs;
-  struct dirent    *entry;
-  const char       *dir      = config.filepath;
-  DIR              *dd       = opendir(dir);
-  const size_t      dir_size = strlen(dir);
-  const char       *fmt      = (!strcmp(dir, "/")) ? "%s%s" : "%s/%s";
+  int            retval = ERR_SUCCESS;
+  SCANNER_CONFIG config = scanner->config;
+  struct dirent *entry;
+  DIR           *dd       = opendir(config.filepath);
+  const size_t   dir_size = strlen(config.filepath);
+  const char    *fmt      = (!strcmp(config.filepath, "/")) ? "%s%s" : "%s/%s";
 
   if (config.max_depth >= 0 && current_depth > config.max_depth) { goto ret; }
   else if (IS_NULL_PTR((dd)))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %s : %d (%s)", dir, errno,
-                                 strerror(errno)));
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %s : %d (%s)", config.filepath,
+                                 errno, strerror(errno)));
     retval = ERR_FAILURE;
     goto ret;
   }
@@ -81,13 +79,13 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
     size_t      size = dir_size + strlen(name) + 2;
 
     if (!strcmp(name, ".") || !strcmp(name, "..") ||
-        get_skipped(&skip_dirs, dir))
+        get_skipped(&config.skip_dirs, config.filepath))
     {
       continue;
     }
 
     char fullpath[size];
-    snprintf(fullpath, size, fmt, dir, name);
+    snprintf(fullpath, size, fmt, config.filepath, name);
     scanner->config.filepath = fullpath;
     scanner->config.filename = name;
 
@@ -138,19 +136,10 @@ scan(SCANNER *scanner)
     goto close_fd;
   }
 
-  mode_t mode = st.st_mode & S_IFMT;
+  const mode_t mode = st.st_mode & S_IFMT;
 
   if (mode == S_IFDIR)
   {
-    if (fchdir(fd) != 0)
-    {
-      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (fchdir) error in set chdir "
-                                   "pwd %i (%s)",
-                                   errno, strerror(errno)));
-      retval = ERR_FAILURE;
-      goto close_fd;
-    }
-
     // Remove '/' if passed argument contains '/'
     size_t size_filepath = strlen(config.filepath);
     if (size_filepath > 0 && config.filepath[size_filepath - 1] == '/')
@@ -158,7 +147,6 @@ scan(SCANNER *scanner)
 
     if (IS_ERR_FAILURE(scan_dir(scanner, DEFAULT_SCAN_FILE, 0)))
     {
-      // Log error
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (scan_dir)"));
       retval = ERR_FAILURE;
     }
@@ -169,7 +157,6 @@ scan(SCANNER *scanner)
     char *filename           = strrchr(config.filepath, '/');
     scanner->config.filename = (filename == NULL) ? config.filepath
                                                   : (filename + 1);
-
     if (IS_ERR_FAILURE(scan_file(scanner, DEFAULT_SCAN_FILE)))
     {
       LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (scan_file)"));

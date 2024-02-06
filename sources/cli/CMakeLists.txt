@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.0.2)
 # Add executable and target libraries
 add_executable(defender main.c)
 
-set(FLAGS_OPTIMIZATIONS OFF)
-set(FLAGS_DEBUG ON)
+set(FLAGS_OPTIMIZATIONS ON)
+set(FLAGS_DEBUG OFF)
 
 file(GLOB_RECURSE sources
     ../defender/*.c
