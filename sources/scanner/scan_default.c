@@ -202,6 +202,8 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                   .filename = ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename,
                   .datetime = ctime(&datetime)};
 
+      LOG_INFO(LOG_MESSAGE_FORMAT("Inserting quarantine file '%s' suspect",
+                                  file.filepath));
       if (IS_ERR_FAILURE(add_quarantine_inspector(
                   ((SCANNER_CALLBACK_ARGS *)user_data)->config.inspector,
                   &file)))

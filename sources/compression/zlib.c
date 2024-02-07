@@ -13,32 +13,57 @@ init_zlib(ZLIB **zlib, ZLIB_CONFIG config)
   ALLOC_ERR_FAILURE(*zlib);
 
   (*zlib)->config = config;
-
-  (*zlib)->fd_in = open((*zlib)->config.filename_in, O_RDONLY);
-  if ((*zlib)->fd_in < 0)
+  if ((*zlib)->config.fd_dir_in > 0)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                 strerror(errno), (*zlib)->config.filename_in));
-    return ERR_FAILURE;
+    (*zlib)->fd_in = openat((*zlib)->config.fd_dir_in,
+                            (*zlib)->config.filename_in, O_RDONLY);
+
+    if ((*zlib)->fd_in < 0)
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
+                                   strerror(errno),
+                                   (*zlib)->config.filename_out));
+      return ERR_FAILURE;
+    }
+  }
+  else
+  {
+    (*zlib)->config.fd_dir_in = (*zlib)->fd_in =
+            open((*zlib)->config.filename_in, O_RDONLY);
+    if ((*zlib)->fd_in < 0)
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
+                                   strerror(errno),
+                                   (*zlib)->config.filename_in));
+      return ERR_FAILURE;
+    }
   }
 
-  if ((*zlib)->config.fd_dir_out < 0)
+  if ((*zlib)->config.fd_dir_out > 0)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE fd '%i' it is not valid",
-                                 (*zlib)->config.fd_dir_out));
-    return ERR_FAILURE;
+    (*zlib)->fd_out = openat((*zlib)->config.fd_dir_out,
+                             (*zlib)->config.filename_out,
+                             O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+    if ((*zlib)->fd_out < 0)
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
+                                   strerror(errno),
+                                   (*zlib)->config.filename_out));
+      return ERR_FAILURE;
+    }
   }
-
-  (*zlib)->fd_out = openat((*zlib)->config.fd_dir_out,
-                           (*zlib)->config.filename_out,
-                           O_WRONLY | O_CREAT | O_TRUNC, 0644);
-
-  if ((*zlib)->fd_out < 0)
+  else
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
-                                 strerror(errno),
-                                 (*zlib)->config.filename_out));
-    return ERR_FAILURE;
+    (*zlib)->config.fd_dir_out = (*zlib)->fd_out = open(
+            (*zlib)->config.filename_out, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if ((*zlib)->fd_out < 0)
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s), '%s'", errno,
+                                   strerror(errno),
+                                   (*zlib)->config.filename_out));
+      return ERR_FAILURE;
+    }
   }
 
   return ERR_SUCCESS;

@@ -2,6 +2,7 @@
 
 typedef struct QUARANTINE_FILES
 {
+  int         id;
   const char *filename;
   const char *filepath;
   const char *datetime;

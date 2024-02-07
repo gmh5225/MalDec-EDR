@@ -45,10 +45,10 @@ help(char *prog_name)
           "in quarantine\n"
           "    --sync-quarantine            Sync files in quarantine and "
           "database\n"
-          "    --restore-quarantine <filepath>\n"
+          "    --restore-quarantine <id>\n"
           "                                 Restore a file from quarantine to "
           "another path original\n"
-          "    --delete-from-quarantine <filename>\n"
+          "    --delete-quarantine <id>\n"
           "                                 Delete a file from quarantine\n\n"
           "  Telekinesis Driver :\n"
           "    --connect-telekinesis         Connect to the Telekinesis "
@@ -115,8 +115,7 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           {"version", no_argument, 0, 'v'},
           {"help", no_argument, 0, 'h'},
           {"view-quarantine", no_argument, 0, 0},
-          {"move-from-quarantine", required_argument, 0, 0},
-          {"delete-from-quarantine", required_argument, 0, 0},
+          {"delete-quarantine", required_argument, 0, 0},
           {"restore-quarantine", required_argument, 0, 0},
           {0, 0, 0, 0},
   };
@@ -130,7 +129,7 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
     switch (c)
     {
       case 0:
-        // Scan 
+        // Scan
         if (!IS_NULL_PTR((*defender)->scanner))
         {
           if (strcmp(long_options[option_index].name, "max-depth") == 0)
@@ -169,14 +168,30 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           init_logger_main(defender);
           init_inspector_main(defender);
 
-          QUARANTINE_FILES file = (QUARANTINE_FILES){.filepath = optarg};
+          QUARANTINE_FILES file = (QUARANTINE_FILES){.id = atoi(optarg)};
           if (IS_ERR_FAILURE(restore_quarantine_inspector(
                       (*defender)->inspector, &file)))
           {
-            fprintf(stderr, LOG_MESSAGE_FORMAT("Error in restore file in quarantine\n"));
+            fprintf(stderr, LOG_MESSAGE_FORMAT("Error in restore file in "
+                                               "quarantine\n"));
           };
         }
 
+        if (strcmp(long_options[option_index].name, "delete-"
+                                                    "quarantine") == 0)
+        {
+          init_cjson_main(defender);
+          init_logger_main(defender);
+          init_inspector_main(defender);
+
+          QUARANTINE_FILES file = (QUARANTINE_FILES){.id = atoi(optarg)};
+          if (IS_ERR_FAILURE(
+                      del_quarantine_inspector((*defender)->inspector, &file)))
+          {
+            fprintf(stderr, LOG_MESSAGE_FORMAT("Error in delete file in "
+                                               "quarantine\n"));
+          };
+        }
         break;
 
       case 's':

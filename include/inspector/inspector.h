@@ -54,6 +54,13 @@ select_where_quarantine_db(INSPECTOR        **inspector,
                            QUARANTINE_FILES **file) warn_unused_result;
 
 ERR
-select_quarantine_db(INSPECTOR **inspector,
-                     int (*callback)(void *, int, char **,
-                                     char **)) warn_unused_result;
+delete_where_quarantine_db(INSPECTOR        **inspector,
+                           QUARANTINE_FILES **file) warn_unused_result;
+
+ERR
+select_all_quarantine_db(INSPECTOR **inspector,
+                         int (*callback)(void *, int, char **,
+                                         char **)) warn_unused_result;
+
+void
+exit_stmt_finalize(INSPECTOR **inspector);
