@@ -50,7 +50,8 @@ del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 {
   if (IS_ERR_FAILURE(select_where_quarantine_db(&inspector, &file)))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select where file id '%i' table "
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select where file id '%i' "
+                                 "table "
                                  "quarantine",
                                  file->id));
     return ERR_FAILURE;
@@ -67,13 +68,15 @@ del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 
   if (IS_ERR_FAILURE(delete_where_quarantine_db(&inspector, &file)))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not delete where file id '%i' table "
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not delete where file id '%i' "
+                                 "table "
                                  "quarantine",
                                  file->id));
     return ERR_FAILURE;
   }
 
-  LOG_INFO(LOG_MESSAGE_FORMAT("File id '%i' deleted from quarantine", file->id));
+  LOG_INFO(
+          LOG_MESSAGE_FORMAT("File id '%i' deleted from quarantine", file->id));
 
   exit_stmt_finalize(&inspector);
 
@@ -127,6 +130,20 @@ view_quarantine_inspector(INSPECTOR *inspector,
     return ERR_FAILURE;
   }
 
-  exit_stmt_finalize(&inspector);
+  return ERR_SUCCESS;
+}
+
+inline ERR
+sync_quarantine_inspector(INSPECTOR *inspector,
+                          int (*callback)(void *ins, int, char **, char **))
+{
+  if (IS_ERR_FAILURE(select_all_quarantine_db(&inspector, callback)))
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select table quarantine"));
+    return ERR_FAILURE;
+  }
+
+  LOG_INFO(
+          LOG_MESSAGE_FORMAT("Database '%s' synced", inspector->config.database));
   return ERR_SUCCESS;
 }

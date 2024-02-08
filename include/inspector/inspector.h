@@ -6,6 +6,7 @@
 #include <sqlite3.h>
 
 #define DEFAULT_VIEW_QUARANTINE default_view_quarantine
+#define DEFAULT_SYNC_QUARANTINE default_sync_quarantine
 
 typedef struct INSPECTOR
 {
@@ -35,14 +36,23 @@ restore_quarantine_inspector(INSPECTOR        *inspector,
 
 ERR
 view_quarantine_inspector(INSPECTOR *inspector,
-                          int (*callback)(void *, int, char **,
+                          int (*callback)(void *ins, int, char **,
+                                          char **)) warn_unused_result;
+
+ERR
+sync_quarantine_inspector(INSPECTOR *inspector,
+                          int (*callback)(void *ins, int, char **,
                                           char **)) warn_unused_result;
 
 void
 exit_inspector(INSPECTOR **inspector);
 
 int
-default_view_quarantine(void *unused, const int count, char **data,
+default_view_quarantine(void *ins, const int count, char **data,
+                        char **columns) warn_unused_result;
+
+int
+default_sync_quarantine(void *ins, const int count, char **data,
                         char **columns) warn_unused_result;
 
 ERR

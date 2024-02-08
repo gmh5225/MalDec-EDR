@@ -117,6 +117,7 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           {"view-quarantine", no_argument, 0, 0},
           {"delete-quarantine", required_argument, 0, 0},
           {"restore-quarantine", required_argument, 0, 0},
+          {"sync-quarantine", no_argument, 0, 0},
           {0, 0, 0, 0},
   };
 
@@ -158,6 +159,18 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
                       (*defender)->inspector, DEFAULT_VIEW_QUARANTINE)))
           {
             fprintf(stderr, LOG_MESSAGE_FORMAT("Error view quarantine\n"));
+          };
+        }
+
+        if (strcmp(long_options[option_index].name, "sync-quarantine") == 0)
+        {
+          init_cjson_main(defender);
+          init_logger_main(defender);
+          init_inspector_main(defender);
+          if (IS_ERR_FAILURE(sync_quarantine_inspector(
+                      (*defender)->inspector, DEFAULT_SYNC_QUARANTINE)))
+          {
+            fprintf(stderr, LOG_MESSAGE_FORMAT("Error sync quarantine\n"));
           };
         }
 

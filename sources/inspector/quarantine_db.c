@@ -52,7 +52,7 @@ select_all_quarantine_db(INSPECTOR **inspector,
                          int (*callback)(void *, int, char **, char **))
 {
   char *sqlite_err_msg = NULL;
-  int rc = sqlite3_exec((*inspector)->db, SQL_SELECT_QUARANTINE, callback, NULL,
+  int rc = sqlite3_exec((*inspector)->db, SQL_SELECT_QUARANTINE, callback, *inspector,
                         &sqlite_err_msg);
   if (rc != SQLITE_OK)
   {
