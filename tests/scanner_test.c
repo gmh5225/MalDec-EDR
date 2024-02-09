@@ -13,12 +13,13 @@ yara_scan(void **state)
 {
   SCANNER *scanner;
 
-  SCANNER_CONFIG config = (SCANNER_CONFIG){.filepath  = "./",
-                                     .max_depth  = -1,
-                                     .scan_type  = 0,
-                                     .skip_dirs  = NULL,
-                                     .yara.rules = "../rules/"
-                                                   "YARA-Mindshield-Analysis"};
+  SCANNER_CONFIG config = (SCANNER_CONFIG){.filepath   = "./",
+                                           .max_depth  = -1,
+                                           .scan_type  = 0,
+                                           .skip_dirs  = NULL,
+                                           .yara.rules = "../rules/"
+                                                         "YARA-Mindshield-"
+                                                         "Analysis"};
 
   if (!IS_ERR_FAILURE(init_scanner(&scanner, config)))
   {
@@ -33,12 +34,12 @@ yara_scan_ignored(void **state)
 {
   SCANNER *scanner;
 
-  SCANNER_CONFIG config = (SCANNER_CONFIG){.filepath  = "./",
-                                     .max_depth  = -1,
-                                     .scan_type  = QUICK_SCAN,
-                                     .yara.rules = "../rules/"
-                                                   "YARA-Mindshield-"
-                                                   "Analysis"};
+  SCANNER_CONFIG config = (SCANNER_CONFIG){.filepath   = "./",
+                                           .max_depth  = -1,
+                                           .scan_type  = QUICK_SCAN,
+                                           .yara.rules = "../rules/"
+                                                         "YARA-Mindshield-"
+                                                         "Analysis"};
 
   if (!IS_ERR_FAILURE(init_scanner(&scanner, config)))
   {
@@ -58,7 +59,7 @@ yara_scan_ignored(void **state)
 int
 main(void)
 {
-  LOGGER_CONFIG logger_config = (LOGGER_CONFIG){.filename = "testeyara.log",
+  LOGGER_CONFIG logger_config = (LOGGER_CONFIG){.filename = "testyara.log",
                                                 .level    = 0,
                                                 .max_backup_files = 0,
                                                 .max_file_size    = 0};
@@ -76,6 +77,8 @@ main(void)
           cmocka_unit_test(yara_scan),
           cmocka_unit_test(yara_scan_ignored),
   };
+  
+  exit_logger(&logger);
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

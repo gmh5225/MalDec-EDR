@@ -52,8 +52,8 @@ select_all_quarantine_db(INSPECTOR **inspector,
                          int (*callback)(void *, int, char **, char **))
 {
   char *sqlite_err_msg = NULL;
-  int rc = sqlite3_exec((*inspector)->db, SQL_SELECT_QUARANTINE, callback, *inspector,
-                        &sqlite_err_msg);
+  int   rc = sqlite3_exec((*inspector)->db, SQL_SELECT_QUARANTINE, callback,
+                          *inspector, &sqlite_err_msg);
   if (rc != SQLITE_OK)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", rc, sqlite_err_msg));
@@ -83,6 +83,7 @@ select_where_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILES **file)
     return ERR_FAILURE;
   }
 
+  (*file)->id       = sqlite3_column_int((*inspector)->stmt, 0);
   (*file)->filename = (const char *)sqlite3_column_text((*inspector)->stmt, 1);
   (*file)->filepath = (const char *)sqlite3_column_text((*inspector)->stmt, 2);
   (*file)->detected = (const char *)sqlite3_column_text((*inspector)->stmt, 3);

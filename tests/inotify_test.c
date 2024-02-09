@@ -33,7 +33,7 @@ inotify(void **state)
 int
 main(void)
 {
-  LOGGER_CONFIG logger_config = (LOGGER_CONFIG){.filename = "testeinotify.log",
+  LOGGER_CONFIG logger_config = (LOGGER_CONFIG){.filename = "testinotify.log",
                                                 .level    = 0,
                                                 .max_backup_files = 0,
                                                 .max_file_size    = 0};
@@ -52,5 +52,7 @@ main(void)
           cmocka_unit_test(inotify),
   };
 
+  exit_logger(&logger);
+  
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

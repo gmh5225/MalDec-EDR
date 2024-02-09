@@ -4,3 +4,5 @@ build
 __pycache__
 .doxyfile*
 documentation/doxygen/*
+tests/*.sqlite3
+tests/inspector

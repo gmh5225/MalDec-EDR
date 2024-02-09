@@ -5,10 +5,10 @@ cmake_minimum_required(VERSION 3.0.2)
 add_subdirectory(../libraries/cmocka bin/cmocka)
 
 set(tests
-    yara_test
-    yara_scanner_test
+	scanner_test
 	json_parser_config_test
 	inotify_test
+	inspector_test
 )
 
 include_directories(
