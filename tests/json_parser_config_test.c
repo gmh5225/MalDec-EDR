@@ -7,7 +7,7 @@
 #include "cjson/cjson.h"
 #include "err/err.h"
 #include "logger/logger.h"
-#include "scan/scan.h"
+#include "scanner/scanner.h"
 
 #define CONFIG_JSON_PATH "../config/appsettings.json"
 
@@ -15,7 +15,7 @@ static void
 json_config(void **state)
 {
   struct json_object *json_obj;
-  assert_int_equal(init_json(&json_obj, CONFIG_JSON_PATH), ERR_SUCCESS);
+  assert_int_equal(init_cjson(&json_obj, CONFIG_JSON_PATH), ERR_SUCCESS);
 
   struct json_object *logger_obj, *filename_obj, *max_file_size_obj,
           *max_backup_files_obj, *level_obj;

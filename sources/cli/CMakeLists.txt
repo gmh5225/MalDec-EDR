@@ -7,19 +7,22 @@ set(FLAGS_OPTIMIZATIONS OFF)
 set(FLAGS_DEBUG ON)
 
 file(GLOB_RECURSE sources
-    ../scan/*.c
+    ../defender/*.c
+    ../scanner/*.c
     ../logger/*.c
     ../cjson/*.c
     ../telekinesis/*.c
     ../inotify/*.c
+    ../inspector/*.c
+    ../compression/*.c
 )
 
 target_sources(defender PRIVATE ${sources})
-target_link_libraries(defender PUBLIC yara c-logger json-c)
+target_link_libraries(defender PUBLIC yara c-logger json-c sqlite3 zlib)
 
 if(FLAGS_OPTIMIZATIONS)
     target_compile_options(defender PUBLIC
-        -O3            # Enable high-level optimization
+        -O2           
         -ftree-vectorize
         -mavx
         -fno-stack-protector

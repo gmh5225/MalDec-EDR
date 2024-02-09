@@ -37,23 +37,6 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
     return retval;
   }
 
-  struct PATHS *paths = (*inotify)->config.paths;
-  for (size_t i = 0; i < (*inotify)->config.quantity_fds;
-       paths    = paths->hh.next, i++)
-  {
-    (*inotify)->wd[i] = inotify_add_watch((*inotify)->fd_inotify, paths->path,
-                                          IN_ALL_EVENTS);
-    LOG_INFO(
-            LOG_MESSAGE_FORMAT("Inotify path '%s' IN_ALL_EVENTS", paths->path));
-
-    if ((*inotify)->wd[i] == -1)
-    {
-      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE  Cannot watch '%s' %d (%s)",
-                                   paths->path, errno, strerror(errno)));
-      return retval;
-    }
-  }
-
   (*inotify)->nfds = 1;
 
   (*inotify)->fds[0].fd     = (*inotify)->fd_inotify;
@@ -62,6 +45,26 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config)
   retval = ERR_SUCCESS;
 
   return retval;
+}
+
+void
+set_watch_paths(INOTIFY *inotify)
+{
+  struct PATHS *paths = inotify->config.paths;
+  for (size_t i = 0; i < inotify->config.quantity_fds;
+       paths    = paths->hh.next, i++)
+  {
+    inotify->wd[i] = inotify_add_watch(inotify->fd_inotify, paths->path,
+                                       inotify->config.mask);
+    LOG_INFO(LOG_MESSAGE_FORMAT("Inotify path '%s', mask %i", paths->path,
+                                inotify->config.mask));
+
+    if (inotify->wd[i] == -1)
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE  Cannot watch '%s' %d (%s)",
+                                   paths->path, errno, strerror(errno)));
+    }
+  }
 }
 
 inline void
