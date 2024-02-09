@@ -135,7 +135,7 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
         {
           if (strcmp(long_options[option_index].name, "max-depth") == 0)
           {
-            uint32_t max_depth = (uint32_t)atoi(optarg);
+            int max_depth = atoi(optarg);
             (*defender)->scanner->config.max_depth = abs(max_depth);
           }
           if (strcmp(long_options[option_index].name, "verbose") == 0)
