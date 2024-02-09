@@ -47,6 +47,7 @@ inspector_quarantine_del(void **state)
     exit_inspector(&inspector);
     assert_int_equal(unlink("inspector/database.sqlite3"), 0);
   }
+  
   (void)state;
 }
 
