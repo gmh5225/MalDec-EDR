@@ -80,8 +80,7 @@ init_inspector(INSPECTOR **inspector, INSPECTOR_CONFIG config)
   }
 
   if (fstatat((*inspector)->ins_fd_dir, (*inspector)->config.quarantine.dir,
-              &sb, 0) != 0 &&
-      !S_ISDIR(sb.st_mode))
+              &sb, 0) != 0)
   {
     if (mkdirat((*inspector)->ins_fd_dir, (*inspector)->config.quarantine.dir,
                 QUARANTINE_PERMISSIONS) == -1)
