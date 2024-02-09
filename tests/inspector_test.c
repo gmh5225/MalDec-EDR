@@ -74,6 +74,8 @@ main(void)
           cmocka_unit_test(inspector_quarantine_del),
   };
 
+  int ret = cmocka_run_group_tests(tests, NULL, NULL);
   exit_logger(&logger);
-  return cmocka_run_group_tests(tests, NULL, NULL);
+
+  return ret;
 }

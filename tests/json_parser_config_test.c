@@ -45,5 +45,7 @@ main(void)
           cmocka_unit_test(json_config),
   };
 
-  return cmocka_run_group_tests(tests, NULL, NULL);
+  int ret = cmocka_run_group_tests(tests, NULL, NULL);
+
+  return ret;
 }

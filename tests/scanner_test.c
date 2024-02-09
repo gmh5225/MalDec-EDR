@@ -54,7 +54,10 @@ main(void)
   }
   const struct CMUnitTest tests[] = {cmocka_unit_test(yara_scan)};
 
+  // exit_logger(&logger);
+
+  int ret = cmocka_run_group_tests(tests, NULL, NULL);
   exit_logger(&logger);
 
-  return cmocka_run_group_tests(tests, NULL, NULL);
+  return ret;
 }
