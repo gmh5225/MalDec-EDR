@@ -14,5 +14,5 @@ include_directories(
     ../sources
 )
 
-add_subdirectory(deamon/)
+add_subdirectory(daemon/)
 add_subdirectory(cli)
