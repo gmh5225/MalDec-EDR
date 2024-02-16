@@ -9,6 +9,7 @@ set(FLAGS_DEBUG OFF)
 
 file(GLOB_RECURSE sources
     sig-hdlr/*.c
+    bus-ifc/*.c
 )
 
 target_sources(defenderd PRIVATE ${sources})

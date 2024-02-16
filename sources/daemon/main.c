@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "sig-hdlr/handler.h"
+#include "bus-ifc/bus-ifc.h"
 
 // #include "logger/logger.h"
 
@@ -18,13 +19,9 @@ int main(void)
         return r;
     }
 
-    sd_notifyf(0,
-                "READY=1\n"
-                "STATUS=Waiting for some action...\n"
-                "MAINPID=%lu",
-                (unsigned long)getpid());
+    notify_success();
 
-    while (1) {}
+    start_dbus_interface("/net/defender/LinuxDefender", "net.defender.LinuxDefender");
 
     return 0;
 }
