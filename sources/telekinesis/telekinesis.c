@@ -25,8 +25,11 @@ init_driver_telekinesis(TELEKINESIS **telekinesis, TELEKINESIS_CONFIG config)
     return ERR_FAILURE;
   };
 
-  if (((*telekinesis)->fd_telekinesis =
-               open((*telekinesis)->config.driver_path, O_RDWR)) < 0)
+  if (((*telekinesis)
+               ->fd_telekinesis = // In order to use this call, one needs an open file descriptor.
+       // Often the open(2) call has unwanted side effects, that can be
+       // avoided under Linux by giving it the O_NONBLOCK flag.
+       open((*telekinesis)->config.driver_path, O_RDWR | O_NONBLOCK)) < 0)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Error in open driver %s : %ld "
                                  "(%s)",

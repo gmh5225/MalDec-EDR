@@ -115,7 +115,14 @@ scan(SCANNER *scanner)
   ALLOC_ERR_FAILURE(scanner->yr_rules);
 #endif
 
-  ERR            retval = ERR_SUCCESS;
+  ERR retval = ERR_SUCCESS;
+
+  if (IS_NULL_PTR(scanner))
+  {
+    retval = ERR_FAILURE;
+    goto ret;
+  }
+
   SCANNER_CONFIG config = scanner->config;
 
   int fd = open(config.filepath, O_RDONLY);
