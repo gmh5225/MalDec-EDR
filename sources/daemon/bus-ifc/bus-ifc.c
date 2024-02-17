@@ -15,7 +15,7 @@ static int method_echo(sd_bus_message *m, void *userdata, sd_bus_error *ret_erro
 
     r = sd_bus_message_read(m, "s", &msg);
     if (r < 0) {
-        printf("Failed to connect to system bus: %s\n", r, strerror(r));
+        printf("Failed to connect to system bus: %i, %s\n", r, strerror(r));
         return r;
     }
 
@@ -37,7 +37,7 @@ int start_dbus_interface(const char *path, const char *interface)
     // NOTE: Probably I'll need to change this to sd_bus_open_system
     r = sd_bus_open_user(&bus);
     if (r < 0) {
-        printf("Failed to connect to system bus: %s\n", r, strerror(r));
+        printf("Failed to connect to system bus: %i, %s\n", r, strerror(r));
         DBUS_CLEAN(slot, bus);
         return r;
     }
