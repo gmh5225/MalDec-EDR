@@ -54,13 +54,3 @@ exit_driver_telekinesis(TELEKINESIS **telekinesis);
  */
 bool
 check_driver_telekinesis_alive(TELEKINESIS *telekinesis) warn_unused_result;
-
-/**
- * @brief Connects to the Telekinesis driver.
- *
- * This function establishes a connection to the Telekinesis driver.
- *
- * @param[in] telekinesis Pointer to the TELEKINESIS structure.
- */
-void
-connect_driver_telekinesis(TELEKINESIS *telekinesis);

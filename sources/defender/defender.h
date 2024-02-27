@@ -8,6 +8,7 @@
 #include "cjson/cjson.h"
 #include "compiler/compiler_attribute.h"
 #include "config.h"
+#include "crowarmor/crowarmor.h"
 #include "inotify/inotify.h"
 #include "inspector/inspector.h"
 #include "logger/logger.h"
@@ -25,8 +26,9 @@ typedef struct packed(8) DEFENDER
   struct json_object *cjson;   /**< Pointer to the configuration JSON object. */
   TELEKINESIS *telekinesis; /**< Pointer to the TELEKINESIS Driver instance. */
   INOTIFY     *inotify;     /**< Pointer to the INOTIFY instance. */
-  INSPECTOR   *inspector;
-  DEFENDER_CONFIG config; /**< Configuration settings for DEFENDER. */
+  INSPECTOR   *inspector;   /**< Pointer to the INSPECTOR instance. */
+  CROWARMOR   *crowarmor;   /**< Pointer to the CROWARMOR instance. */
+  DEFENDER_CONFIG config;   /**< Configuration settings for DEFENDER. */
 }
 DEFENDER;
 
@@ -67,12 +69,25 @@ void
 init_telekinesis_main(DEFENDER **defender);
 
 /**
+ * @brief Initializes the CROWARMOR component within the DEFENDER module.
+ * 
+ * @param defender 
+ */
+void
+init_crowarmor_main(DEFENDER **defender);
+
+/**
  * @brief Initializes the CJSON component within the DEFENDER module.
  * @param defender Pointer to the DEFENDER instance.
  */
 void
 init_cjson_main(DEFENDER **defender);
 
+/**
+ * @brief Initializes the INSPECTOR component within the DEFENDER module.
+ * 
+ * @param defender 
+ */
 void
 init_inspector_main(DEFENDER **defender);
 

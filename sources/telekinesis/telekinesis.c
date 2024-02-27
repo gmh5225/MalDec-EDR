@@ -41,17 +41,6 @@ init_driver_telekinesis(TELEKINESIS **telekinesis, TELEKINESIS_CONFIG config)
   return ERR_SUCCESS;
 }
 
-inline void
-connect_driver_telekinesis(TELEKINESIS *telekinesis)
-{
-  if (!check_driver_telekinesis_alive(telekinesis))
-  {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Driver %s not alive",
-                                 telekinesis->config.driver_name));
-    return;
-  }
-}
-
 void
 exit_driver_telekinesis(TELEKINESIS **telekinesis)
 {

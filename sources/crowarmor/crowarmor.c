@@ -42,19 +42,37 @@ check_driver_crowarmor_alive(CROWARMOR *crowarmor)
   return (access(crowarmor->config.driver_path, F_OK) == 0);
 }
 
-bool
+inline void
 check_driver_crowarmor_activated(CROWARMOR *crowarmor)
 {
   if (!check_driver_crowarmor_alive(crowarmor))
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Driver %s not alive",
                                  (crowarmor)->config.driver_name));
-    return ERR_FAILURE;
-  };
-
-  // ioctl(crowarmor->fd_crowarmor);
-
-  return ERR_SUCCESS;
+  }
+  else
+  {
+    if (ioctl(crowarmor->fd_crowarmor, IOCTL_READ_CROW, &crowarmor->crow) == -1)
+    {
+      LOG_ERROR(LOG_MESSAGE_FORMAT("Error ioctl driver %s : %ld "
+                                   "(%s)",
+                                   crowarmor->config.driver_name, errno,
+                                   strerror(errno)));
+    }
+    else
+    {
+      LOG_INFO(LOG_MESSAGE_FORMAT("%s",(crowarmor->crow.chrdev_is_actived)
+                                          ? "chrdev feature is activated"
+                                          : "chrdev feature is not activated"));
+      LOG_INFO(LOG_MESSAGE_FORMAT("%s",(crowarmor->crow.hook_is_actived)
+                                          ? "hook feature is activated"
+                                          : "hook feature is not activated"));
+      LOG_INFO(LOG_MESSAGE_FORMAT("%s",(crowarmor->crow.inspector_is_actived)
+                                          ? "inspector feature is activated"
+                                          : "inspector feature is not "
+                                            "activated"));
+    }
+  }
 }
 
 void

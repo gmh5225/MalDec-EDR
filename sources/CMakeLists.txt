@@ -12,6 +12,7 @@ include_directories(
     ../libraries
     ../packages
     ../sources
+    ../drivers/crowarmor/include
 )
 
 add_subdirectory(daemon/)
