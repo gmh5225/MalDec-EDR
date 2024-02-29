@@ -14,5 +14,6 @@ include_directories(
     ../sources
 )
 
-add_subdirectory(deamon/)
+add_subdirectory(deamon)
 add_subdirectory(cli)
+add_subdirectory(gui)
