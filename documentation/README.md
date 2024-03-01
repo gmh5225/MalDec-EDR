@@ -1,4 +1,4 @@
-# LinuxDefender : Anti0Day for linux servers ( Documentation )
+# LinuxDefender ( Documentation )
 
 Comprehensive Documentation on the Functionality and Components of Linux Defender
 

@@ -1,4 +1,4 @@
-# LinuxDefender : Anti0Day
+# LinuxDefender
 
 ![Linuxdefender](assets/linuxdefender.png)
 

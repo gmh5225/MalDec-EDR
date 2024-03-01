@@ -1,55 +1,66 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 
-# Add executable and target libraries
-add_executable(defender-gui main.c)
+project(defender-gui VERSION 0.1 LANGUAGES CXX)
 
-set(FLAGS_OPTIMIZATIONS ON)
-set(FLAGS_DEBUG OFF)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-file(GLOB_RECURSE sources
-    ../defender/*.c
-    ../scanner/*.c
-    ../logger/*.c
-    ../cjson/*.c
-    ../telekinesis/*.c
-    ../inotify/*.c
-    ../inspector/*.c
-    ../compression/*.c
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
+set(PROJECT_SOURCES
+        main.cpp
+        mainwindow.cpp
+        mainwindow.h
+        ui/mainwindow.ui
+        ${TS_FILES}
 )
 
-# Encontre o pacote GTK4
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK4 REQUIRED gtk4)
-
-# Inclua os diretórios de inclusão do GTK4
-include_directories(${GTK4_INCLUDE_DIRS})
-
-target_sources(defender-gui PRIVATE ${sources})
-
-# Include GLib directories
-include_directories(${GLIB_INCLUDE_DIRS})
-
-target_link_libraries(defender-gui PUBLIC ${GTK4_LIBRARIES} yara c-logger json-c sqlite3 zlib)
-
-if(FLAGS_OPTIMIZATIONS)
-    target_compile_options(defender-gui PUBLIC
-        -O2           
-        -ftree-vectorize
-        -mavx
-        -fno-stack-protector
-        -march=native
-        -fdelete-null-pointer-checks
-        -fdelete-dead-exceptions
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_executable(defender-gui
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
     )
-elseif(FLAGS_DEBUG)
-    target_compile_options(defender-gui PUBLIC
-        -ggdb3
-        -fms-extensions
-        --all-warnings
-        -DDEBUG
-        -g
-        -Warray-bounds
-        -Werror
-        --extra-warnings
+# Define target properties for Android with Qt 6 as:
+#    set_property(TARGET mainwindow APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+
+else()
+    add_executable(defender-gui
+            ${PROJECT_SOURCES}
     )
+
+    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+endif()
+
+target_link_libraries(defender-gui PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
+# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
+# If you are developing for iOS or macOS you should consider setting an
+# explicit, fixed bundle identifier manually though.
+if(${QT_VERSION} VERSION_LESS 6.1.0)
+  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.defender.msr)
+endif()
+set_target_properties(defender-gui PROPERTIES
+    ${BUNDLE_ID_OPTION}
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+)
+
+include(GNUInstallDirs)
+install(TARGETS defender-gui
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_finalize_executable(defender-gui)
 endif()
