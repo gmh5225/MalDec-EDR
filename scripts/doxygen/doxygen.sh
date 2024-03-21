@@ -9,7 +9,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 # Project information
-PROJECT_NAME="LinuxDefender"
+PROJECT_NAME="UnixProtection"
 PROJECT_VERSION="1.0.0"
 
 # Specify the paths

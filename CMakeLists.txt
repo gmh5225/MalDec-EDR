@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 # Information projec
-project(LinuxDefender VERSION 1.0.0 LANGUAGES C)
+project(UnixProtection VERSION 1.0.0 LANGUAGES C)
 set(LIB_MAJOR_VERSION "1")
 set(LIB_MINOR_VERSION "0")
 set(LIB_PATCH_VERSION "0")
