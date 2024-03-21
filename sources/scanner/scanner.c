@@ -41,7 +41,7 @@ scanner_load_rules(SCANNER *scanner, const char *dir)
     LOG_ERROR(
             LOG_MESSAGE_FORMAT("ERR_FAILURE (%s : %s)", dir, strerror(errno)));
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
   while ((entry = readdir(dd)))
@@ -60,14 +60,14 @@ scanner_load_rules(SCANNER *scanner, const char *dir)
       {
         LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE"));
         retval = ERR_FAILURE;
-        goto ret;
+        goto _retval;
       }
     }
 
     if (entry->d_type == DT_DIR) { scanner_load_rules(scanner, full_path); }
   }
 
-ret:
+_retval:
   closedir(dd);
   return retval;
 }
@@ -85,14 +85,14 @@ init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERROR_SUCCESS"));
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
   if (yr_compiler_create(&(*scanner)->yr_compiler) != ERROR_SUCCESS)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERROR_SUCCESS"));
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
   if (IS_ERR_FAILURE(
@@ -100,7 +100,7 @@ init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE"));
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
   if (yr_compiler_get_rules((*scanner)->yr_compiler, &(*scanner)->yr_rules) !=
@@ -108,10 +108,10 @@ init_scanner(SCANNER **scanner, SCANNER_CONFIG config)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERROR_SUCCESS"));
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
-ret:
+_retval:
   return retval;
 }
 
@@ -123,14 +123,14 @@ exit_scanner(SCANNER **scanner)
   if (!scanner)
   {
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
   if (yr_finalize() != ERROR_SUCCESS)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERROR_SUCCESS"));
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
   yr_compiler_destroy((*scanner)->yr_compiler);
@@ -142,6 +142,6 @@ exit_scanner(SCANNER **scanner)
   free(*scanner);
   NO_USE_AFTER_FREE(*scanner);
 
-ret:
+_retval:
   return retval;
 }

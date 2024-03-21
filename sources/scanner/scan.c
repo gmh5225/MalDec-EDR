@@ -64,13 +64,13 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
   const size_t   dir_size = strlen(config.filepath);
   const char    *fmt      = (!strcmp(config.filepath, "/")) ? "%s%s" : "%s/%s";
 
-  if (config.max_depth >= 0 && current_depth > config.max_depth) { goto ret; }
+  if (config.max_depth >= 0 && current_depth > config.max_depth) { goto _retval; }
   else if (IS_NULL_PTR((dd)))
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %s : %d (%s)", config.filepath,
                                  errno, strerror(errno)));
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
   while ((entry = readdir(dd)) != NULL)
@@ -102,7 +102,7 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
 
   closedir(dd);
 
-ret:
+_retval:
   return retval;
 }
 
@@ -115,7 +115,14 @@ scan(SCANNER *scanner)
   ALLOC_ERR_FAILURE(scanner->yr_rules);
 #endif
 
-  ERR            retval = ERR_SUCCESS;
+  ERR retval = ERR_SUCCESS;
+
+  if (IS_NULL_PTR(scanner))
+  {
+    retval = ERR_FAILURE;
+    goto _retval;
+  }
+
   SCANNER_CONFIG config = scanner->config;
 
   int fd = open(config.filepath, O_RDONLY);
@@ -124,7 +131,7 @@ scan(SCANNER *scanner)
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (open) %s (%s)", config.filepath,
                                  strerror(errno)));
     retval = ERR_FAILURE;
-    goto ret;
+    goto _retval;
   }
 
   struct stat st;
@@ -133,7 +140,7 @@ scan(SCANNER *scanner)
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (fstat) %s (%s)", config.filepath,
                                  strerror(errno)));
     retval = ERR_FAILURE;
-    goto close_fd;
+    goto _close_fd;
   }
 
   const mode_t mode = st.st_mode & S_IFMT;
@@ -164,7 +171,7 @@ scan(SCANNER *scanner)
     }
   }
 
-close_fd:
+_close_fd:
   if (close(fd) == -1)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE (close) %s (%s)", config.filepath,
@@ -172,7 +179,7 @@ close_fd:
     retval = ERR_FAILURE;
   }
 
-ret:
+_retval:
   return retval;
 }
 

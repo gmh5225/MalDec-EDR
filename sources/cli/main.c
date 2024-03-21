@@ -22,7 +22,7 @@ static inline void no_return
 help(char *prog_name)
 {
   fprintf(stdout,
-          "Linux Defender Anti0Day\n"
+          "Linux Defender \n"
           "Usage: %s [OPTIONS]\n\n"
           "Options:\n\n"
           "  Scan :\n"
@@ -50,11 +50,12 @@ help(char *prog_name)
           "another path original\n"
           "    --delete-quarantine <id>\n"
           "                                 Delete a file from quarantine\n\n"
-          "  Telekinesis Driver :\n"
-          "    --connect-telekinesis         Connect to the Telekinesis "
-          "driver "
-          "shell\n"
-          "\n\n"
+          "  Telekinesis Driver:\n"
+          "    --status-telekinesis         Check the driver status and "
+          "whether its features are active.\n\n"
+          "  CrowArmor Driver:\n"
+          "    --status-crowarmor           Check the driver status and "
+          "whether its features are active.\n\n"
           "  General Options:\n"
           "    -v, --version                 Display the version of Linux "
           "Defender \n"
@@ -111,7 +112,8 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           {"verbose", no_argument, 0, 0},
           {"quick", no_argument, 0, 'q'},
           {"max-depth", required_argument, 0, 0},
-          {"connect-telekinesis", no_argument, 0, 0},
+          {"status-telekinesis", no_argument, 0, 0},
+          {"status-crowarmor", no_argument, 0, 0},
           {"version", no_argument, 0, 'v'},
           {"help", no_argument, 0, 'h'},
           {"view-quarantine", no_argument, 0, 0},
@@ -135,7 +137,7 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
         {
           if (strcmp(long_options[option_index].name, "max-depth") == 0)
           {
-            int max_depth = atoi(optarg);
+            int max_depth                          = atoi(optarg);
             (*defender)->scanner->config.max_depth = abs(max_depth);
           }
           if (strcmp(long_options[option_index].name, "verbose") == 0)
@@ -143,10 +145,9 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
         }
 
         // Driver telekinesis
-        if (strcmp(long_options[option_index].name, "connect-telekinesis") == 0)
+        if (strcmp(long_options[option_index].name, "status-telekinesis") == 0)
         {
           init_telekinesis_main(defender);
-          connect_driver_telekinesis((*defender)->telekinesis);
         }
 
         if (strcmp(long_options[option_index].name, "view-quarantine") == 0)
@@ -161,6 +162,7 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
           };
         }
 
+        // Quarantine for malwares
         if (strcmp(long_options[option_index].name, "sync-quarantine") == 0)
         {
           init_cjson_main(defender);
@@ -203,6 +205,15 @@ process_command_line_options(DEFENDER **defender, int argc, char **argv)
             fprintf(stderr, LOG_MESSAGE_FORMAT("Error in delete file in "
                                                "quarantine\n"));
           };
+        }
+
+        // Driver CrowArmor
+        if (strcmp(long_options[option_index].name, "status-crowarmor") == 0)
+        {
+          init_cjson_main(defender);
+          init_logger_main(defender);
+          init_crowarmor_main(defender);
+          check_driver_crowarmor_activated((*defender)->crowarmor);
         }
         break;
 
