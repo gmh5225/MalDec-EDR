@@ -10,11 +10,11 @@
 #include "compiler/compiler_attribute.h"
 #include "err/err.h"
 #include "inotify/inotify.h"
-#include "scan/config.h"
-#include "scan/skip_dirs.h"
+#include "scanner/config.h"
+#include "scanner/skip_dirs.h"
 
-#define DEFAULT_SCAN_CALLBACK \
-  default_scan_callback /**< Default scan callback function. */
+#define DEFAULT_SCAN_FILE \
+  default_scan_file /**< Default scan callback function. */
 
 #define DEFAULT_SCAN_INOTIFY default_scan_inotify /**< default scan inotify*/
 
@@ -35,9 +35,8 @@ typedef struct SCANNER
  */
 typedef struct SCANNER_CALLBACK_ARGS
 {
-  const char *file_path;     /**< Path of the file being scanned. */
-  int         current_count; /**< Current count during scanning. */
-  bool        verbose;       /**< Verbose mode flag. */
+  int            current_count; /**< Current count during scanning. */
+  SCANNER_CONFIG config;        /**< Scanner configuration. */
 } SCANNER_CALLBACK_ARGS;
 
 /**
@@ -86,11 +85,13 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback) warn_unused_result;
  * This function initiates the scanning process using the provided scanner and listens for
  * events using the specified inotify instance.
  *
+ * if inotify == NULL return ERR_ERR_FAILURE
+ * 
  * @param scanner A pointer to the SCANNER struct representing the scanning module.
- * @param inotify A pointer to the INOTIFY struct representing the inotify module.
+ * @return Returns ERR_SUCCESS on success, ERR_FAILURE on failure.
  */
-void
-scan_listen(SCANNER *scanner, INOTIFY *inotify);
+ERR
+scan_listen_inotify(SCANNER *scanner);
 
 /**
  * @brief Scans a directory and its subdirectories using the specified YARA scanner and callback
@@ -115,8 +116,8 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback,
  * @return Returns yara call_back_macros.
  */
 int
-default_scan_callback(YR_SCAN_CONTEXT *context, int message, void *message_data,
-                      void *user_data) warn_unused_result;
+default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
+                  void *user_data) warn_unused_result;
 
 void
 default_scan_inotify(INOTIFY *inotify, void *user_data);

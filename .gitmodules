@@ -22,3 +22,9 @@
 [submodule "libraries/yara"]
 	path = libraries/yara
 	url = https://github.com/VirusTotal/yara.git
+[submodule "libraries/zlib"]
+	path = libraries/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "drivers/crowarmor"]
+	path = drivers/crowarmor
+	url = git@github.com:moblog-security-researchers/CrowArmor.git

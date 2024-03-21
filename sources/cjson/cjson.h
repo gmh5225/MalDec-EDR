@@ -38,7 +38,7 @@
  * @return Returns ERR_SUCCESS on success, or ERROR on failure.
  */
 ERR
-init_json(struct json_object **json_obj, const char *filename);
+init_cjson(struct json_object **json_obj, const char *filename);
 
 /**
  * @brief Frees resources associated with a JSON object.

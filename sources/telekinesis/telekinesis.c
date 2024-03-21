@@ -20,32 +20,25 @@ init_driver_telekinesis(TELEKINESIS **telekinesis, TELEKINESIS_CONFIG config)
 
   if (!check_driver_telekinesis_alive(*telekinesis))
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("Driver %s not alive",
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Driver %s not alive",
                                  (*telekinesis)->config.driver_name));
     return ERR_FAILURE;
   };
 
-  if (((*telekinesis)->fd_telekinesis =
-               open((*telekinesis)->config.driver_path, O_RDWR)) < 0)
+  if (((*telekinesis)
+               ->fd_telekinesis = // In order to use this call, one needs an open file descriptor.
+       // Often the open(2) call has unwanted side effects, that can be
+       // avoided under Linux by giving it the O_NONBLOCK flag.
+       open((*telekinesis)->config.driver_path, O_RDWR | O_NONBLOCK)) < 0)
   {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("Error in open driver %s : %ld (%s)",
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Error in open driver %s : %ld "
+                                 "(%s)",
                                  (*telekinesis)->config.driver_name, errno,
                                  strerror(errno)));
     return ERR_FAILURE;
   }
 
   return ERR_SUCCESS;
-}
-
-inline void
-connect_driver_telekinesis(TELEKINESIS *telekinesis)
-{
-  if (!check_driver_telekinesis_alive(telekinesis))
-  {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("Driver %s not alive",
-                                 telekinesis->config.driver_name));
-    return;
-  }
 }
 
 void

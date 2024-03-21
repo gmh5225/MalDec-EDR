@@ -43,6 +43,14 @@ ERR
 init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config) warn_unused_result;
 
 /**
+  * @brief Set the watch paths object
+  * 
+  * @param inotify  Pointer to a pointer to the INOTIFY structure.
+  */
+void
+set_watch_paths(INOTIFY *inotify);
+
+/**
  * @brief Listens to events using the INOTIFY structure.
  * @param inotify - Pointer to a pointer to the INOTIFY structure.
  * @param user_data - User-defined data to be passed to the callback.

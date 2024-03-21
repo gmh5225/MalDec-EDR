@@ -2,6 +2,7 @@
 add_subdirectory(../libraries/elfo libraries/elfo)
 add_subdirectory(../libraries/c-logger libraries/c-logger)
 add_subdirectory(../libraries/json-c libraries/json-c)
+add_subdirectory(../libraries/zlib libraries/zlib)
 
 # add subdirectory compiler
 cmake_minimum_required(VERSION 3.5)
@@ -11,7 +12,8 @@ include_directories(
     ../libraries
     ../packages
     ../sources
+    ../drivers/crowarmor/include
 )
 
-add_subdirectory(deamon/)
+add_subdirectory(daemon/)
 add_subdirectory(cli)
