@@ -37,7 +37,7 @@ The standard practice is to have the latest stable production version available 
 ```
 # Testing
 
-You need to test all components of Linux Defender, if possible detail the task of the components you tested, which paths you took and how we can perform the tests, if possible create a script of how the tests for your task work, more than 1 developer can carry out the review.
+You need to test all components of Unix Defender, if possible detail the task of the components you tested, which paths you took and how we can perform the tests, if possible create a script of how the tests for your task work, more than 1 developer can carry out the review.
 
 ## Automated Testing
 

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Linux Defender</string>
+   <string>Unix Defender</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -35,7 +35,7 @@
          <string notr="true">color: #f8f8f2;</string>
         </property>
         <property name="text">
-         <string>Linux Defender</string>
+         <string>Unix Defender</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

@@ -1,4 +1,4 @@
 # UnixProtection ( Documentation )
 
-Comprehensive Documentation on the Functionality and Components of Linux Defender
+Comprehensive Documentation on the Functionality and Components of Unix Defender
 

@@ -19,7 +19,7 @@ STYLE="customdoxygen.css"
 HEADER="customheader.html"
 FOOTER="customfooter.html"
 ICON="icon.png"
-PROJECT_BRIEF="Linux Defender revolutionizes security for Linux servers by taking an advanced approach focusing on 0day threats"
+PROJECT_BRIEF="Unix Defender revolutionizes security for Linux servers by taking an advanced approach focusing on 0day threats"
 
 # Step 1: Generate Doxygen configuration file
 echo -e "${GREEN}[*] Generating Doxygen configuration file...${NC}"

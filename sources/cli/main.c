@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @brief Linux Defender main program.
+ * @brief Unix Defender main program.
  * @note Main does not use LOG, only fprintf, without dependence on LOG, all components except json and logger do not use log to save to the file.
  */
 
@@ -22,7 +22,7 @@ static inline void no_return
 help(char *prog_name)
 {
   fprintf(stdout,
-          "Linux Defender\n"
+          "Unix Defender\n"
           "Usage: %s [OPTIONS]\n\n"
           "Options:\n\n"
           "  Scan :\n"
@@ -70,7 +70,7 @@ static inline void no_return
 pr_version()
 {
   fprintf(stdout,
-          "Linux Defender (Moblog Security Researchers) %d.%d.%d\n",
+          "Unix Defender (Moblog Security Researchers) %d.%d.%d\n",
           LINUX_DEFENDER_VERSION_MAJOR, LINUX_DEFENDER_VERSION_PATCHLEVEL,
           LINUX_DEFENDER_VERSION_SUBLEVEL);
   exit(ERR_SUCCESS);
