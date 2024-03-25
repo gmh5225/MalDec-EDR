@@ -15,7 +15,7 @@ include_directories(
 		../include/
 		../packages/
 		../libraries/
-		../sources
+		../sources/
 )
 
 file(GLOB_RECURSE sources
