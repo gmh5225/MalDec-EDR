@@ -1,5 +1,5 @@
 /**
- * @file defender.h
+ * @file edr.h
  * @brief Header file for the DEFENDER module.
  */
 
@@ -36,7 +36,7 @@ DEFENDER;
  * @param config Configuration settings for DEFENDER.
  */
 void
-init_defender(DEFENDER **defender, DEFENDER_CONFIG config);
+init_edr(DEFENDER **defender, DEFENDER_CONFIG config);
 
 /**
  * @brief Initializes the LOGGER component within the DEFENDER module.
@@ -81,4 +81,4 @@ init_inspector_main(DEFENDER **defender);
  * @param defender Pointer to a pointer to the DEFENDER instance.
  */
 void
-exit_defender(DEFENDER **defender);
+exit_edr(DEFENDER **defender);

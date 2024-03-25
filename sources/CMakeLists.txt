@@ -7,6 +7,8 @@ add_subdirectory(../libraries/zlib libraries/zlib)
 # add subdirectory compiler
 cmake_minimum_required(VERSION 3.5)
 
+set(compiler_gui FALSE)
+
 include_directories(
     ../include
     ../libraries
@@ -16,4 +18,6 @@ include_directories(
 
 add_subdirectory(deamon)
 add_subdirectory(cli)
-add_subdirectory(gui)
+if(compiler_gui)
+    add_subdirectory(gui)
+endif()

@@ -2,18 +2,18 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 # add executable and target libraries
-add_executable(defenderd main.c)
+add_executable(maldec-edrd main.c)
 
 set(FLAGS_OPTIMIZATIONS ON)
 set(FLAGS_DEBUG OFF)
 
-target_link_libraries(defenderd PUBLIC yara c-logger)
+target_link_libraries(maldec-edrd PUBLIC yara c-logger)
 
-target_sources(defenderd PRIVATE ${sources})
-target_link_libraries(defenderd PUBLIC yara c-logger json-c)
+target_sources(maldec-edrd PRIVATE ${sources})
+target_link_libraries(maldec-edrd PUBLIC yara c-logger json-c)
 
 if(FLAGS_OPTIMIZATIONS)
-    target_compile_options(defenderd PUBLIC
+    target_compile_options(maldec-edrd PUBLIC
         -O3            # Enable high-level optimization
         -ftree-vectorize
         -mavx
@@ -23,7 +23,7 @@ if(FLAGS_OPTIMIZATIONS)
         -fdelete-dead-exceptions
     )
 elseif(FLAGS_DEBUG)
-    target_compile_options(defenderd PUBLIC
+    target_compile_options(maldec-edrd PUBLIC
         -ggdb3
         -fms-extensions
         --all-warnings

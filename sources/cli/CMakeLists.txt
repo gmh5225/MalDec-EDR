@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 # Add executable and target libraries
-add_executable(defender main.c)
+add_executable(maldec-edr main.c)
 
 set(FLAGS_OPTIMIZATIONS OFF)
 set(FLAGS_DEBUG ON)
 
 file(GLOB_RECURSE sources
-    ../defender/*.c
+    ../edr/*.c
     ../scanner/*.c
     ../logger/*.c
     ../cjson/*.c
@@ -17,11 +17,11 @@ file(GLOB_RECURSE sources
     ../compression/*.c
 )
 
-target_sources(defender PRIVATE ${sources})
-target_link_libraries(defender PUBLIC yara c-logger json-c sqlite3 zlib)
+target_sources(maldec-edr PRIVATE ${sources})
+target_link_libraries(maldec-edr PUBLIC yara c-logger json-c sqlite3 zlib)
 
 if(FLAGS_OPTIMIZATIONS)
-    target_compile_options(defender PUBLIC
+    target_compile_options(maldec-edr PUBLIC
         -O2           
         -ftree-vectorize
         -mavx
@@ -31,7 +31,7 @@ if(FLAGS_OPTIMIZATIONS)
         -fdelete-dead-exceptions
     )
 elseif(FLAGS_DEBUG)
-    target_compile_options(defender PUBLIC
+    target_compile_options(maldec-edr PUBLIC
         -ggdb3
         -fms-extensions
         --all-warnings

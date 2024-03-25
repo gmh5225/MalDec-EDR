@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @brief Unix Defender main program.
+ * @brief MalDec-EDR main program.
  * @note Main does not use LOG, only fprintf, without dependence on LOG, all components except json and logger do not use log to save to the file.
  */
 
@@ -13,7 +13,7 @@
 #include "compiler/compiler_attribute.h"
 #include "compression/zlib.h"
 #include "config.h"
-#include "defender/defender.h"
+#include "edr/edr.h"
 #include "err/err.h"
 #include "inspector/inspector.h"
 #include "version/version.h"
@@ -22,7 +22,7 @@ static inline void no_return
 help(char *prog_name)
 {
   fprintf(stdout,
-          "Unix Defender\n"
+          "MalDec EDR (Endpoint detection and response)\n"
           "Usage: %s [OPTIONS]\n\n"
           "Options:\n\n"
           "  Scan :\n"
@@ -57,10 +57,10 @@ help(char *prog_name)
           "\n\n"
           "  General Options:\n"
           "    -v, --version                 Display the version of Linux "
-          "Defender \n"
+          "edr \n"
           "    -h, --help                    Display this help menu for "
           "Linux "
-          "Defender\n",
+          "edr\n",
           prog_name);
 
   exit(ERR_SUCCESS);
@@ -70,7 +70,7 @@ static inline void no_return
 pr_version()
 {
   fprintf(stdout,
-          "Unix Defender (Moblog Security Researchers) %d.%d.%d\n",
+          "MalDec-EDR (Moblog Security Researchers) %d.%d.%d\n",
           LINUX_DEFENDER_VERSION_MAJOR, LINUX_DEFENDER_VERSION_PATCHLEVEL,
           LINUX_DEFENDER_VERSION_SUBLEVEL);
   exit(ERR_SUCCESS);
@@ -97,7 +97,7 @@ cleanup_resources(DEFENDER **defender)
   if (!IS_NULL_PTR((*defender)->inspector))
     exit_inspector(&(*defender)->inspector);
 
-  exit_defender(defender);
+  exit_edr(defender);
   exit(EXIT_SUCCESS);
 }
 
@@ -267,7 +267,7 @@ main(int argc, char **argv)
 #endif
   };
 
-  init_defender(&defender, config);
+  init_edr(&defender, config);
 
   process_command_line_options(&defender, argc, argv);
 

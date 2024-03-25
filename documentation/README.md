@@ -1,4 +1,4 @@
-# UnixProtection ( Documentation )
+# MalDec-EDR ( Documentation )
 
-Comprehensive Documentation on the Functionality and Components of Unix Defender
+Comprehensive Documentation on the Functionality and Components of MalDec-EDR
 

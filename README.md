@@ -1,11 +1,11 @@
-# UnixProtection
+# MalDec EDR (Endpoint detection and response)
 
-![UnixProtection](assets/UnixProtection.png)
+![MalDec-EDR](assets/MalDec-EDR.png)
 
 
-# What is UnixProtection ?
+# What is MalDec-EDR ?
 
-Unix Protection is a solution for malware attacks for Unix systems, with kernel-level solutions [Documentation](documentation)
+MalDec-EDR is a solution for malware attacks for Unix systems, with kernel-level solutions [Documentation](documentation)
 
 
 # Development Process
@@ -37,7 +37,7 @@ The standard practice is to have the latest stable production version available 
 ```
 # Testing
 
-You need to test all components of Unix Defender, if possible detail the task of the components you tested, which paths you took and how we can perform the tests, if possible create a script of how the tests for your task work, more than 1 developer can carry out the review.
+You need to test all components of MalDec-EDR, if possible detail the task of the components you tested, which paths you took and how we can perform the tests, if possible create a script of how the tests for your task work, more than 1 developer can carry out the review.
 
 ## Automated Testing
 
