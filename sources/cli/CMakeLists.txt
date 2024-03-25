@@ -15,6 +15,7 @@ file(GLOB_RECURSE sources
     ../inotify/*.c
     ../inspector/*.c
     ../compression/*.c
+    ../crowarmor/*.c
 )
 
 target_sources(maldec-edr PRIVATE ${sources})

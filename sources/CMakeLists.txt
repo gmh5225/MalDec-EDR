@@ -14,10 +14,12 @@ include_directories(
     ../libraries
     ../packages
     ../sources
+    ../drivers/crowarmor/include
 )
 
-add_subdirectory(deamon)
+add_subdirectory(daemon)
 add_subdirectory(cli)
+
 if(compiler_gui)
     add_subdirectory(gui)
 endif()

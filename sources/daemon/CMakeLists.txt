@@ -7,10 +7,13 @@ add_executable(maldec-edrd main.c)
 set(FLAGS_OPTIMIZATIONS ON)
 set(FLAGS_DEBUG OFF)
 
-target_link_libraries(maldec-edrd PUBLIC yara c-logger)
+file(GLOB_RECURSE sources
+    sig-hdlr/*.c
+    bus-ifc/*.c
+)
 
 target_sources(maldec-edrd PRIVATE ${sources})
-target_link_libraries(maldec-edrd PUBLIC yara c-logger json-c)
+target_link_libraries(maldec-edrd PUBLIC yara c-logger json-c systemd)
 
 if(FLAGS_OPTIMIZATIONS)
     target_compile_options(maldec-edrd PUBLIC

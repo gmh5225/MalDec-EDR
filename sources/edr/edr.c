@@ -11,6 +11,7 @@ init_edr(DEFENDER **defender, DEFENDER_CONFIG config)
   (*defender)->cjson       = NULL;
   (*defender)->logger      = NULL;
   (*defender)->inspector   = NULL;
+  (*defender)->crowarmor   = NULL;
 
   ALLOC_ERR_FAILURE(*defender);
 }
@@ -197,6 +198,45 @@ init_telekinesis_main(DEFENDER **defender)
 
   if (IS_ERR_FAILURE(
               init_driver_telekinesis(&(*defender)->telekinesis, config)))
+  {
+    fprintf(stderr, LOG_MESSAGE_FORMAT("Error in init driver %s\n",
+                                       config.driver_name));
+    exit(EXIT_FAILURE);
+  }
+}
+
+void
+init_crowarmor_main(DEFENDER **defender)
+{
+  struct json_object *crowarmor_obj, *driver_path_obj, *driver_name_obj;
+
+  if (json_object_object_get_ex((*defender)->cjson, "driver_crowarmor",
+                                &crowarmor_obj))
+  {
+    if (!json_object_object_get_ex(crowarmor_obj, "driver_path",
+                                   &driver_path_obj) ||
+        !json_object_object_get_ex(crowarmor_obj, "driver_name",
+                                   &driver_name_obj))
+    {
+      fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve "
+                                         "driver_telekinesis "
+                                         "configuration from JSON\n"));
+      exit(ERR_FAILURE);
+    }
+  }
+
+  CROWARMOR_CONFIG config = (CROWARMOR_CONFIG){
+          .driver_name = json_object_get_string(driver_name_obj),
+          .driver_path = json_object_get_string(driver_path_obj)};
+
+#ifdef DEBUG
+  LOG_DEBUG(LOG_MESSAGE_FORMAT("crowarmor.config.driver_name = '%s', "
+                               "crowarmor.config.driver_path = '%s' ",
+                               config.driver_name, config.driver_path));
+
+#endif
+
+  if (IS_ERR_FAILURE(init_driver_crowarmor(&(*defender)->crowarmor, config)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error in init driver %s\n",
                                        config.driver_name));
