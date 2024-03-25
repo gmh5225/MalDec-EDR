@@ -1,12 +1,11 @@
-# LinuxDefender : Anti0Day
+# MalDec EDR (Endpoint detection and response)
 
-![Linuxdefender](assets/linuxdefender.png)
+![MalDec-EDR](assets/MalDec-EDR.png)
 
 
-# What is LinuxDefender ?
+# What is MalDec-EDR ?
 
-Linux Defender revolutionizes security for Linux servers by taking an advanced approach focusing on 0day threats. Equipped with cutting-edge artificial intelligence, this innovative system redefines protection, going beyond traditional threat detection. Built with kernel-level solutions, Linux Defender not only identifies and neutralizes 0days, but does so efficiently, ensuring your server maintains optimized performance. [Documentation](documentation)
-
+MalDec-EDR is a solution for malware attacks for Unix systems, with kernel-level solutions [Documentation](documentation)
 
 
 # Development Process
@@ -38,7 +37,7 @@ The standard practice is to have the latest stable production version available 
 ```
 # Testing
 
-You need to test all components of Linux Defender, if possible detail the task of the components you tested, which paths you took and how we can perform the tests, if possible create a script of how the tests for your task work, more than 1 developer can carry out the review.
+You need to test all components of MalDec-EDR, if possible detail the task of the components you tested, which paths you took and how we can perform the tests, if possible create a script of how the tests for your task work, more than 1 developer can carry out the review.
 
 ## Automated Testing
 

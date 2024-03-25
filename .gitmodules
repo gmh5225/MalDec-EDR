@@ -3,28 +3,25 @@
 	url = https://git.cryptomilk.org/projects/cmocka.git
 [submodule "rules/YARA-Mindshield-Analysis"]
 	path = rules/YARA-Mindshield-Analysis
-	url = git@github.com:mlg-security/YARA-Mindshield-Analysis.git
+	url = https://github.com/maldeclabs/YARA-Mindshield-Analysis
 [submodule "libraries/uthash"]
 	path = libraries/uthash
 	url = https://github.com/troydhanson/uthash.git
 [submodule "drivers/telekinesis"]
 	path = drivers/telekinesis
-	url = git@github.com:mlg-security/Telekinesis.git
+	url = https://github.com/maldeclabs/Telekinesis
 [submodule "libraries/elfo"]
 	path = libraries/elfo
-	url = git@github.com:mlg-security/Elfo.git
+	url = https://github.com/maldeclabs/Elfo
 [submodule "libraries/c-logger"]
 	path = libraries/c-logger
-	url = git@github.com:mlg-security/c-logger.git
+	url = https://github.com/maldeclabs/Clogger
 [submodule "libraries/json-c"]
 	path = libraries/json-c
-	url = git@github.com:json-c/json-c.git
-[submodule "libraries/yara"]
-	path = libraries/yara
-	url = https://github.com/VirusTotal/yara.git
+	url = https://github.com/json-c/json-c
 [submodule "libraries/zlib"]
 	path = libraries/zlib
 	url = https://github.com/madler/zlib.git
 [submodule "drivers/crowarmor"]
 	path = drivers/crowarmor
-	url = git@github.com:moblog-security-researchers/CrowArmor.git
+	url = https://github.com/maldeclabs/CrowArmor

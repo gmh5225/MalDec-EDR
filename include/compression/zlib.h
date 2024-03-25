@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <zlib.h>
+#include <zlib/zlib.h>
 
 #include "compiler/compiler_attribute.h"
 #include "config.h"

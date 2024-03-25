@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zlib.h>
+#include <zlib/zlib.h>
 
 typedef struct ZLIB_CONFIG
 {

@@ -1,5 +1,5 @@
 [Unit]
-Description=Linux Defender Daemon
+Description=MalDec-EDR Daemon
 After=network.target
 
 [Service]

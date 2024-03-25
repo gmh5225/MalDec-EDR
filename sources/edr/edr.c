@@ -1,7 +1,7 @@
-#include "defender.h"
+#include "edr.h"
 
 inline void
-init_defender(DEFENDER **defender, DEFENDER_CONFIG config)
+init_edr(DEFENDER **defender, DEFENDER_CONFIG config)
 {
   *defender                = malloc(sizeof(struct DEFENDER));
   (*defender)->config      = config;
@@ -300,7 +300,7 @@ init_scanner_main(DEFENDER **defender)
 }
 
 inline void
-exit_defender(DEFENDER **defender)
+exit_edr(DEFENDER **defender)
 {
   free((*defender));
   NO_USE_AFTER_FREE((*defender));

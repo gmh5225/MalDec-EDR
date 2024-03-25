@@ -2,13 +2,13 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 # Information projec
-project(LinuxDefender VERSION 1.0.0 LANGUAGES C)
+project(MalDec-EDR VERSION 1.0.0 LANGUAGES C)
 set(LIB_MAJOR_VERSION "1")
 set(LIB_MINOR_VERSION "0")
 set(LIB_PATCH_VERSION "0")
 
 
-set(BUILD_TESTS ON )
+set(BUILD_TESTS OFF )
 set(BUILD_BENCHMARK OFF )
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -9,7 +9,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 # Project information
-PROJECT_NAME="LinuxDefender"
+PROJECT_NAME="MalDec-EDR"
 PROJECT_VERSION="1.0.0"
 
 # Specify the paths
@@ -19,7 +19,7 @@ STYLE="customdoxygen.css"
 HEADER="customheader.html"
 FOOTER="customfooter.html"
 ICON="icon.png"
-PROJECT_BRIEF="Linux Defender revolutionizes security for Linux servers by taking an advanced approach focusing on 0day threats"
+PROJECT_BRIEF="MalDec-EDR revolutionizes security for Linux servers by taking an advanced approach focusing on 0day threats"
 
 # Step 1: Generate Doxygen configuration file
 echo -e "${GREEN}[*] Generating Doxygen configuration file...${NC}"

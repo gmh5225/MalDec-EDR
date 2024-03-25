@@ -1,6 +1,6 @@
 /**
  * @file version.h
- * @brief Header file for the version LinuxDefender
+ * @brief Header file for the version MalDec-EDR
  */
 
 #pragma once
