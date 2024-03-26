@@ -5,7 +5,7 @@
 
 # What is MalDec-EDR ?
 
-MalDec-EDR is a solution for malware attacks for Unix systems, with kernel-level solutions [Documentation](documentation)
+MalDec-EDR is a Unix system solution designed to detect anomalies and malware attacks using kernel-level mechanisms. For more information, please refer to the [Documentation](documentation).
 
 
 # Development Process
