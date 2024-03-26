@@ -14,7 +14,7 @@ Comprehensive Documentation on the Functionality and Components of MalDec-EDR.
 
 To build projects, you need to download the Debian-based dependencies `libsystemd-dev`, `libsqlite3-dev`, `libyara-dev`. Additionally, for building the GUI using QT, you will need [QT6](https://www.qt.io/product/qt6).
 
-Run this script [scripts/build.sh](scripts/build.sh) to build the project.
+Run this script [scripts/build.sh](../scripts/build.sh) to build the project.
 
 ## Build using Docker 
 
@@ -26,7 +26,7 @@ docker build .
 
 ## Generate Documentation using Doxygen
 
-To generate documentation using Doxygen for the entire codebase, simply run the script [`scripts/doxygen/doxygen.sh`](scripts/doxygen/doxygen.sh). This script will generate the documentation.
+To generate documentation using Doxygen for the entire codebase, simply run the script [`scripts/doxygen/doxygen.sh`](../scripts/doxygen/doxygen.sh). This script will generate the documentation.
 
 # Drivers
 
