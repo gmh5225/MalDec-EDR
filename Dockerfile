@@ -5,7 +5,9 @@ RUN apt update && \
         g++ \
         cmake \
         libyara-dev \
-        binutils
+        binutils \
+        libsqlite3-dev \
+        libsystemd-dev \
         
 COPY . /app
 
