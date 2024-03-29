@@ -25,12 +25,12 @@
  */
 typedef struct INSPECTOR
 {
-  INSPECTOR_CONFIG config; /**< Configuration for the inspector. */
-  ZLIB            *zlib;   /**< Pointer to the zlib library. */
+  INSPECTOR_CONFIG config;     /**< Configuration for the inspector. */
+  ZLIB            *zlib;       /**< Pointer to the zlib library. */
   int              ins_fd_dir; /**< File descriptor for inspection directory. */
   int              qua_fd_dir; /**< File descriptor for quarantine directory. */
-  sqlite3         *db;      /**< Pointer to SQLite database. */
-  sqlite3_stmt    *stmt;    /**< SQLite statement. */
+  sqlite3         *db;         /**< Pointer to SQLite database. */
+  sqlite3_stmt    *stmt;       /**< SQLite statement. */
 } INSPECTOR;
 
 /**

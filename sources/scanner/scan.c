@@ -64,7 +64,10 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
   const size_t   dir_size = strlen(config.filepath);
   const char    *fmt      = (!strcmp(config.filepath, "/")) ? "%s%s" : "%s/%s";
 
-  if (config.max_depth >= 0 && current_depth > config.max_depth) { goto _retval; }
+  if (config.max_depth >= 0 && current_depth > config.max_depth)
+  {
+    goto _retval;
+  }
   else if (IS_NULL_PTR((dd)))
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %s : %d (%s)", config.filepath,

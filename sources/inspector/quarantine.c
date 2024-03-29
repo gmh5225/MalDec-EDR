@@ -143,7 +143,7 @@ sync_quarantine_inspector(INSPECTOR *inspector,
     return ERR_FAILURE;
   }
 
-  LOG_INFO(
-          LOG_MESSAGE_FORMAT("Database '%s' synced", inspector->config.database));
+  LOG_INFO(LOG_MESSAGE_FORMAT("Database '%s' synced",
+                              inspector->config.database));
   return ERR_SUCCESS;
 }

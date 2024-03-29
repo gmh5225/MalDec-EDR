@@ -7,7 +7,8 @@ Comprehensive Documentation on the Functionality and Components of MalDec-EDR.
 1. [Build Debian-based](#build-debian-based)
 2. [Build using Docker](#build-using-docker)
 3. [Generate Documentation using Doxygen](#generate-documentation-using-doxygen)
-4. [Folder organization](#folder-organization)
+4. [Drivers](#drivers)
+5. [Folder organization](#folder-organization)
 
 ---
 
@@ -45,36 +46,36 @@ You can check the features it comprises using the maldec-edr CLI.
 
 # Folder organization
 
-```md
+
+```markdown
 .
-├── [assets](../assets/)
-├── [benchmark](../benchmark/)
+├── assets
+├── benchmark
 ├── CMakeLists.txt
-├── [config](../config/)
+├── config
 ├── Dockerfile
-├── [documentation](../documentation/)
-├── [drivers](../drivers/)
-├── [include](../include)
-├── [libraries](../libraries/)
-├── [packages](../packages/)
+├── documentation
+├── drivers
+├── include
+├── libraries
+├── packages
 ├── README.md
-├── [rules](../rules)
-├── [scripts](../scripts/)
-├── [sources](../sources/)
-└── [tests](../tests/)
+├── rules
+├── scripts
+├── sources
+└── tests
 
 14 directories, 3 files
-
 ```
 
-* include - headers that modules use
-* sources - contains the source code of header and modules
-* libraries - libraries that we often use a submodule
-* rules - currently yara rules
-* packages - packages that we use as dependencies
-* config - contains the project input settings
-* drivers - contains submodules that point to drivers
-* benchmark - Contains component benchmark
-* tests - contains unit tests
-* assets - images
-* script - contains automations using shell scripts
+* [include](../include) - headers that modules use
+* [sources](../sources) - contains the source code of header and modules
+* [libraries](../libraries) - libraries that we often use as submodules
+* [rules](../rules) - currently Yara rules
+* [packages](../packages) - packages that we use as dependencies
+* [config](../config) - contains the project input settings
+* [drivers](../drivers) - contains submodules that point to drivers
+* [benchmark](../benchmark) - Contains component benchmarks
+* [tests](../tests) - contains unit tests
+* [assets](../assets) - images
+* [scripts](../scripts) - contains automations using shell scripts

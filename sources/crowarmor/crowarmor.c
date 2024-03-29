@@ -61,16 +61,19 @@ check_driver_crowarmor_activated(CROWARMOR *crowarmor)
     }
     else
     {
-      LOG_INFO(LOG_MESSAGE_FORMAT("%s",(crowarmor->crow.chrdev_is_actived)
-                                          ? "chrdev feature is activated"
-                                          : "chrdev feature is not activated"));
-      LOG_INFO(LOG_MESSAGE_FORMAT("%s",(crowarmor->crow.hook_is_actived)
-                                          ? "hook feature is activated"
-                                          : "hook feature is not activated"));
-      LOG_INFO(LOG_MESSAGE_FORMAT("%s",(crowarmor->crow.inspector_is_actived)
-                                          ? "inspector feature is activated"
-                                          : "inspector feature is not "
-                                            "activated"));
+      LOG_INFO(LOG_MESSAGE_FORMAT("%s", (crowarmor->crow.chrdev_is_actived)
+                                                ? "chrdev feature is activated"
+                                                : "chrdev feature is not "
+                                                  "activated"));
+      LOG_INFO(LOG_MESSAGE_FORMAT("%s", (crowarmor->crow.hook_is_actived)
+                                                ? "hook feature is activated"
+                                                : "hook feature is not "
+                                                  "activated"));
+      LOG_INFO(LOG_MESSAGE_FORMAT("%s", (crowarmor->crow.inspector_is_actived)
+                                                ? "inspector feature is "
+                                                  "activated"
+                                                : "inspector feature is not "
+                                                  "activated"));
     }
   }
 }

@@ -52,7 +52,7 @@ default_sync_quarantine(void *ins, const int count, char **data, char **columns)
         }
         LOG_INFO(LOG_MESSAGE_FORMAT("File '%s' synchronized with the database ",
                                     data[i]));
-                                    
+
         exit_stmt_finalize(&inspector);
         free(file);
       }
