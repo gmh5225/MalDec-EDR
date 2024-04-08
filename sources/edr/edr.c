@@ -1,7 +1,7 @@
 #include "edr.h"
 
 inline void
-init_edr(EDR **edr, DEFENDER_CONFIG config)
+init_edr(EDR **edr, EDR_CONFIG config)
 {
   *edr                = malloc(sizeof(struct EDR));
   (*edr)->config      = config;

@@ -40,7 +40,7 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
                                         : (SCAN_FLAGS_REPORT_RULES_MATCHING),
                                 callback, user_data, 0);
 
-  if (code != ERROR_SUCCESS || code == ERROR_INSUFFICIENT_MEMORY ||
+  if (code == ERROR_INSUFFICIENT_MEMORY ||
       code == ERROR_COULD_NOT_MAP_FILE || code == ERROR_TOO_MANY_SCAN_THREADS ||
       code == ERROR_SCAN_TIMEOUT || code == ERROR_CALLBACK_ERROR ||
       code == ERROR_TOO_MANY_MATCHES)
@@ -110,7 +110,7 @@ _retval:
 }
 
 ERR
-scan(SCANNER *scanner)
+scan_files_and_dirs(SCANNER *scanner)
 {
 #if DEBUG
   ALLOC_ERR_FAILURE(scanner->config.inspector);

@@ -20,7 +20,7 @@ main(void)
 
   notify_success();
 
-  start_dbus_interface("/net/edr/LinuxDefender", "net.edr.LinuxDefender");
+  start_dbus_interface("/net/edr/maldec", "net.edr.MalDec");
 
   return 0;
 }

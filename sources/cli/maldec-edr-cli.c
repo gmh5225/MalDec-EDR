@@ -255,7 +255,7 @@ process_command_line_options(EDR **edr, int argc, char **argv)
 
   // Scan Yara
   if (!IS_NULL_PTR((*edr)->scanner) && IS_NULL_PTR((*edr)->inotify))
-    if (IS_ERR_FAILURE(scan((*edr)->scanner)))
+    if (IS_ERR_FAILURE(scan_files_and_dirs((*edr)->scanner)))
       fprintf(stderr, LOG_MESSAGE_FORMAT("Error in scan\n"));
 }
 
@@ -266,7 +266,7 @@ main(int argc, char **argv)
 
   EDR *edr;
 
-  DEFENDER_CONFIG config = (DEFENDER_CONFIG){
+  EDR_CONFIG config = (EDR_CONFIG){
 #ifdef DEBUG
           .settings_json_path = "../../../config/"
                                 "appsettings.development.json",

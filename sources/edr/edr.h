@@ -28,7 +28,7 @@ typedef struct packed(8) EDR
   INOTIFY     *inotify;     /**< Pointer to the INOTIFY instance. */
   INSPECTOR   *inspector;   /**< Pointer to the INSPECTOR instance. */
   CROWARMOR   *crowarmor;   /**< Pointer to the CROWARMOR instance. */
-  DEFENDER_CONFIG config;   /**< Configuration settings for EDR. */
+  EDR_CONFIG config;   /**< Configuration settings for EDR. */
 }
 EDR;
 
@@ -38,7 +38,7 @@ EDR;
  * @param config Configuration settings for EDR.
  */
 void
-init_edr(EDR **edr, DEFENDER_CONFIG config);
+init_edr(EDR **edr, EDR_CONFIG config);
 
 /**
  * @brief Initializes the LOGGER component within the EDR module.
