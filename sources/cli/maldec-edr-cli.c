@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <systemd/sd-bus.h>
 
 #include "compiler/compiler_attribute.h"
 #include "compression/zlib.h"
@@ -117,6 +118,9 @@ process_command_line_options(EDR **edr, int argc, char **argv)
   int option_index = 0;
   int c;
 
+  init_cjson_main(edr);
+  init_logger_main(edr);
+
   while ((c = getopt_long(argc, argv, "qs:y:d:vh", long_options,
                           &option_index)) != -1)
   {
@@ -135,17 +139,8 @@ process_command_line_options(EDR **edr, int argc, char **argv)
             (*edr)->scanner->config.verbose = true;
         }
 
-        // Driver telekinesis
-        if (strcmp(long_options[option_index].name, "status-telekinesis") == 0)
-        {
-          init_cjson_main(edr);
-          init_logger_main(edr);
-        }
-
         if (strcmp(long_options[option_index].name, "view-quarantine") == 0)
         {
-          init_cjson_main(edr);
-          init_logger_main(edr);
           init_inspector_main(edr);
           if (IS_ERR_FAILURE(view_quarantine_inspector(
                       (*edr)->inspector, DEFAULT_VIEW_QUARANTINE)))
@@ -157,8 +152,6 @@ process_command_line_options(EDR **edr, int argc, char **argv)
         // Quarantine for malwares
         if (strcmp(long_options[option_index].name, "sync-quarantine") == 0)
         {
-          init_cjson_main(edr);
-          init_logger_main(edr);
           init_inspector_main(edr);
           if (IS_ERR_FAILURE(sync_quarantine_inspector(
                       (*edr)->inspector, DEFAULT_SYNC_QUARANTINE)))
@@ -170,8 +163,6 @@ process_command_line_options(EDR **edr, int argc, char **argv)
         if (strcmp(long_options[option_index].name, "restore-"
                                                     "quarantine") == 0)
         {
-          init_cjson_main(edr);
-          init_logger_main(edr);
           init_inspector_main(edr);
 
           QUARANTINE_FILE file = (QUARANTINE_FILE){.id = atoi(optarg)};
@@ -186,8 +177,6 @@ process_command_line_options(EDR **edr, int argc, char **argv)
         if (strcmp(long_options[option_index].name, "delete-"
                                                     "quarantine") == 0)
         {
-          init_cjson_main(edr);
-          init_logger_main(edr);
           init_inspector_main(edr);
 
           QUARANTINE_FILE file = (QUARANTINE_FILE){.id = atoi(optarg)};
@@ -202,16 +191,12 @@ process_command_line_options(EDR **edr, int argc, char **argv)
         // Driver CrowArmor
         if (strcmp(long_options[option_index].name, "status-crowarmor") == 0)
         {
-          init_cjson_main(edr);
-          init_logger_main(edr);
           init_crowarmor_main(edr);
           check_driver_crowarmor_activated((*edr)->crowarmor);
         }
         break;
 
       case 's':
-        init_cjson_main(edr);
-        init_logger_main(edr);
         init_inspector_main(edr);
         init_scanner_main(edr);
         (*edr)->scanner->config.filepath  = optarg;
@@ -223,8 +208,6 @@ process_command_line_options(EDR **edr, int argc, char **argv)
       case 'v': pr_version(); break;
 
       case 'y':
-        init_cjson_main(edr);
-        init_logger_main(edr);
         init_scanner_main(edr);
         init_inotify_main(edr);
         init_inspector_main(edr);
