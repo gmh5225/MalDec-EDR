@@ -3,7 +3,7 @@
 #include <errno.h>
 
 inline ERR
-add_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
+add_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILE *file)
 {
   ZLIB_CONFIG config = (ZLIB_CONFIG){.filename_in  = file->filepath,
                                      .filename_out = file->filename,
@@ -46,7 +46,7 @@ add_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 }
 
 inline ERR
-del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
+del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILE *file)
 {
   if (IS_ERR_FAILURE(select_where_quarantine_db(&inspector, &file)))
   {
@@ -84,7 +84,7 @@ del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 }
 
 inline ERR
-restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
+restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILE *file)
 {
   if (select_where_quarantine_db(&inspector, &file))
   {

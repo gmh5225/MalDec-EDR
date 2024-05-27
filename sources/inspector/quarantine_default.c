@@ -39,7 +39,7 @@ default_sync_quarantine(void *ins, const int count, char **data, char **columns)
         LOG_INFO(LOG_MESSAGE_FORMAT("File '%s' not synchronized with the "
                                     "database ",
                                     data[i]));
-        QUARANTINE_FILES *file = malloc(sizeof(QUARANTINE_FILES));
+        QUARANTINE_FILE *file = malloc(sizeof(QUARANTINE_FILE));
         file->id               = atoi(data[0]);
         if (IS_ERR_FAILURE(delete_where_quarantine_db(&inspector, &file)))
         {

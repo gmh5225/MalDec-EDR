@@ -50,9 +50,6 @@ help(char *prog_name)
           "another path original\n"
           "    --delete-quarantine <id>\n"
           "                                 Delete a file from quarantine\n\n"
-          "  Telekinesis Driver:\n"
-          "    --status-telekinesis         Check the driver status and "
-          "whether its features are active.\n\n"
           "  CrowArmor Driver:\n"
           "    --status-crowarmor           Check the driver status and "
           "whether its features are active.\n\n"
@@ -88,9 +85,6 @@ cleanup_resources(EDR **edr)
   if (!IS_NULL_PTR((*edr)->scanner))
     if (IS_ERR_FAILURE(exit_scanner(&(*edr)->scanner)))
       printf(LOG_MESSAGE_FORMAT("Error in exit scanner"));
-
-  if (!IS_NULL_PTR((*edr)->telekinesis))
-    exit_driver_telekinesis(&(*edr)->telekinesis);
 
   if (!IS_NULL_PTR((*edr)->inotify)) exit_inotify(&(*edr)->inotify);
 
@@ -146,7 +140,6 @@ process_command_line_options(EDR **edr, int argc, char **argv)
         {
           init_cjson_main(edr);
           init_logger_main(edr);
-          init_telekinesis_main(edr);
         }
 
         if (strcmp(long_options[option_index].name, "view-quarantine") == 0)
@@ -181,7 +174,7 @@ process_command_line_options(EDR **edr, int argc, char **argv)
           init_logger_main(edr);
           init_inspector_main(edr);
 
-          QUARANTINE_FILES file = (QUARANTINE_FILES){.id = atoi(optarg)};
+          QUARANTINE_FILE file = (QUARANTINE_FILE){.id = atoi(optarg)};
           if (IS_ERR_FAILURE(
                       restore_quarantine_inspector((*edr)->inspector, &file)))
           {
@@ -197,7 +190,7 @@ process_command_line_options(EDR **edr, int argc, char **argv)
           init_logger_main(edr);
           init_inspector_main(edr);
 
-          QUARANTINE_FILES file = (QUARANTINE_FILES){.id = atoi(optarg)};
+          QUARANTINE_FILE file = (QUARANTINE_FILE){.id = atoi(optarg)};
           if (IS_ERR_FAILURE(
                       del_quarantine_inspector((*edr)->inspector, &file)))
           {

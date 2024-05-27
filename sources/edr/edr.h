@@ -10,10 +10,8 @@
 #include "config.h"
 #include "crowarmor/crowarmor.h"
 #include "inotify/inotify.h"
-#include "inspector/inspector.h"
 #include "logger/logger.h"
 #include "scanner/scanner.h"
-#include "telekinesis/telekinesis.h"
 
 /**
  * @struct EDR
@@ -24,7 +22,6 @@ typedef struct packed(8) EDR
   LOGGER             *logger;  /**< Pointer to the LOGGER instance. */
   SCANNER            *scanner; /**< Pointer to the SCANNER instance. */
   struct json_object *cjson;   /**< Pointer to the configuration JSON object. */
-  TELEKINESIS *telekinesis; /**< Pointer to the TELEKINESIS Driver instance. */
   INOTIFY     *inotify;     /**< Pointer to the INOTIFY instance. */
   INSPECTOR   *inspector;   /**< Pointer to the INSPECTOR instance. */
   CROWARMOR   *crowarmor;   /**< Pointer to the CROWARMOR instance. */
@@ -60,13 +57,6 @@ init_inotify_main(EDR **edr);
  */
 void
 init_scanner_main(EDR **edr);
-
-/**
- * @brief Initializes the TELEKINESIS component within the EDR module.
- * @param edr Pointer to the EDR instance.
- */
-void
-init_telekinesis_main(EDR **edr);
 
 /**
  * @brief Initializes the CROWARMOR component within the EDR module.

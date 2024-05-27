@@ -17,7 +17,7 @@
 #define SQL_DELETE_WHERE_QUARANTINE "DELETE FROM quarantine WHERE id = ?"
 
 ERR
-insert_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILES **file)
+insert_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILE **file)
 {
   int rc = sqlite3_prepare((*inspector)->db, SQL_INSERT_QUARANTINE, -1,
                            &(*inspector)->stmt, NULL);
@@ -63,7 +63,7 @@ select_all_quarantine_db(INSPECTOR **inspector,
 }
 
 ERR
-select_where_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILES **file)
+select_where_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILE **file)
 {
   int rc = sqlite3_prepare((*inspector)->db, SQL_SELECT_WHERE_QUARANTINE, -1,
                            &(*inspector)->stmt, NULL);
@@ -93,7 +93,7 @@ select_where_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILES **file)
 }
 
 ERR
-delete_where_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILES **file)
+delete_where_quarantine_db(INSPECTOR **inspector, QUARANTINE_FILE **file)
 {
   int rc = sqlite3_prepare((*inspector)->db, SQL_DELETE_WHERE_QUARANTINE, -1,
                            &(*inspector)->stmt, NULL);

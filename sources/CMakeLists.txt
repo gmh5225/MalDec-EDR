@@ -14,7 +14,7 @@ include_directories(
     ../drivers/crowarmor/include
 )
 
-add_subdirectory(daemon)
+#add_subdirectory(daemon)
 add_subdirectory(cli)
 
 if(compiler_gui)

@@ -11,11 +11,12 @@ file(GLOB_RECURSE sources
     ../scanner/*.c
     ../logger/*.c
     ../cjson/*.c
-    ../telekinesis/*.c
     ../inotify/*.c
     ../inspector/*.c
     ../compression/*.c
     ../crowarmor/*.c
+    ../memory/*.c
+    ../modules/*.c
 )
 
 target_sources(maldec-edr-cli PRIVATE ${sources})

@@ -51,7 +51,7 @@ init_inspector(INSPECTOR      **inspector,
  */
 ERR
 add_quarantine_inspector(INSPECTOR        *inspector,
-                         QUARANTINE_FILES *file) warn_unused_result;
+                         QUARANTINE_FILE *file) warn_unused_result;
 
 /**
  * @brief Removes a file from quarantine.
@@ -61,7 +61,7 @@ add_quarantine_inspector(INSPECTOR        *inspector,
  */
 ERR
 del_quarantine_inspector(INSPECTOR        *inspector,
-                         QUARANTINE_FILES *file) warn_unused_result;
+                         QUARANTINE_FILE *file) warn_unused_result;
 
 /**
  * @brief Restores a file from quarantine.
@@ -71,7 +71,7 @@ del_quarantine_inspector(INSPECTOR        *inspector,
  */
 ERR
 restore_quarantine_inspector(INSPECTOR        *inspector,
-                             QUARANTINE_FILES *file) warn_unused_result;
+                             QUARANTINE_FILE *file) warn_unused_result;
 
 /**
  * @brief Views quarantine files.
@@ -134,7 +134,7 @@ default_sync_quarantine(void *ins, const int count, char **data,
  */
 ERR
 insert_quarantine_db(INSPECTOR        **inspector,
-                     QUARANTINE_FILES **file) warn_unused_result;
+                     QUARANTINE_FILE **file) warn_unused_result;
 
 /**
  * @brief Selects quarantine files from the database based on a condition.
@@ -144,7 +144,7 @@ insert_quarantine_db(INSPECTOR        **inspector,
  */
 ERR
 select_where_quarantine_db(INSPECTOR        **inspector,
-                           QUARANTINE_FILES **file) warn_unused_result;
+                           QUARANTINE_FILE **file) warn_unused_result;
 
 /**
  * @brief Deletes quarantine files from the database based on a condition.
@@ -154,7 +154,7 @@ select_where_quarantine_db(INSPECTOR        **inspector,
  */
 ERR
 delete_where_quarantine_db(INSPECTOR        **inspector,
-                           QUARANTINE_FILES **file) warn_unused_result;
+                           QUARANTINE_FILE **file) warn_unused_result;
 
 /**
  * @brief Selects all quarantine files from the database.

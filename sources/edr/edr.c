@@ -7,7 +7,6 @@ init_edr(EDR **edr, EDR_CONFIG config)
   (*edr)->config      = config;
   (*edr)->inotify     = NULL;
   (*edr)->scanner     = NULL;
-  (*edr)->telekinesis = NULL;
   (*edr)->cjson       = NULL;
   (*edr)->logger      = NULL;
   (*edr)->inspector   = NULL;
@@ -164,45 +163,6 @@ init_logger_main(EDR **edr)
 #endif
 }
 
-inline void
-init_telekinesis_main(EDR **edr)
-{
-  struct json_object *telekinesis_obj, *driver_path_obj, *driver_name_obj;
-
-  if (json_object_object_get_ex((*edr)->cjson, "driver_telekinesis",
-                                &telekinesis_obj))
-  {
-    if (!json_object_object_get_ex(telekinesis_obj, "driver_path",
-                                   &driver_path_obj) ||
-        !json_object_object_get_ex(telekinesis_obj, "driver_name",
-                                   &driver_name_obj))
-    {
-      fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve "
-                                         "driver_telekinesis "
-                                         "configuration from JSON\n"));
-      exit(ERR_FAILURE);
-    }
-  }
-
-  TELEKINESIS_CONFIG config = (TELEKINESIS_CONFIG){
-          .driver_name = json_object_get_string(driver_name_obj),
-          .driver_path = json_object_get_string(driver_path_obj)};
-
-#ifdef DEBUG
-  LOG_DEBUG(LOG_MESSAGE_FORMAT("telekinesis.config.driver_name = '%s', "
-                               "telekinesis.config.driver_path = '%s' ",
-                               config.driver_name, config.driver_path));
-
-#endif
-
-  if (IS_ERR_FAILURE(init_driver_telekinesis(&(*edr)->telekinesis, config)))
-  {
-    fprintf(stderr, LOG_MESSAGE_FORMAT("Error in init driver %s\n",
-                                       config.driver_name));
-    exit(EXIT_FAILURE);
-  }
-}
-
 void
 init_crowarmor_main(EDR **edr)
 {
@@ -217,7 +177,7 @@ init_crowarmor_main(EDR **edr)
                                    &driver_name_obj))
     {
       fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve "
-                                         "driver_telekinesis "
+                                         "driver_crowarmor "
                                          "configuration from JSON\n"));
       exit(ERR_FAILURE);
     }

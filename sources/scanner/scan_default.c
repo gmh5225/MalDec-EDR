@@ -162,7 +162,7 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
       }
 
       time_t           datetime = time(NULL);
-      QUARANTINE_FILES file     = (QUARANTINE_FILES){
+      QUARANTINE_FILE file     = (QUARANTINE_FILE){
                   .filepath = path,
                   .detected = rule->identifier,
                   .filename = ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename,

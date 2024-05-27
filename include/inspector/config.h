@@ -1,13 +1,13 @@
 #pragma once
 
-typedef struct QUARANTINE_FILES
+typedef struct QUARANTINE_FILE
 {
   int         id;
   const char *filename;
   const char *filepath;
   const char *datetime;
   const char *detected;
-} QUARANTINE_FILES;
+} QUARANTINE_FILE;
 
 typedef struct QUARANTINE_CONFIG
 {
