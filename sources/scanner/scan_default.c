@@ -143,6 +143,9 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 rule->identifier,
                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath,
                 strings_match));
+
+        free(strings_match);
+        NO_USE_AFTER_FREE(strings_match);
       }
       else
       {
@@ -161,7 +164,7 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath));
       }
 
-      time_t           datetime = time(NULL);
+      time_t          datetime = time(NULL);
       QUARANTINE_FILE file     = (QUARANTINE_FILE){
                   .filepath = path,
                   .detected = rule->identifier,
@@ -178,13 +181,6 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 "ERR_FAILURE Failed to add file '%s' to quarantine.",
                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename));
       }
-
-      if (((SCANNER_CALLBACK_ARGS *)user_data)->config.verbose)
-      {
-        free(strings_match);
-        NO_USE_AFTER_FREE(strings_match);
-      }
-
       break;
 
     case CALLBACK_MSG_RULE_NOT_MATCHING: break;

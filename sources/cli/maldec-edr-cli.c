@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <systemd/sd-bus.h>
+//#include <systemd/sd-bus.h>
 
 #include "compiler/compiler_attribute.h"
 #include "compression/zlib.h"
@@ -90,8 +90,6 @@ cleanup_resources(EDR **edr)
   if (!IS_NULL_PTR((*edr)->inotify)) exit_inotify(&(*edr)->inotify);
 
   if (!IS_NULL_PTR((*edr)->inspector)) exit_inspector(&(*edr)->inspector);
-
-  exit(EXIT_SUCCESS);
 }
 
 void
