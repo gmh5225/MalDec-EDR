@@ -140,7 +140,7 @@ process_command_line_options(EDR **edr, int argc, char **argv)
         if (strcmp(long_options[option_index].name, "view-quarantine") == 0)
         {
           init_inspector_main(edr);
-          if (IS_ERR_FAILURE(view_quarantine_inspector(
+          if (IS_ERR_FAILURE(sql_quarantine_inspector(
                       (*edr)->inspector, DEFAULT_VIEW_QUARANTINE)))
           {
             fprintf(stderr, LOG_MESSAGE_FORMAT("Error view quarantine\n"));
@@ -151,7 +151,7 @@ process_command_line_options(EDR **edr, int argc, char **argv)
         if (strcmp(long_options[option_index].name, "sync-quarantine") == 0)
         {
           init_inspector_main(edr);
-          if (IS_ERR_FAILURE(sync_quarantine_inspector(
+          if (IS_ERR_FAILURE(sql_quarantine_inspector(
                       (*edr)->inspector, DEFAULT_SYNC_QUARANTINE)))
           {
             fprintf(stderr, LOG_MESSAGE_FORMAT("Error sync quarantine\n"));

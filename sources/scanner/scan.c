@@ -40,10 +40,9 @@ scan_file(SCANNER *scanner, YR_CALLBACK_FUNC callback)
                                         : (SCAN_FLAGS_REPORT_RULES_MATCHING),
                                 callback, user_data, 0);
 
-  if (code == ERROR_INSUFFICIENT_MEMORY ||
-      code == ERROR_COULD_NOT_MAP_FILE || code == ERROR_TOO_MANY_SCAN_THREADS ||
-      code == ERROR_SCAN_TIMEOUT || code == ERROR_CALLBACK_ERROR ||
-      code == ERROR_TOO_MANY_MATCHES)
+  if (code == ERROR_INSUFFICIENT_MEMORY || code == ERROR_COULD_NOT_MAP_FILE ||
+      code == ERROR_TOO_MANY_SCAN_THREADS || code == ERROR_SCAN_TIMEOUT ||
+      code == ERROR_CALLBACK_ERROR || code == ERROR_TOO_MANY_MATCHES)
   {
     retval = ERR_FAILURE;
   }
@@ -62,7 +61,6 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
   struct dirent *entry;
   DIR           *dd       = opendir(config.filepath);
   const size_t   dir_size = strlen(config.filepath);
-  const char    *fmt      = (!strcmp(config.filepath, "/")) ? "%s%s" : "%s/%s";
 
   if (config.max_depth >= 0 && current_depth > config.max_depth)
   {
@@ -88,7 +86,9 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
     }
 
     char fullpath[size];
-    snprintf(fullpath, size, fmt, config.filepath, name);
+    snprintf(fullpath, size, (!strcmp(config.filepath, "/")) ? "%s%s" : "%s/%s",
+             config.filepath, name);
+             
     scanner->config.filepath = fullpath;
     scanner->config.filename = name;
 

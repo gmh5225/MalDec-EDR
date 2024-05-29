@@ -11,6 +11,7 @@ typedef struct MEMORY
 {
   MEMORY_CONFIG config; /**< Configuration for the inspector. */
   void         *head;
+  void         *ptr;
 
 } MEMORY;
 
@@ -19,19 +20,19 @@ typedef struct MEMORY
  */
 typedef struct BLOCK
 {
-  void    *claim;
+  void    *mem;
   uint64_t size;
 
 } BLOCK;
 
-void *
+void
 init_memory(MEMORY **memory, MEMORY_CONFIG config);
 
-void *
+void
 reclaim_memory();
 
 void
-free_ptr();
+free_block(BLOCK **block);
 
 void
-exit_memory();
+exit_memory(MEMORY **memory);

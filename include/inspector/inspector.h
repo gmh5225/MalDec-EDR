@@ -74,24 +74,13 @@ restore_quarantine_inspector(INSPECTOR        *inspector,
                              QUARANTINE_FILE *file) warn_unused_result;
 
 /**
- * @brief Views quarantine files.
+ * @brief execute sql in quarantine files.
  * @param[in] inspector Pointer to the inspector.
  * @param[in] callback Callback function to process quarantine files.
  * @return ERR code indicating success or failure.
  */
 ERR
-view_quarantine_inspector(INSPECTOR *inspector,
-                          int (*callback)(void *ins, int, char **,
-                                          char **)) warn_unused_result;
-
-/**
- * @brief Syncs quarantine files.
- * @param[in] inspector Pointer to the inspector.
- * @param[in] callback Callback function to sync quarantine files.
- * @return ERR code indicating success or failure.
- */
-ERR
-sync_quarantine_inspector(INSPECTOR *inspector,
+sql_quarantine_inspector(INSPECTOR *inspector,
                           int (*callback)(void *ins, int, char **,
                                           char **)) warn_unused_result;
 

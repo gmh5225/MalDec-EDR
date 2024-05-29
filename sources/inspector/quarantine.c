@@ -121,8 +121,8 @@ restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILE *file)
 }
 
 inline ERR
-view_quarantine_inspector(INSPECTOR *inspector,
-                          int (*callback)(void *, int, char **, char **))
+sql_quarantine_inspector(INSPECTOR *inspector,
+                         int (*callback)(void *, int, char **, char **))
 {
   if (IS_ERR_FAILURE(select_all_quarantine_db(&inspector, callback)))
   {
@@ -130,20 +130,5 @@ view_quarantine_inspector(INSPECTOR *inspector,
     return ERR_FAILURE;
   }
 
-  return ERR_SUCCESS;
-}
-
-inline ERR
-sync_quarantine_inspector(INSPECTOR *inspector,
-                          int (*callback)(void *ins, int, char **, char **))
-{
-  if (IS_ERR_FAILURE(select_all_quarantine_db(&inspector, callback)))
-  {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select table quarantine"));
-    return ERR_FAILURE;
-  }
-
-  LOG_INFO(LOG_MESSAGE_FORMAT("Database '%s' synced",
-                              inspector->config.database));
   return ERR_SUCCESS;
 }
