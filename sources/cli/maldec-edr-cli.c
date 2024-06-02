@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <systemd/sd-bus.h>
+#include <systemd/sd-bus.h>
 
 #include "compiler/compiler_attribute.h"
 #include "compression/zlib.h"
