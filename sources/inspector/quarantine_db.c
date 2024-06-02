@@ -8,6 +8,10 @@
   "VALUES (?, ?, ?, ?)"
 
 #define SQL_SELECT_QUARANTINE "SELECT * FROM quarantine"
+#define JSON_SQL_SELECT_QUARANTINE                                         \
+  "SELECT json_group_array(json_object('id', id, 'filename', filename, "   \
+  "'filepath', filepath, 'detected', detected, 'datetime', datetime)) AS " \
+  "json_data FROM quarantine"
 
 #define SQL_SELECT_WHERE_QUARANTINE      \
   "SELECT * FROM quarantine WHERE id = " \
@@ -54,11 +58,36 @@ select_all_quarantine_db(INSPECTOR **inspector,
   char *sqlite_err_msg = NULL;
   int   rc = sqlite3_exec((*inspector)->db, SQL_SELECT_QUARANTINE, callback,
                           *inspector, &sqlite_err_msg);
+
   if (rc != SQLITE_OK)
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", rc, sqlite_err_msg));
     return ERR_FAILURE;
   }
+
+  return ERR_SUCCESS;
+}
+
+ERR
+select_all_quarantine_json_db(INSPECTOR **inspector,
+                              const char **__restrict__ json_dump)
+{
+  char         *sqlite_err_msg = NULL;
+  sqlite3_stmt *stmt;
+  int rc = sqlite3_prepare_v2((*inspector)->db, JSON_SQL_SELECT_QUARANTINE, -1,
+                              &stmt, 0);
+
+  if (rc != SQLITE_OK)
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d  (%s)", rc, sqlite_err_msg));
+    return ERR_FAILURE;
+  }
+
+  if (sqlite3_step(stmt) == SQLITE_ROW)
+  {
+    *json_dump = (const char *)sqlite3_column_text(stmt, 0);
+  }
+
   return ERR_SUCCESS;
 }
 

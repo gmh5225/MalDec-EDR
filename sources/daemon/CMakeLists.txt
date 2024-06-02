@@ -5,15 +5,26 @@ cmake_minimum_required(VERSION 3.0.2)
 add_executable(maldec-edr-daemon maldec-edr-daemon.c)
 
 set(FLAGS_OPTIMIZATIONS ON)
-set(FLAGS_DEBUG OFF)
+set(FLAGS_DEBUG ON)
 
 file(GLOB_RECURSE sources
+    ./*.c
     sig-hdlr/*.c
     bus-ifc/*.c
+    ../edr/*.c
+    ../scanner/*.c
+    ../logger/*.c
+    ../cjson/*.c
+    ../inotify/*.c
+    ../inspector/*.c
+    ../compression/*.c
+    ../crowarmor/*.c
+    ../memory/*.c
+    ../modules/*.c
 )
 
 target_sources(maldec-edr-daemon PRIVATE ${sources})
-target_link_libraries(maldec-edr-daemon PUBLIC yara c-logger json-c systemd)
+target_link_libraries(maldec-edr-daemon PUBLIC yara c-logger json-c systemd z sqlite3)
 
 if(FLAGS_OPTIMIZATIONS)
     target_compile_options(maldec-edr-daemon PUBLIC

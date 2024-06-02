@@ -22,10 +22,10 @@ typedef struct packed(8) EDR
   LOGGER             *logger;  /**< Pointer to the LOGGER instance. */
   SCANNER            *scanner; /**< Pointer to the SCANNER instance. */
   struct json_object *cjson;   /**< Pointer to the configuration JSON object. */
-  INOTIFY     *inotify;     /**< Pointer to the INOTIFY instance. */
-  INSPECTOR   *inspector;   /**< Pointer to the INSPECTOR instance. */
-  CROWARMOR   *crowarmor;   /**< Pointer to the CROWARMOR instance. */
-  EDR_CONFIG config;   /**< Configuration settings for EDR. */
+  INOTIFY            *inotify; /**< Pointer to the INOTIFY instance. */
+  INSPECTOR          *inspector; /**< Pointer to the INSPECTOR instance. */
+  CROWARMOR          *crowarmor; /**< Pointer to the CROWARMOR instance. */
+  EDR_CONFIG          config;    /**< Configuration settings for EDR. */
 }
 EDR;
 

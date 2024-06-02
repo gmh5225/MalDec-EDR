@@ -14,11 +14,29 @@
 #include "compiler/compiler_attribute.h"
 #include "compression/zlib.h"
 #include "config.h"
+#include "daemon/bus-ifc/bus-ifc.h"
 #include "edr/edr.h"
 #include "err/err.h"
 #include "inspector/inspector.h"
 #include "version/version.h"
 
+#define CALL_METHOD(method, sig, data...)                                \
+  sd_bus_call_method(bus, DEFAULT_DBUS_INTERFACE, DEFAULT_DBUS_PATH,     \
+                     DEFAULT_DBUS_INTERFACE, #method, &error, &msg, sig, \
+                     data);
+#define BUS_CHECK()                                                            \
+  {                                                                            \
+    r = sd_bus_message_read(msg, "i", &bus_ret);                               \
+    if (r < 0)                                                                 \
+    {                                                                          \
+      fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r)); \
+    }                                                                          \
+                                                                               \
+    if (bus_ret < 0)                                                           \
+    {                                                                          \
+      fprintf(stderr, "Something failed on daemon: %s\n", strerror(-r));       \
+    }                                                                          \
+  }
 static inline void no_return
 help(char *prog_name)
 {
@@ -74,26 +92,9 @@ pr_version()
   exit(ERR_SUCCESS);
 }
 
-static inline void
-cleanup_resources(EDR **edr)
-{
-  if (IS_NULL_PTR(*edr)) exit(EXIT_SUCCESS);
-
-  if (!IS_NULL_PTR((*edr)->cjson)) exit_json(&(*edr)->cjson);
-
-  if (!IS_NULL_PTR((*edr)->logger)) exit_logger(&(*edr)->logger);
-
-  if (!IS_NULL_PTR((*edr)->scanner))
-    if (IS_ERR_FAILURE(exit_scanner(&(*edr)->scanner)))
-      printf(LOG_MESSAGE_FORMAT("Error in exit scanner"));
-
-  if (!IS_NULL_PTR((*edr)->inotify)) exit_inotify(&(*edr)->inotify);
-
-  if (!IS_NULL_PTR((*edr)->inspector)) exit_inspector(&(*edr)->inspector);
-}
-
 void
-process_command_line_options(EDR **edr, int argc, char **argv)
+process_command_line_options(sd_bus *bus, sd_bus_message *msg,
+                             sd_bus_error error, int argc, char **argv)
 {
   // Command-line options
   struct option long_options[] = {
@@ -114,10 +115,15 @@ process_command_line_options(EDR **edr, int argc, char **argv)
   };
 
   int option_index = 0;
-  int c;
+  int c, r, bus_ret;
 
-  init_cjson_main(edr);
-  init_logger_main(edr);
+  // Options
+  int         max_depth = 0;
+  bool        verbose   = false;
+  const char *filepath  = NULL;
+  uint8_t     scan_type = 0;
+
+  BUS_CHECK();
 
   while ((c = getopt_long(argc, argv, "qs:y:d:vh", long_options,
                           &option_index)) != -1)
@@ -126,98 +132,105 @@ process_command_line_options(EDR **edr, int argc, char **argv)
     {
       case 0:
         // Scan
-        if (!IS_NULL_PTR((*edr)->scanner))
+        if (strcmp(long_options[option_index].name, "max-depth") == 0)
         {
-          if (strcmp(long_options[option_index].name, "max-depth") == 0)
-          {
-            int max_depth                     = atoi(optarg);
-            (*edr)->scanner->config.max_depth = abs(max_depth);
-          }
-          if (strcmp(long_options[option_index].name, "verbose") == 0)
-            (*edr)->scanner->config.verbose = true;
+          max_depth = abs(atoi(optarg));
+        }
+
+        if (strcmp(long_options[option_index].name, "verbose") == 0)
+        {
+          verbose = true;
         }
 
         if (strcmp(long_options[option_index].name, "view-quarantine") == 0)
         {
-          init_inspector_main(edr);
-          if (IS_ERR_FAILURE(sql_quarantine_inspector(
-                      (*edr)->inspector, DEFAULT_VIEW_QUARANTINE)))
+          const char *json = NULL;
+          r                = CALL_METHOD(QuarantineView, "", '\0');
+          if (r < 0)
           {
-            fprintf(stderr, LOG_MESSAGE_FORMAT("Error view quarantine\n"));
-          };
+            fprintf(stderr, "Error during \"QuarantineView\" method call: %s\n",
+                    strerror(-r));
+            return;
+          }
+
+          r = sd_bus_message_read(msg, "s", &json);
+          if (r < 0)
+          {
+            fprintf(stderr, "Failed to parse response message: %s\n",
+                    strerror(-r));
+          }
+
+          printf("%s\n", json);
         }
 
         // Quarantine for malwares
         if (strcmp(long_options[option_index].name, "sync-quarantine") == 0)
         {
-          init_inspector_main(edr);
-          if (IS_ERR_FAILURE(sql_quarantine_inspector(
-                      (*edr)->inspector, DEFAULT_SYNC_QUARANTINE)))
+          r = CALL_METHOD(QuarantineSync, "", '\0');
+          if (r < 0)
           {
-            fprintf(stderr, LOG_MESSAGE_FORMAT("Error sync quarantine\n"));
-          };
+            fprintf(stderr, "Error during \"QuarantineSync\" method call: %s\n",
+                    strerror(-r));
+            return;
+          }
+
+          BUS_CHECK();
         }
 
         if (strcmp(long_options[option_index].name, "restore-"
                                                     "quarantine") == 0)
         {
-          init_inspector_main(edr);
-
-          QUARANTINE_FILE file = (QUARANTINE_FILE){.id = atoi(optarg)};
-          if (IS_ERR_FAILURE(
-                      restore_quarantine_inspector((*edr)->inspector, &file)))
+          r = CALL_METHOD(QuarantineRestore, "u", atoi(optarg));
+          if (r < 0)
           {
-            fprintf(stderr, LOG_MESSAGE_FORMAT("Error in restore file in "
-                                               "quarantine\n"));
-          };
+            fprintf(stderr,
+                    "Error during \"QuarantineRestore\" method call: %s\n",
+                    strerror(-r));
+            return;
+          }
+
+          BUS_CHECK();
         }
 
         if (strcmp(long_options[option_index].name, "delete-"
                                                     "quarantine") == 0)
         {
-          init_inspector_main(edr);
-
-          QUARANTINE_FILE file = (QUARANTINE_FILE){.id = atoi(optarg)};
-          if (IS_ERR_FAILURE(
-                      del_quarantine_inspector((*edr)->inspector, &file)))
+          r = CALL_METHOD(QuarantineDelete, "u", atoi(optarg));
+          if (r < 0)
           {
-            fprintf(stderr, LOG_MESSAGE_FORMAT("Error in delete file in "
-                                               "quarantine\n"));
-          };
+            fprintf(stderr,
+                    "Error during \"QuarantineDelete\" method call: %s\n",
+                    strerror(-r));
+            return;
+          }
+
+          BUS_CHECK();
         }
 
         // Driver CrowArmor
-        if (strcmp(long_options[option_index].name, "status-crowarmor") == 0)
+        if (strcmp(long_options[option_index].name, "status-"
+                                                    "crowarmo"
+                                                    "r") == 0)
         {
-          init_crowarmor_main(edr);
-          check_driver_crowarmor_activated((*edr)->crowarmor);
+          r = CALL_METHOD(CrowArmor, "", '\0');
+          if (r < 0)
+          {
+            fprintf(stderr, "Error during \"CrowArmor\" method call: %s\n",
+                    strerror(-r));
+            return;
+          }
+
+          BUS_CHECK();
         }
         break;
 
-      case 's':
-        init_inspector_main(edr);
-        init_scanner_main(edr);
-        (*edr)->scanner->config.filepath  = optarg;
-        (*edr)->scanner->config.inspector = (*edr)->inspector;
+      case 's': filepath = strdup(optarg); break;
+
+      case 'q': scan_type |= QUICK_SCAN; break;
+
+      case 'v':
+        pr_version();
         break;
-
-      case 'q': (*edr)->scanner->config.scan_type |= QUICK_SCAN; break;
-
-      case 'v': pr_version(); break;
-
-      case 'y':
-        init_scanner_main(edr);
-        init_inotify_main(edr);
-        init_inspector_main(edr);
-        (*edr)->inotify->config.mask = (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
-        (*edr)->inotify->config.time = atoi(optarg);
-        (*edr)->scanner->config.inotify   = (*edr)->inotify;
-        (*edr)->scanner->config.inspector = (*edr)->inspector;
-        set_watch_paths((*edr)->inotify);
-        if (IS_ERR_FAILURE(scan_listen_inotify((*edr)->scanner)))
-        {
-          fprintf(stderr, LOG_MESSAGE_FORMAT("Error scan inotify\n"));
-        }
         break;
 
       case 'h':
@@ -227,10 +240,16 @@ process_command_line_options(EDR **edr, int argc, char **argv)
     }
   }
 
-  // Scan Yara
-  if (!IS_NULL_PTR((*edr)->scanner) && IS_NULL_PTR((*edr)->inotify))
-    if (IS_ERR_FAILURE(scan_files_and_dirs((*edr)->scanner)))
-      fprintf(stderr, LOG_MESSAGE_FORMAT("Error in scan\n"));
+  if (verbose != false || max_depth != 0 || filepath != NULL)
+  {
+    r = CALL_METHOD(InitParams, "bis", verbose, max_depth, filepath);
+    if (r < 0)
+    {
+      fprintf(stderr, "Error during \"InitParams\" method call: %s\n",
+              strerror(-r));
+      return;
+    }
+  }
 }
 
 int
@@ -238,25 +257,24 @@ main(int argc, char **argv)
 {
   if (argc < 2) { help(argv[0]); }
 
-  EDR *edr;
+  sd_bus_error    error = SD_BUS_ERROR_NULL;
+  sd_bus_message *msg   = NULL;
+  sd_bus         *bus   = NULL;
+  int             r;
 
-  EDR_CONFIG config = (EDR_CONFIG){
-#ifdef DEBUG
-          .settings_json_path = "../../../config/"
-                                "appsettings.development.json",
+  // NOTE: Probably I'll need to change this to sd_bus_open_system
+  r = sd_bus_open_user(&bus);
+  if (r < 0)
+  {
+    fprintf(stderr, "Failed to connect to system bus: %s\n", strerror(-r));
+    return -1;
+  }
 
-#else
-          .settings_json_path = "../../../config/appsettings.json",
-#endif
-  };
+  process_command_line_options(bus, msg, error, argc, argv);
 
-  init_edr(&edr, config);
-
-  process_command_line_options(&edr, argc, argv);
-
-  cleanup_resources(&edr);
-
-  exit_edr(&edr);
+  sd_bus_error_free(&error);
+  sd_bus_message_unref(msg);
+  sd_bus_unref(bus);
 
   return ERR_SUCCESS;
 }

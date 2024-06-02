@@ -131,4 +131,51 @@ sql_quarantine_inspector(INSPECTOR *inspector,
   }
 
   return ERR_SUCCESS;
+<<<<<<< HEAD
+||||||| parent of 16e7dca (huge commit ahead, sorry)
+}
+
+inline ERR
+sync_quarantine_inspector(INSPECTOR *inspector,
+                          int (*callback)(void *ins, int, char **, char **))
+{
+  if (IS_ERR_FAILURE(select_all_quarantine_db(&inspector, callback)))
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select table quarantine"));
+    return ERR_FAILURE;
+  }
+
+  LOG_INFO(LOG_MESSAGE_FORMAT("Database '%s' synced",
+                              inspector->config.database));
+  return ERR_SUCCESS;
+=======
+}
+
+inline ERR
+view_json_dump_inspector(INSPECTOR *inspector,
+                         const char **__restrict__ json_dump)
+{
+  if (IS_ERR_FAILURE(select_all_quarantine_json_db(&inspector, json_dump)))
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select table quarantine"));
+    return ERR_FAILURE;
+  }
+
+  return ERR_SUCCESS;
+}
+
+inline ERR
+sync_quarantine_inspector(INSPECTOR *inspector,
+                          int (*callback)(void *ins, int, char **, char **))
+{
+  if (IS_ERR_FAILURE(select_all_quarantine_db(&inspector, callback)))
+  {
+    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select table quarantine"));
+    return ERR_FAILURE;
+  }
+
+  LOG_INFO(LOG_MESSAGE_FORMAT("Database '%s' synced",
+                              inspector->config.database));
+  return ERR_SUCCESS;
+>>>>>>> 16e7dca (huge commit ahead, sorry)
 }

@@ -50,7 +50,7 @@ init_inspector(INSPECTOR      **inspector,
  * @return ERR code indicating success or failure.
  */
 ERR
-add_quarantine_inspector(INSPECTOR        *inspector,
+add_quarantine_inspector(INSPECTOR       *inspector,
                          QUARANTINE_FILE *file) warn_unused_result;
 
 /**
@@ -60,7 +60,7 @@ add_quarantine_inspector(INSPECTOR        *inspector,
  * @return ERR code indicating success or failure.
  */
 ERR
-del_quarantine_inspector(INSPECTOR        *inspector,
+del_quarantine_inspector(INSPECTOR       *inspector,
                          QUARANTINE_FILE *file) warn_unused_result;
 
 /**
@@ -70,7 +70,7 @@ del_quarantine_inspector(INSPECTOR        *inspector,
  * @return ERR code indicating success or failure.
  */
 ERR
-restore_quarantine_inspector(INSPECTOR        *inspector,
+restore_quarantine_inspector(INSPECTOR       *inspector,
                              QUARANTINE_FILE *file) warn_unused_result;
 
 /**
@@ -80,7 +80,20 @@ restore_quarantine_inspector(INSPECTOR        *inspector,
  * @return ERR code indicating success or failure.
  */
 ERR
-sql_quarantine_inspector(INSPECTOR *inspector,
+view_quarantine_inspector(INSPECTOR *inspector,
+                          int (*callback)(void *ins, int, char **,
+                                          char **)) warn_unused_result;
+ERR
+view_json_dump_inspector(INSPECTOR *inspector,
+                         const char **__restrict__ json_dump) warn_unused_result;
+/**
+ * @brief Syncs quarantine files.
+ * @param[in] inspector Pointer to the inspector.
+ * @param[in] callback Callback function to sync quarantine files.
+ * @return ERR code indicating success or failure.
+ */
+ERR
+sync_quarantine_inspector(INSPECTOR *inspector,
                           int (*callback)(void *ins, int, char **,
                                           char **)) warn_unused_result;
 
@@ -122,7 +135,7 @@ default_sync_quarantine(void *ins, const int count, char **data,
  * @return ERR code indicating success or failure.
  */
 ERR
-insert_quarantine_db(INSPECTOR        **inspector,
+insert_quarantine_db(INSPECTOR       **inspector,
                      QUARANTINE_FILE **file) warn_unused_result;
 
 /**
@@ -132,7 +145,7 @@ insert_quarantine_db(INSPECTOR        **inspector,
  * @return ERR code indicating success or failure.
  */
 ERR
-select_where_quarantine_db(INSPECTOR        **inspector,
+select_where_quarantine_db(INSPECTOR       **inspector,
                            QUARANTINE_FILE **file) warn_unused_result;
 
 /**
@@ -142,7 +155,7 @@ select_where_quarantine_db(INSPECTOR        **inspector,
  * @return ERR code indicating success or failure.
  */
 ERR
-delete_where_quarantine_db(INSPECTOR        **inspector,
+delete_where_quarantine_db(INSPECTOR       **inspector,
                            QUARANTINE_FILE **file) warn_unused_result;
 
 /**
@@ -155,6 +168,11 @@ ERR
 select_all_quarantine_db(INSPECTOR **inspector,
                          int (*callback)(void *, int, char **,
                                          char **)) warn_unused_result;
+
+ERR
+select_all_quarantine_json_db(INSPECTOR **inspector,
+                              const char **__restrict__ json_dump)
+        warn_unused_result;
 
 /**
  * @brief Exits and finalizes the SQLite statement.

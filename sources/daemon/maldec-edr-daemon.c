@@ -20,7 +20,7 @@ main(void)
 
   notify_success();
 
-  start_dbus_interface("/net/edr/maldec", "net.edr.MalDec");
+  start_dbus_interface(DEFAULT_DBUS_PATH, DEFAULT_DBUS_INTERFACE);
 
   return 0;
 }

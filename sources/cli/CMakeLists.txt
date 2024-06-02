@@ -20,7 +20,8 @@ file(GLOB_RECURSE sources
 )
 
 target_sources(maldec-edr-cli PRIVATE ${sources})
-target_link_libraries(maldec-edr-cli PUBLIC yara c-logger json-c sqlite3 zlib)
+target_link_libraries(maldec-edr-cli PUBLIC yara c-logger json-c sqlite3 zlib systemd)
+target_include_directories(maldec-edr-cli PRIVATE ${PROJECT_SOURCE_DIR}/libraries/uthash)
 
 if(FLAGS_OPTIMIZATIONS)
     target_compile_options(maldec-edr-cli PUBLIC

@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <systemd/sd-bus.h>
+#include <pthread.h>
 
+#include "../bus_methods.h"
 #include "bus-ifc.h"
 
 #define DBUS_CLEAN(slot, bus) \
@@ -10,27 +12,23 @@
     sd_bus_unref(bus);        \
   }
 
-// TODO: Remove printf calls
-
-static int
-method_echo(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
-{
-  char *msg = NULL;
-  int   r   = 0;
-
-  r = sd_bus_message_read(m, "s", &msg);
-  if (r < 0)
-  {
-    printf("Failed to connect to system bus: %i, %s\n", r, strerror(r));
-    return r;
-  }
-
-  return sd_bus_reply_method_return(m, "s", msg);
-}
-
-static const sd_bus_vtable DEFAULT_VTABLE[] = {
+const sd_bus_vtable DEFAULT_VTABLE[] = {
         SD_BUS_VTABLE_START(0),
-        SD_BUS_METHOD("Echo", "s", "s", method_echo,
+        SD_BUS_METHOD("InitParams", "bis", "i", method_init_params,
+                      SD_BUS_VTABLE_UNPRIVILEGED),
+        SD_BUS_METHOD("Scan", "s", "i", method_scan,
+                      SD_BUS_VTABLE_UNPRIVILEGED),
+        SD_BUS_METHOD("CrowArmor", "s", "i", method_driver_crowarmor,
+                      SD_BUS_VTABLE_UNPRIVILEGED),
+        SD_BUS_METHOD("QuarantineView", "", "s", method_quarantine_view,
+                      SD_BUS_VTABLE_UNPRIVILEGED),
+        SD_BUS_METHOD("QuarantineSync", "", "i", method_quarantine_sync,
+                      SD_BUS_VTABLE_UNPRIVILEGED),
+        SD_BUS_METHOD("QuarantineRestore", "u", "i", method_quarantine_restore,
+                      SD_BUS_VTABLE_UNPRIVILEGED),
+        SD_BUS_METHOD("QuarantineDelete", "u", "i", method_quarantine_delete,
+                      SD_BUS_VTABLE_UNPRIVILEGED),
+        SD_BUS_METHOD("Clean", "", "i", method_clean,
                       SD_BUS_VTABLE_UNPRIVILEGED),
         SD_BUS_VTABLE_END};
 
@@ -40,6 +38,9 @@ start_dbus_interface(const char *path, const char *interface)
   sd_bus_slot *slot = NULL;
   sd_bus      *bus  = NULL;
   int          r    = 0;
+  pthread_t tid;
+
+  tid = init_all();
 
   // NOTE: Probably I'll need to change this to sd_bus_open_system
   r = sd_bus_open_user(&bus);
@@ -55,7 +56,7 @@ start_dbus_interface(const char *path, const char *interface)
 
   if (r < 0)
   {
-    printf("Failed to issue method call: %s\n", strerror(-r));
+    printf("(Daemon) Failed to issue method call: %s\n", strerror(-r));
     DBUS_CLEAN(slot, bus);
     return r;
   }
@@ -92,4 +93,6 @@ start_dbus_interface(const char *path, const char *interface)
       return r;
     }
   }
+
+  pthread_join(tid, NULL);
 }

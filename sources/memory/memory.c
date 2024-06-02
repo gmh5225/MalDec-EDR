@@ -1,4 +1,5 @@
 #include "memory/memory.h"
+<<<<<<< HEAD
 #include "err/err.h"
 #include <stdlib.h>
 
@@ -27,3 +28,8 @@ exit_memory(MEMORY **memory)
 {
   if (IS_NULL_PTR(*memory)) free(*memory);
 }
+||||||| parent of 16e7dca (huge commit ahead, sorry)
+
+
+=======
+>>>>>>> 16e7dca (huge commit ahead, sorry)
