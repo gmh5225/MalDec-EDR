@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.0.2)
 # add executable and target libraries
 add_executable(maldec-edr-daemon maldec-edr-daemon.c)
 
-set(FLAGS_OPTIMIZATIONS ON)
-set(FLAGS_DEBUG OFF)
+set(FLAGS_OPTIMIZATIONS OFF)
+set(FLAGS_DEBUG ON)
 
 file(GLOB_RECURSE sources
     ./*.c

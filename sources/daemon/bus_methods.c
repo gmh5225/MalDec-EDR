@@ -20,9 +20,16 @@ thread(void *args)
 int
 init_all(void)
 {
-  EDR_CONFIG config = (EDR_CONFIG){.settings_json_path = "config/"
-                                                         "appsettings."
-                                                         "development.json"};
+  EDR_CONFIG config = (EDR_CONFIG){
+  #ifdef DEBUG
+            .settings_json_path = "../../../config/"
+                                  "appsettings.development.json",
+
+  #else
+            .settings_json_path = "../../../config/appsettings.json"
+  #endif
+  };
+
   pthread_t  tid;
 
   init_edr(&edr, config);
@@ -73,6 +80,10 @@ method_clean(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 int
 method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
+  // 
+  userdata = userdata;
+  ret_error = ret_error;
+
   bool    verbose   = false;
   int     max_depth = 0;
   uint8_t scan_type = 0;
@@ -98,6 +109,9 @@ method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 int
 method_scan(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
+  userdata = userdata;
+  ret_error = ret_error;
+
   char *filepath = NULL;
   int   r        = 0;
 
@@ -111,14 +125,10 @@ method_scan(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
   edr->scanner->config.filepath  = filepath;
   edr->scanner->config.inspector = edr->inspector;
 
-  printf("Scannig %s...\n", filepath);
-
   // Scan Yara
   if (!IS_NULL_PTR(edr->scanner) && IS_NULL_PTR(edr->inotify))
     if (IS_ERR_FAILURE(scan_files_and_dirs(edr->scanner)))
       fprintf(stderr, LOG_MESSAGE_FORMAT("Error in scan\n"));
-
-  printf("Scan!\n");
 
   return sd_bus_reply_method_return(m, "i", r);
 }
@@ -127,6 +137,9 @@ int
 method_driver_crowarmor(sd_bus_message *m, void *userdata,
                         sd_bus_error *ret_error)
 {
+  userdata = userdata;
+  ret_error = ret_error;
+
   init_crowarmor_main(&edr);
   check_driver_crowarmor_activated(edr->crowarmor);
 
@@ -137,6 +150,9 @@ int
 method_quarantine_view(sd_bus_message *m, void *userdata,
                        sd_bus_error *ret_error)
 {
+  userdata = userdata;
+  ret_error = ret_error;
+
   const char *json = NULL;
 
   if (IS_ERR_FAILURE(view_json_dump_inspector(edr->inspector, &json)))
@@ -151,6 +167,9 @@ int
 method_quarantine_sync(sd_bus_message *m, void *userdata,
                        sd_bus_error *ret_error)
 {
+  userdata = userdata;
+  ret_error = ret_error;
+
   int r = 0;
 
   if (IS_ERR_FAILURE(sync_quarantine_inspector(edr->inspector,
@@ -167,6 +186,9 @@ int
 method_quarantine_restore(sd_bus_message *m, void *userdata,
                           sd_bus_error *ret_error)
 {
+  userdata = userdata;
+  ret_error = ret_error;
+
   int r, id;
 
   r = sd_bus_message_read(m, "u", &id);
@@ -192,6 +214,9 @@ int
 method_quarantine_delete(sd_bus_message *m, void *userdata,
                          sd_bus_error *ret_error)
 {
+  userdata = userdata;
+  ret_error = ret_error;
+
   int r, id;
 
   r = sd_bus_message_read(m, "u", &id);
@@ -216,6 +241,9 @@ method_quarantine_delete(sd_bus_message *m, void *userdata,
 int
 method_echo(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
+  userdata = userdata;
+  ret_error = ret_error;
+
   void *msg = NULL;
   int   r   = 0;
 
