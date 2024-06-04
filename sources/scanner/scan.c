@@ -88,7 +88,7 @@ scan_dir(SCANNER *scanner, YR_CALLBACK_FUNC callback, int32_t current_depth)
     char fullpath[size];
     snprintf(fullpath, size, (!strcmp(config.filepath, "/")) ? "%s%s" : "%s/%s",
              config.filepath, name);
-             
+
     scanner->config.filepath = fullpath;
     scanner->config.filename = name;
 

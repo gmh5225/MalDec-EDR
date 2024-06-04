@@ -1,7 +1,7 @@
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <systemd/sd-bus.h>
-#include <pthread.h>
 
 #include "../bus_methods.h"
 #include "bus-ifc.h"
@@ -14,7 +14,7 @@
 
 const sd_bus_vtable DEFAULT_VTABLE[] = {
         SD_BUS_VTABLE_START(0),
-        SD_BUS_METHOD("InitParams", "bis", "i", method_init_params,
+        SD_BUS_METHOD("InitParams", "biy", "i", method_init_params,
                       SD_BUS_VTABLE_UNPRIVILEGED),
         SD_BUS_METHOD("Scan", "s", "i", method_scan,
                       SD_BUS_VTABLE_UNPRIVILEGED),
@@ -38,7 +38,7 @@ start_dbus_interface(const char *path, const char *interface)
   sd_bus_slot *slot = NULL;
   sd_bus      *bus  = NULL;
   int          r    = 0;
-  pthread_t tid;
+  pthread_t    tid;
 
   tid = init_all();
 

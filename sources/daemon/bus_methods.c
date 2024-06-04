@@ -6,8 +6,10 @@
 
 EDR *edr;
 
-void* thread(void *args) {
-  if (IS_ERR_FAILURE(scan_listen_inotify((SCANNER*)args)))
+void *
+thread(void *args)
+{
+  if (IS_ERR_FAILURE(scan_listen_inotify((SCANNER *)args)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error scan inotify\n"));
   }
@@ -21,7 +23,7 @@ init_all(void)
   EDR_CONFIG config = (EDR_CONFIG){.settings_json_path = "config/"
                                                          "appsettings."
                                                          "development.json"};
-  pthread_t tid;
+  pthread_t  tid;
 
   init_edr(&edr, config);
 
@@ -36,15 +38,13 @@ init_all(void)
 
   set_watch_paths(edr->inotify);
 
-
-  pthread_create(&tid, NULL, thread, (void*)edr->scanner);
+  pthread_create(&tid, NULL, thread, (void *)edr->scanner);
 
   edr->scanner->config.inotify->config.mask = IN_ALL_EVENTS;
   edr->scanner->config.inotify->config.time = -1;
 
   return tid;
 }
-
 
 int
 method_clean(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
@@ -77,7 +77,7 @@ method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 
   int r = 0;
 
-  r = sd_bus_message_read(m, "bi", &verbose, &max_depth, &scan_type);
+  r = sd_bus_message_read(m, "biy", &verbose, &max_depth, &scan_type);
   if (r < 0)
   {
     printf("(InitParams) Failed to connect to system bus: %i, %s\n", r,
@@ -108,6 +108,8 @@ method_scan(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 
   edr->scanner->config.filepath  = filepath;
   edr->scanner->config.inspector = edr->inspector;
+
+  printf("Scannig %s...\n", filepath);
 
   // Scan Yara
   if (!IS_NULL_PTR(edr->scanner) && IS_NULL_PTR(edr->inotify))

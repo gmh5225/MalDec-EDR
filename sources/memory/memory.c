@@ -11,7 +11,7 @@ init_memory(MEMORY **memory, MEMORY_CONFIG config)
   (*memory)->config = config;
 }
 
-void 
+void
 reclaim_memory()
 {
 }

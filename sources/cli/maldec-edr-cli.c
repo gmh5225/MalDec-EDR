@@ -5,35 +5,37 @@
  */
 
 #include <getopt.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <systemd/sd-bus.h>
-#include <stdbool.h>
 
-#include "scanner/config.h"
-#include "version/version.h"
-#include "err/err.h"
 #include "compiler/compiler_attribute.h"
 #include "daemon/bus-ifc/bus-ifc.h"
+#include "err/err.h"
+#include "scanner/config.h"
+#include "version/version.h"
 
 #define CALL_METHOD(method, sig, data...)                                \
   sd_bus_call_method(bus, DEFAULT_DBUS_INTERFACE, DEFAULT_DBUS_PATH,     \
                      DEFAULT_DBUS_INTERFACE, #method, &error, &msg, sig, \
                      data);
-#define BUS_CHECK()                                                            \
-  {                                                                            \
-    r = sd_bus_message_read(msg, "i", &bus_ret);                               \
-    if (r < 0)                                                                 \
-    {                                                                          \
-      fprintf(stderr, "Failed to parse response message: %s\n", strerror(-r)); \
-    }                                                                          \
-                                                                               \
-    if (bus_ret < 0)                                                           \
-    {                                                                          \
-      fprintf(stderr, "Something failed on daemon: %s\n", strerror(-r));       \
-    }                                                                          \
+#define BUS_CHECK(method)                                              \
+  {                                                                    \
+    r = sd_bus_message_read(msg, "i", &bus_ret);                       \
+    if (r < 0)                                                         \
+    {                                                                  \
+      fprintf(stderr, "Failed to parse \"%s\" response message: %s\n", \
+              #method, strerror(-r));                                  \
+    }                                                                  \
+                                                                       \
+    if (bus_ret < 0)                                                   \
+    {                                                                  \
+      fprintf(stderr, "Something failed on \"%s\": %s\n", #method,     \
+              strerror(-r));                                           \
+    }                                                                  \
   }
 static inline void no_return
 help(char *prog_name)
@@ -121,8 +123,6 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
   const char *filepath  = NULL;
   uint8_t     scan_type = 0;
 
-  BUS_CHECK();
-
   while ((c = getopt_long(argc, argv, "qs:y:d:vh", long_options,
                           &option_index)) != -1)
   {
@@ -172,7 +172,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
             return;
           }
 
-          BUS_CHECK();
+          BUS_CHECK(QuarantineSync);
         }
 
         if (strcmp(long_options[option_index].name, "restore-"
@@ -187,7 +187,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
             return;
           }
 
-          BUS_CHECK();
+          BUS_CHECK(QuarantineRestore);
         }
 
         if (strcmp(long_options[option_index].name, "delete-"
@@ -202,7 +202,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
             return;
           }
 
-          BUS_CHECK();
+          BUS_CHECK(QuarantineDelete);
         }
 
         // Driver CrowArmor
@@ -218,7 +218,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
             return;
           }
 
-          BUS_CHECK();
+          BUS_CHECK(CrowArmor);
         }
         break;
 
@@ -238,14 +238,26 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
     }
   }
 
-  if (verbose != false || max_depth != 0 || filepath != NULL)
+  if (verbose != false || max_depth != 0 || scan_type != 0 || filepath != NULL)
   {
-    r = CALL_METHOD(InitParams, "bis", verbose, max_depth, filepath);
+    r = CALL_METHOD(InitParams, "biy", verbose, max_depth, scan_type);
     if (r < 0)
     {
       fprintf(stderr, "Error during \"InitParams\" method call: %s\n",
               strerror(-r));
       return;
+    }
+
+    if (filepath)
+    {
+      r = CALL_METHOD(Scan, "s", filepath);
+      if (r < 0)
+      {
+        fprintf(stderr, "Error during \"InitParams\" method call: %s\n",
+                strerror(-r));
+        return;
+      }
+      BUS_CHECK(Scan);
     }
   }
 }
