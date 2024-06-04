@@ -13,13 +13,13 @@ thread(void *args)
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error scan inotify\n"));
   }
+
+  return NULL;
 }
 
 int
 init_all(void)
 {
-  int r = 0;
-
   EDR_CONFIG config = (EDR_CONFIG){.settings_json_path = "config/"
                                                          "appsettings."
                                                          "development.json"};
@@ -49,6 +49,8 @@ init_all(void)
 int
 method_clean(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
+  userdata = userdata;
+  ret_error = ret_error;
   if (IS_NULL_PTR(edr)) exit(EXIT_SUCCESS);
 
   if (!IS_NULL_PTR(edr->cjson)) exit_json(&edr->cjson);

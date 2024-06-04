@@ -1,7 +1,7 @@
 # Information cmake
 cmake_minimum_required(VERSION 3.0.2)
 
-# Information projec
+# Information project
 project(MalDec-EDR VERSION 1.0.0 LANGUAGES C)
 set(LIB_MAJOR_VERSION "1")
 set(LIB_MINOR_VERSION "0")
