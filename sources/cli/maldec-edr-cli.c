@@ -10,15 +10,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <systemd/sd-bus.h>
+#include <stdbool.h>
 
-#include "compiler/compiler_attribute.h"
-#include "compression/zlib.h"
-#include "config.h"
-#include "daemon/bus-ifc/bus-ifc.h"
-#include "edr/edr.h"
-#include "err/err.h"
-#include "inspector/inspector.h"
+#include "scanner/config.h"
 #include "version/version.h"
+#include "err/err.h"
+#include "compiler/compiler_attribute.h"
+#include "daemon/bus-ifc/bus-ifc.h"
 
 #define CALL_METHOD(method, sig, data...)                                \
   sd_bus_call_method(bus, DEFAULT_DBUS_INTERFACE, DEFAULT_DBUS_PATH,     \
