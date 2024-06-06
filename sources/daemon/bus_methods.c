@@ -42,13 +42,13 @@ init_all(void)
 
   edr->scanner->config.inotify   = edr->inotify;
   edr->scanner->config.inspector = edr->inspector;
+  edr->scanner->config.inotify->config.mask = (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
+  edr->scanner->config.inotify->config.time = -1;
 
   set_watch_paths(edr->inotify);
 
   pthread_create(&tid, NULL, thread, (void *)edr->scanner);
 
-  edr->scanner->config.inotify->config.mask = IN_ALL_EVENTS;
-  edr->scanner->config.inotify->config.time = -1;
 
   return tid;
 }
@@ -80,7 +80,7 @@ method_clean(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 int
 method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
-  // 
+  //
   userdata = userdata;
   ret_error = ret_error;
 
@@ -96,8 +96,6 @@ method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
     printf("(InitParams) Failed to connect to system bus: %i, %s\n", r,
            strerror(r));
   }
-
-  printf("max_depth = %d\nverbose = %u\n", max_depth, verbose);
 
   edr->scanner->config.max_depth = max_depth;
   edr->scanner->config.verbose   = verbose;
@@ -117,16 +115,10 @@ method_scan(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 
   r = sd_bus_message_read(m, "s", &filepath);
 
-  if (r < 0)
-  {
-    printf("(Scan) Failed to connect to system bus: %i, %s\n", r, strerror(r));
-  }
-
   edr->scanner->config.filepath  = filepath;
   edr->scanner->config.inspector = edr->inspector;
 
-  // Scan Yara
-  if (!IS_NULL_PTR(edr->scanner) && IS_NULL_PTR(edr->inotify))
+  if (!IS_NULL_PTR(edr->scanner))
     if (IS_ERR_FAILURE(scan_files_and_dirs(edr->scanner)))
       fprintf(stderr, LOG_MESSAGE_FORMAT("Error in scan\n"));
 

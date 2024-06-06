@@ -238,7 +238,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
     }
   }
 
-  if (verbose != false || max_depth != 0 || scan_type != 0 || filepath != NULL)
+  if (verbose != false || max_depth != 0 || scan_type != 0)
   {
     r = CALL_METHOD(InitParams, "biy", verbose, max_depth, scan_type);
     if (r < 0)
@@ -247,18 +247,17 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
               strerror(-r));
       return;
     }
-
-    if (filepath)
+  }
+  if (filepath)
+  {
+    r = CALL_METHOD(Scan, "s", filepath);
+    if (r < 0)
     {
-      r = CALL_METHOD(Scan, "s", filepath);
-      if (r < 0)
-      {
-        fprintf(stderr, "Error during \"InitParams\" method call: %s\n",
+      fprintf(stderr, "Error during \"InitParams\" method call: %s\n",
                 strerror(-r));
-        return;
-      }
-      BUS_CHECK(Scan);
+      return;
     }
+    BUS_CHECK(Scan);
   }
 }
 
