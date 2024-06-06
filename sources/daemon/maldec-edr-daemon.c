@@ -1,15 +1,11 @@
-#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <systemd/sd-bus.h>
-
 #include <unistd.h>
 
 #include "bus-ifc/bus-ifc.h"
 #include "sig-hdlr/handler.h"
-
-// #include "logger/logger.h"
 
 int
 main(void)

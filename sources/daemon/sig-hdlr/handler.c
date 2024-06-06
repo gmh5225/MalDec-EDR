@@ -41,13 +41,11 @@ signal_handler(void (*hdlr)(int))
 
   if ((r = sigaction(SIGTERM, &action, NULL)))
   {
-    // LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d (%s)", errno, strerror(errno)));
     return r;
   }
 
   if ((r = sigaction(SIGHUP, &action, NULL)))
   {
-    // LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE %d (%s)", r, strerror(r)));
     return r;
   }
 

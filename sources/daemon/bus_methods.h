@@ -8,16 +8,13 @@
 #include <systemd/sd-bus.h>
 
 int
-method_echo(sd_bus_message *m, void *userdata, sd_bus_error *ret_error);
-
-int
 init_all(void);
 
 int
 method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error);
 
-int
-method_clean(sd_bus_message *m, void *userdata, sd_bus_error *ret_error);
+void
+end_all(void);
 
 int
 method_scan(sd_bus_message *m, void *userdata, sd_bus_error *ret_error);

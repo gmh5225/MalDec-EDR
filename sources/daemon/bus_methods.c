@@ -1,8 +1,7 @@
 #include "bus_methods.h"
-#include "../edr/edr.h"
-#include "../include/inspector/inspector.h"
-#include "../scanner/scanner.h"
-#include <stdint.h>
+#include "edr/edr.h"
+#include "inspector/inspector.h"
+#include "scanner/scanner.h"
 
 EDR *edr;
 
@@ -49,15 +48,12 @@ init_all(void)
 
   pthread_create(&tid, NULL, thread, (void *)edr->scanner);
 
-
   return tid;
 }
 
-int
-method_clean(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
+void
+end_all()
 {
-  userdata = userdata;
-  ret_error = ret_error;
   if (IS_NULL_PTR(edr)) exit(EXIT_SUCCESS);
 
   if (!IS_NULL_PTR(edr->cjson)) exit_json(&edr->cjson);
@@ -73,14 +69,12 @@ method_clean(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
   if (!IS_NULL_PTR(edr->inspector)) exit_inspector(&edr->inspector);
 
   exit_edr(&edr);
-
-  return sd_bus_reply_method_return(m, "i", 0);
 }
 
 int
 method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
-  //
+  // unused parameters
   userdata = userdata;
   ret_error = ret_error;
 
@@ -107,6 +101,7 @@ method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 int
 method_scan(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
+  // unused parameters
   userdata = userdata;
   ret_error = ret_error;
 
@@ -129,6 +124,7 @@ int
 method_driver_crowarmor(sd_bus_message *m, void *userdata,
                         sd_bus_error *ret_error)
 {
+  // unused parameters
   userdata = userdata;
   ret_error = ret_error;
 
@@ -142,6 +138,7 @@ int
 method_quarantine_view(sd_bus_message *m, void *userdata,
                        sd_bus_error *ret_error)
 {
+  // unused parameters
   userdata = userdata;
   ret_error = ret_error;
 
@@ -159,6 +156,7 @@ int
 method_quarantine_sync(sd_bus_message *m, void *userdata,
                        sd_bus_error *ret_error)
 {
+  // unused parameters
   userdata = userdata;
   ret_error = ret_error;
 
@@ -178,6 +176,7 @@ int
 method_quarantine_restore(sd_bus_message *m, void *userdata,
                           sd_bus_error *ret_error)
 {
+  // unused parameters
   userdata = userdata;
   ret_error = ret_error;
 
@@ -206,6 +205,7 @@ int
 method_quarantine_delete(sd_bus_message *m, void *userdata,
                          sd_bus_error *ret_error)
 {
+  // unused parameters
   userdata = userdata;
   ret_error = ret_error;
 
@@ -228,23 +228,4 @@ method_quarantine_delete(sd_bus_message *m, void *userdata,
   }
 
   return sd_bus_reply_method_return(m, "i", r);
-}
-
-int
-method_echo(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
-{
-  userdata = userdata;
-  ret_error = ret_error;
-
-  void *msg = NULL;
-  int   r   = 0;
-
-  r = sd_bus_message_read(m, "s", &msg);
-  if (r < 0)
-  {
-    printf("(Echo) Failed to connect to system bus: %i, %s\n", r, strerror(r));
-    return r;
-  }
-
-  return sd_bus_reply_method_return(m, "s", msg);
 }

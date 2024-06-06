@@ -3,13 +3,14 @@
 #include <string.h>
 #include <systemd/sd-bus.h>
 
-#include "../bus_methods.h"
+#include "bus_methods.h"
 #include "bus-ifc.h"
 
 #define DBUS_CLEAN(slot, bus) \
   {                           \
     sd_bus_slot_unref(slot);  \
     sd_bus_unref(bus);        \
+    end_all();                 \
   }
 
 const sd_bus_vtable DEFAULT_VTABLE[] = {
@@ -18,7 +19,7 @@ const sd_bus_vtable DEFAULT_VTABLE[] = {
                       SD_BUS_VTABLE_UNPRIVILEGED),
         SD_BUS_METHOD("Scan", "s", "i", method_scan,
                       SD_BUS_VTABLE_UNPRIVILEGED),
-        SD_BUS_METHOD("CrowArmor", "s", "i", method_driver_crowarmor,
+        SD_BUS_METHOD("CrowArmor", "", "i", method_driver_crowarmor,
                       SD_BUS_VTABLE_UNPRIVILEGED),
         SD_BUS_METHOD("QuarantineView", "", "s", method_quarantine_view,
                       SD_BUS_VTABLE_UNPRIVILEGED),
@@ -27,8 +28,6 @@ const sd_bus_vtable DEFAULT_VTABLE[] = {
         SD_BUS_METHOD("QuarantineRestore", "u", "i", method_quarantine_restore,
                       SD_BUS_VTABLE_UNPRIVILEGED),
         SD_BUS_METHOD("QuarantineDelete", "u", "i", method_quarantine_delete,
-                      SD_BUS_VTABLE_UNPRIVILEGED),
-        SD_BUS_METHOD("Clean", "", "i", method_clean,
                       SD_BUS_VTABLE_UNPRIVILEGED),
         SD_BUS_VTABLE_END};
 
@@ -80,8 +79,7 @@ start_dbus_interface(const char *path, const char *interface)
       return r;
     }
 
-    if (r >
-        0) /* we processed a request, try to process another one, right-away */
+    if (r > 0) /* we processed a request, try to process another one, right-away */
       continue;
 
     /* Wait for the next request to process */

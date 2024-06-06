@@ -157,8 +157,6 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
             fprintf(stderr, "Failed to parse response message: %s\n",
                     strerror(-r));
           }
-
-          printf("%s\n", json);
         }
 
         // Quarantine for malwares
