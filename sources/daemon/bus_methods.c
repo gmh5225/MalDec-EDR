@@ -8,11 +8,15 @@ EDR *edr;
 void *
 thread(void *args)
 {
-  if (IS_ERR_FAILURE(scan_listen_inotify((SCANNER *)args)))
+  // Workaround for `invalid pointer` (Abort)
+  SCANNER *_scanner_copy = calloc(1, sizeof(SCANNER));
+  memcpy(_scanner_copy, (SCANNER*)args, sizeof(SCANNER));
+  if (IS_ERR_FAILURE(scan_listen_inotify(_scanner_copy)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error scan inotify\n"));
   }
 
+  free(_scanner_copy);
   return NULL;
 }
 
