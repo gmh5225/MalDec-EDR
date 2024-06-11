@@ -18,5 +18,5 @@ main(void)
 
   start_dbus_interface(DEFAULT_DBUS_PATH, DEFAULT_DBUS_INTERFACE);
 
-  return 0;
+  return r;
 }

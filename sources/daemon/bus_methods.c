@@ -6,17 +6,17 @@
 EDR *edr;
 
 void *
-thread(void *args)
+thread_inotify(void *args)
 {
   // Workaround for `invalid pointer` (Abort)
-  SCANNER *_scanner_copy = calloc(1, sizeof(SCANNER));
-  memcpy(_scanner_copy, (SCANNER*)args, sizeof(SCANNER));
-  if (IS_ERR_FAILURE(scan_listen_inotify(_scanner_copy)))
+  SCANNER *scanner_copy = calloc(1, sizeof(SCANNER));
+  memcpy(scanner_copy, (SCANNER*)args, sizeof(SCANNER));
+  if (IS_ERR_FAILURE(scan_listen_inotify(scanner_copy)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error scan inotify\n"));
   }
 
-  free(_scanner_copy);
+  free(scanner_copy);
   return NULL;
 }
 
@@ -48,9 +48,9 @@ init_all(void)
   edr->scanner->config.inotify->config.mask = (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
   edr->scanner->config.inotify->config.time = -1;
 
-  set_watch_paths(edr->inotify);
+  set_watch_paths_inotify(edr->inotify);
 
-  pthread_create(&tid, NULL, thread, (void *)edr->scanner);
+  pthread_create(&tid, NULL, thread_inotify, (void *)edr->scanner);
 
   return tid;
 }

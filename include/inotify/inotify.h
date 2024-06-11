@@ -48,7 +48,7 @@ init_inotify(INOTIFY **inotify, INOTIFY_CONFIG config) warn_unused_result;
   * @param inotify  Pointer to a pointer to the INOTIFY structure.
   */
 void
-set_watch_paths(INOTIFY *inotify);
+set_watch_paths_inotify(INOTIFY *inotify);
 
 /**
  * @brief Listens to events using the INOTIFY structure.

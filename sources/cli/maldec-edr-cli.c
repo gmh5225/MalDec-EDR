@@ -95,7 +95,6 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
   // Command-line options
   struct option long_options[] = {
           {"scan", required_argument, 0, 's'},
-          {"scan-inotify", required_argument, 0, 'y'},
           {"verbose", no_argument, 0, 0},
           {"quick", no_argument, 0, 'q'},
           {"max-depth", required_argument, 0, 0},
