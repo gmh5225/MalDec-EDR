@@ -1,29 +1,27 @@
 #include "edr.h"
 
 inline void
-init_edr(DEFENDER **defender, DEFENDER_CONFIG config)
+init_edr(EDR **edr, EDR_CONFIG config)
 {
-  *defender                = malloc(sizeof(struct DEFENDER));
-  (*defender)->config      = config;
-  (*defender)->inotify     = NULL;
-  (*defender)->scanner     = NULL;
-  (*defender)->telekinesis = NULL;
-  (*defender)->cjson       = NULL;
-  (*defender)->logger      = NULL;
-  (*defender)->inspector   = NULL;
-  (*defender)->crowarmor   = NULL;
+  *edr              = malloc(sizeof(struct EDR));
+  (*edr)->config    = config;
+  (*edr)->inotify   = NULL;
+  (*edr)->scanner   = NULL;
+  (*edr)->cjson     = NULL;
+  (*edr)->logger    = NULL;
+  (*edr)->inspector = NULL;
+  (*edr)->crowarmor = NULL;
 
-  ALLOC_ERR_FAILURE(*defender);
+  ALLOC_ERR_FAILURE(*edr);
 }
 
 inline void
-init_inspector_main(DEFENDER **defender)
+init_inspector_main(EDR **edr)
 {
   struct json_object *inspector_obj, *dir_obj, *database_obj, *quarantine_obj,
           *quarantine_dir_obj;
 
-  if (json_object_object_get_ex((*defender)->cjson, "inspector",
-                                &inspector_obj))
+  if (json_object_object_get_ex((*edr)->cjson, "inspector", &inspector_obj))
   {
     if (!json_object_object_get_ex(inspector_obj, "dir", &dir_obj) ||
         !json_object_object_get_ex(inspector_obj, "database", &database_obj) ||
@@ -51,7 +49,7 @@ init_inspector_main(DEFENDER **defender)
 
 #endif
 
-  if (IS_ERR_FAILURE(init_inspector(&(*defender)->inspector, config)))
+  if (IS_ERR_FAILURE(init_inspector(&(*edr)->inspector, config)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error init inspector\n"));
     exit(ERR_FAILURE);
@@ -59,22 +57,22 @@ init_inspector_main(DEFENDER **defender)
 }
 
 inline void
-init_cjson_main(DEFENDER **defender)
+init_cjson_main(EDR **edr)
 {
-  if (IS_ERR_FAILURE(init_cjson(&(*defender)->cjson,
-                                (*defender)->config.settings_json_path)))
+  if (IS_ERR_FAILURE(
+              init_cjson(&(*edr)->cjson, (*edr)->config.settings_json_path)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error in parser json config '%s'\n",
-                                       (*defender)->config.settings_json_path));
+                                       (*edr)->config.settings_json_path));
     exit(EXIT_FAILURE);
   }
 }
 
 inline void
-init_inotify_main(DEFENDER **defender)
+init_inotify_main(EDR **edr)
 {
   struct json_object *inotify_obj, *paths_obj;
-  if (json_object_object_get_ex((*defender)->cjson, "inotify", &inotify_obj))
+  if (json_object_object_get_ex((*edr)->cjson, "inotify", &inotify_obj))
   {
     if (!json_object_object_get_ex(inotify_obj, "paths", &paths_obj))
     {
@@ -104,7 +102,7 @@ init_inotify_main(DEFENDER **defender)
 
 #endif
 
-  if (IS_ERR_FAILURE(init_inotify(&(*defender)->inotify, config)))
+  if (IS_ERR_FAILURE(init_inotify(&(*edr)->inotify, config)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error init inotify\n"));
     exit(ERR_FAILURE);
@@ -112,12 +110,12 @@ init_inotify_main(DEFENDER **defender)
 }
 
 inline void
-init_logger_main(DEFENDER **defender)
+init_logger_main(EDR **edr)
 {
   struct json_object *logger_obj, *filename_obj, *max_file_size_obj,
           *max_backup_files_obj, *level_obj, *console_obj;
 
-  if (json_object_object_get_ex((*defender)->cjson, "logger", &logger_obj))
+  if (json_object_object_get_ex((*edr)->cjson, "logger", &logger_obj))
   {
     if (!json_object_object_get_ex(logger_obj, "filename", &filename_obj) ||
         !json_object_object_get_ex(logger_obj, "max_file_size",
@@ -146,7 +144,7 @@ init_logger_main(DEFENDER **defender)
           .max_file_size    = json_object_get_int(max_file_size_obj),
           .console          = json_object_get_boolean(console_obj)};
 
-  if (IS_ERR_FAILURE(init_logger(&(*defender)->logger, config)))
+  if (IS_ERR_FAILURE(init_logger(&(*edr)->logger, config)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error init logger\n"));
     exit(ERR_FAILURE);
@@ -165,52 +163,12 @@ init_logger_main(DEFENDER **defender)
 #endif
 }
 
-inline void
-init_telekinesis_main(DEFENDER **defender)
-{
-  struct json_object *telekinesis_obj, *driver_path_obj, *driver_name_obj;
-
-  if (json_object_object_get_ex((*defender)->cjson, "driver_telekinesis",
-                                &telekinesis_obj))
-  {
-    if (!json_object_object_get_ex(telekinesis_obj, "driver_path",
-                                   &driver_path_obj) ||
-        !json_object_object_get_ex(telekinesis_obj, "driver_name",
-                                   &driver_name_obj))
-    {
-      fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve "
-                                         "driver_telekinesis "
-                                         "configuration from JSON\n"));
-      exit(ERR_FAILURE);
-    }
-  }
-
-  TELEKINESIS_CONFIG config = (TELEKINESIS_CONFIG){
-          .driver_name = json_object_get_string(driver_name_obj),
-          .driver_path = json_object_get_string(driver_path_obj)};
-
-#ifdef DEBUG
-  LOG_DEBUG(LOG_MESSAGE_FORMAT("telekinesis.config.driver_name = '%s', "
-                               "telekinesis.config.driver_path = '%s' ",
-                               config.driver_name, config.driver_path));
-
-#endif
-
-  if (IS_ERR_FAILURE(
-              init_driver_telekinesis(&(*defender)->telekinesis, config)))
-  {
-    fprintf(stderr, LOG_MESSAGE_FORMAT("Error in init driver %s\n",
-                                       config.driver_name));
-    exit(EXIT_FAILURE);
-  }
-}
-
 void
-init_crowarmor_main(DEFENDER **defender)
+init_crowarmor_main(EDR **edr)
 {
   struct json_object *crowarmor_obj, *driver_path_obj, *driver_name_obj;
 
-  if (json_object_object_get_ex((*defender)->cjson, "driver_crowarmor",
+  if (json_object_object_get_ex((*edr)->cjson, "driver_crowarmor",
                                 &crowarmor_obj))
   {
     if (!json_object_object_get_ex(crowarmor_obj, "driver_path",
@@ -219,7 +177,7 @@ init_crowarmor_main(DEFENDER **defender)
                                    &driver_name_obj))
     {
       fprintf(stderr, LOG_MESSAGE_FORMAT("Unable to retrieve "
-                                         "driver_telekinesis "
+                                         "driver_crowarmor "
                                          "configuration from JSON\n"));
       exit(ERR_FAILURE);
     }
@@ -236,7 +194,7 @@ init_crowarmor_main(DEFENDER **defender)
 
 #endif
 
-  if (IS_ERR_FAILURE(init_driver_crowarmor(&(*defender)->crowarmor, config)))
+  if (IS_ERR_FAILURE(init_driver_crowarmor(&(*edr)->crowarmor, config)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error in init driver %s\n",
                                        config.driver_name));
@@ -245,10 +203,10 @@ init_crowarmor_main(DEFENDER **defender)
 }
 
 inline void
-init_scanner_main(DEFENDER **defender)
+init_scanner_main(EDR **edr)
 {
   struct json_object *scan_obj, *yara_obj, *rules_obj, *skip_dir_objs;
-  if (json_object_object_get_ex((*defender)->cjson, "scanner", &scan_obj))
+  if (json_object_object_get_ex((*edr)->cjson, "scanner", &scan_obj))
   {
     if (!json_object_object_get_ex(scan_obj, "yara", &yara_obj) ||
         !json_object_object_get_ex(scan_obj, "skip_dirs", &skip_dir_objs) ||
@@ -292,7 +250,7 @@ init_scanner_main(DEFENDER **defender)
 
 #endif
 
-  if (IS_ERR_FAILURE(init_scanner(&(*defender)->scanner, config)))
+  if (IS_ERR_FAILURE(init_scanner(&(*edr)->scanner, config)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error init scanner\n"));
     exit(ERR_FAILURE);
@@ -300,8 +258,8 @@ init_scanner_main(DEFENDER **defender)
 }
 
 inline void
-exit_edr(DEFENDER **defender)
+exit_edr(EDR **edr)
 {
-  free((*defender));
-  NO_USE_AFTER_FREE((*defender));
+  free((*edr));
+  NO_USE_AFTER_FREE((*edr));
 }

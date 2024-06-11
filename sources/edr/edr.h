@@ -1,6 +1,6 @@
 /**
  * @file edr.h
- * @brief Header file for the DEFENDER module.
+ * @brief Header file for the EDR module.
  */
 
 #pragma once
@@ -10,90 +10,80 @@
 #include "config.h"
 #include "crowarmor/crowarmor.h"
 #include "inotify/inotify.h"
-#include "inspector/inspector.h"
 #include "logger/logger.h"
 #include "scanner/scanner.h"
-#include "telekinesis/telekinesis.h"
 
 /**
- * @struct DEFENDER
- * @brief Structure representing the DEFENDER module.
+ * @struct EDR
+ * @brief Structure representing the EDR module.
  */
-typedef struct packed(8) DEFENDER
+typedef struct packed(8) EDR
 {
   LOGGER             *logger;  /**< Pointer to the LOGGER instance. */
   SCANNER            *scanner; /**< Pointer to the SCANNER instance. */
   struct json_object *cjson;   /**< Pointer to the configuration JSON object. */
-  TELEKINESIS *telekinesis; /**< Pointer to the TELEKINESIS Driver instance. */
-  INOTIFY     *inotify;     /**< Pointer to the INOTIFY instance. */
-  INSPECTOR   *inspector;   /**< Pointer to the INSPECTOR instance. */
-  CROWARMOR   *crowarmor;   /**< Pointer to the CROWARMOR instance. */
-  DEFENDER_CONFIG config;   /**< Configuration settings for DEFENDER. */
+  INOTIFY            *inotify; /**< Pointer to the INOTIFY instance. */
+  INSPECTOR          *inspector; /**< Pointer to the INSPECTOR instance. */
+  CROWARMOR          *crowarmor; /**< Pointer to the CROWARMOR instance. */
+  EDR_CONFIG          config;    /**< Configuration settings for EDR. */
 }
-DEFENDER;
+EDR;
 
 /**
- * @brief Initializes the DEFENDER module.
- * @param defender Pointer to a pointer to the DEFENDER instance.
- * @param config Configuration settings for DEFENDER.
+ * @brief Initializes the EDR module.
+ * @param edr Pointer to a pointer to the EDR instance.
+ * @param config Configuration settings for EDR.
  */
 void
-init_edr(DEFENDER **defender, DEFENDER_CONFIG config);
+init_edr(EDR **edr, EDR_CONFIG config);
 
 /**
- * @brief Initializes the LOGGER component within the DEFENDER module.
- * @param defender Pointer to the DEFENDER instance.
+ * @brief Initializes the LOGGER component within the EDR module.
+ * @param edr Pointer to the EDR instance.
  */
 void
-init_logger_main(DEFENDER **defender);
+init_logger_main(EDR **edr);
 
 /**
- * @brief Initializes the INOTIFY component within the DEFENDER module.
- * @param defender Pointer to the DEFENDER instance.
+ * @brief Initializes the INOTIFY component within the EDR module.
+ * @param edr Pointer to the EDR instance.
  */
 void
-init_inotify_main(DEFENDER **defender);
+init_inotify_main(EDR **edr);
 
 /**
- * @brief Initializes the SCANNER component within the DEFENDER module.
- * @param defender Pointer to the DEFENDER instance.
+ * @brief Initializes the SCANNER component within the EDR module.
+ * @param edr Pointer to the EDR instance.
  */
 void
-init_scanner_main(DEFENDER **defender);
+init_scanner_main(EDR **edr);
 
 /**
- * @brief Initializes the TELEKINESIS component within the DEFENDER module.
- * @param defender Pointer to the DEFENDER instance.
- */
-void
-init_telekinesis_main(DEFENDER **defender);
-
-/**
- * @brief Initializes the CROWARMOR component within the DEFENDER module.
+ * @brief Initializes the CROWARMOR component within the EDR module.
  * 
- * @param defender 
+ * @param edr 
  */
 void
-init_crowarmor_main(DEFENDER **defender);
+init_crowarmor_main(EDR **edr);
 
 /**
- * @brief Initializes the CJSON component within the DEFENDER module.
- * @param defender Pointer to the DEFENDER instance.
+ * @brief Initializes the CJSON component within the EDR module.
+ * @param edr Pointer to the EDR instance.
  */
 void
-init_cjson_main(DEFENDER **defender);
+init_cjson_main(EDR **edr);
 
 /**
- * @brief Initializes the INSPECTOR component within the DEFENDER module.
+ * @brief Initializes the INSPECTOR component within the EDR module.
  * 
- * @param defender 
+ * @param edr 
  */
 void
-init_inspector_main(DEFENDER **defender);
+init_inspector_main(EDR **edr);
 
 /**
- * @brief Exits and cleans up resources used by the DEFENDER module.
- * @param defender Pointer to a pointer to the DEFENDER instance.
+ * @brief Exits and cleans up resources used by the EDR module.
+ * @param edr Pointer to a pointer to the EDR instance.
  */
 void
-exit_edr(DEFENDER **defender);
+exit_edr(EDR **edr);

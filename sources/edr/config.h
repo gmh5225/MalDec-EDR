@@ -6,8 +6,8 @@
 
 #include "compiler/compiler_attribute.h"
 
-typedef struct packed(8) DEFENDER_CONFIG
+typedef struct packed(8) EDR_CONFIG
 {
   const char *settings_json_path;
 }
-DEFENDER_CONFIG;
+EDR_CONFIG;
