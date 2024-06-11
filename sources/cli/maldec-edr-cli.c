@@ -248,6 +248,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
   }
   if (filepath)
   {
+    puts("Starting scan...");
     r = CALL_METHOD(Scan, "s", filepath);
     if (r < 0)
     {
@@ -256,6 +257,8 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
       return;
     }
     BUS_CHECK(Scan);
+
+    puts("Scan ended! (see log for details)");
   }
 }
 
