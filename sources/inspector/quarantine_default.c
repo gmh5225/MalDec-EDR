@@ -5,20 +5,6 @@
 #include <unistd.h>
 
 inline int
-default_view_quarantine(void *ins, const int count, char **data, char **columns)
-{
-  ins = ins; // inspector
-
-  for (int i = 0; i < count; i++)
-  {
-    LOG_INFO(LOG_MESSAGE_FORMAT("| %-*s : %-*s", 20 - 2, columns[i], 20 - 2,
-                                data[i]));
-  }
-
-  return 0;
-}
-
-inline int
 default_sync_quarantine(void *ins, const int count, char **data, char **columns)
 {
   INSPECTOR *inspector = (INSPECTOR *)ins;

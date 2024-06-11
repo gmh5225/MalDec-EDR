@@ -134,6 +134,7 @@ method_driver_crowarmor(sd_bus_message *m, void *userdata,
 
   init_crowarmor_main(&edr);
   check_driver_crowarmor_activated(edr->crowarmor);
+  exit_driver_crowarmor(&edr->crowarmor);
 
   return sd_bus_reply_method_return(m, "i", 0);
 }
@@ -227,8 +228,8 @@ method_quarantine_delete(sd_bus_message *m, void *userdata,
 
   if (IS_ERR_FAILURE(del_quarantine_inspector(edr->inspector, &file)))
   {
-    fprintf(stderr, LOG_MESSAGE_FORMAT("Error View quarantine\n"));
-    return 1;
+    r = -1;
+    fprintf(stderr, LOG_MESSAGE_FORMAT("Error Del quarantine\n"));
   }
 
   return sd_bus_reply_method_return(m, "i", r);

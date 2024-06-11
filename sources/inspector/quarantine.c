@@ -121,19 +121,6 @@ restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILE *file)
 }
 
 inline ERR
-sql_quarantine_inspector(INSPECTOR *inspector,
-                         int (*callback)(void *, int, char **, char **))
-{
-  if (IS_ERR_FAILURE(select_all_quarantine_db(&inspector, callback)))
-  {
-    LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select table quarantine"));
-    return ERR_FAILURE;
-  }
-
-  return ERR_SUCCESS;
-}
-
-inline ERR
 view_json_dump_inspector(INSPECTOR *inspector,
                          const char **__restrict__ json_dump)
 {

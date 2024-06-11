@@ -105,18 +105,6 @@ void
 exit_inspector(INSPECTOR **inspector);
 
 /**
- * @brief Default view quarantine callback function.
- * @param[in] ins Pointer to the inspector.
- * @param[in] count Number of results.
- * @param[in] data Data.
- * @param[in] columns Column names.
- * @return Result of the operation.
- */
-int
-default_view_quarantine(void *ins, const int count, char **data,
-                        char **columns) warn_unused_result;
-
-/**
  * @brief Default sync quarantine callback function.
  * @param[in] ins Pointer to the inspector.
  * @param[in] count Number of results.

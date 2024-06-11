@@ -48,10 +48,6 @@ help(char *prog_name)
           "    -s, --scan <file>|<folder>    Scan a specific file or folder "
           "(default "
           "max-depth: X)\n"
-          "    -y, --scan-inotify <time>     Enable real-time monitoring "
-          "using "
-          "inotify. "
-          "If a file is created or changed, it will trigger a scan.\n"
           "    -q, --quick                   Perform a quick scan for faster "
           "results\n"
           "    --max-depth <depth>           Set the maximum depth for "
@@ -157,6 +153,8 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
             fprintf(stderr, "Failed to parse response message: %s\n",
                     strerror(-r));
           }
+
+          fprintf(stdout,"%s\n", json);
         }
 
         // Quarantine for malwares
@@ -169,6 +167,8 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
                     strerror(-r));
             return;
           }
+
+          puts("Database synced (see log for details)");
 
           BUS_CHECK(QuarantineSync);
         }
@@ -191,7 +191,8 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
         if (strcmp(long_options[option_index].name, "delete-"
                                                     "quarantine") == 0)
         {
-          r = CALL_METHOD(QuarantineDelete, "u", atoi(optarg));
+          const int id = atoi(optarg);
+          r = CALL_METHOD(QuarantineDelete, "u", id);
           if (r < 0)
           {
             fprintf(stderr,
