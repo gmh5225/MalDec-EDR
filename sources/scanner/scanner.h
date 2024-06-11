@@ -40,15 +40,15 @@ typedef struct SCANNER_CALLBACK_ARGS
 } SCANNER_CALLBACK_ARGS;
 
 /**
- * @brief Scans a file or directory using the specified YARA scanner.
+ * @brief Scans a file or directory.
  *
  * This function scans a file or directory based on the provided YARA scanner and callback function.
  *
- * @param[in] scanner Pointer to the YARA scanner.
+ * @param[in] scanner Pointer to the scanner.
  * @return Returns ERR_SUCCESS on success, ERR_FAILURE on failure.
  */
 ERR
-scan(SCANNER *scanner) warn_unused_result;
+scan_files_and_dirs(SCANNER *scanner) warn_unused_result;
 
 /**
  * @brief Initializes a YARA scanner with the given configuration.

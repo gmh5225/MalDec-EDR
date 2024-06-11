@@ -20,7 +20,7 @@ inspector_quarantine_add(void **state)
   if (!IS_ERR_FAILURE(init_inspector(&inspector, config)))
   {
     time_t           datetime = time(NULL);
-    QUARANTINE_FILES file     = (QUARANTINE_FILES){.filepath = "./malware.elf",
+    QUARANTINE_FILE file     = (QUARANTINE_FILE){.filepath = "./malware.elf",
                                                    .detected = "elf_infected",
                                                    .filename = "malware.elf",
                                                    .datetime = ctime(&datetime)};
@@ -41,7 +41,7 @@ inspector_quarantine_del(void **state)
   if (!IS_ERR_FAILURE(init_inspector(&inspector, config)))
   {
     time_t           datetime = time(NULL);
-    QUARANTINE_FILES file     = (QUARANTINE_FILES){.id = 1};
+    QUARANTINE_FILE file     = (QUARANTINE_FILE){.id = 1};
 
     assert_int_equal(del_quarantine_inspector(inspector, &file), ERR_SUCCESS);
     exit_inspector(&inspector);

@@ -4,22 +4,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define COLUMN_WIDTH 20
-
-inline int
-default_view_quarantine(void *ins, const int count, char **data, char **columns)
-{
-  ins = ins; // inspector
-
-  for (int i = 0; i < count; i++)
-  {
-    LOG_INFO(LOG_MESSAGE_FORMAT("| %-*s : %-*s", COLUMN_WIDTH - 2, columns[i],
-                                COLUMN_WIDTH - 2, data[i]));
-  }
-
-  return 0;
-}
-
 inline int
 default_sync_quarantine(void *ins, const int count, char **data, char **columns)
 {
@@ -39,8 +23,8 @@ default_sync_quarantine(void *ins, const int count, char **data, char **columns)
         LOG_INFO(LOG_MESSAGE_FORMAT("File '%s' not synchronized with the "
                                     "database ",
                                     data[i]));
-        QUARANTINE_FILES *file = malloc(sizeof(QUARANTINE_FILES));
-        file->id               = atoi(data[0]);
+        QUARANTINE_FILE *file = malloc(sizeof(QUARANTINE_FILE));
+        file->id              = atoi(data[0]);
         if (IS_ERR_FAILURE(delete_where_quarantine_db(&inspector, &file)))
         {
           LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not delete where file id "
@@ -52,7 +36,7 @@ default_sync_quarantine(void *ins, const int count, char **data, char **columns)
         }
         LOG_INFO(LOG_MESSAGE_FORMAT("File '%s' synchronized with the database ",
                                     data[i]));
-                                    
+
         exit_stmt_finalize(&inspector);
         free(file);
       }

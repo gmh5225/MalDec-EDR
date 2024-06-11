@@ -3,7 +3,7 @@
 #include <errno.h>
 
 inline ERR
-add_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
+add_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILE *file)
 {
   ZLIB_CONFIG config = (ZLIB_CONFIG){.filename_in  = file->filepath,
                                      .filename_out = file->filename,
@@ -46,7 +46,7 @@ add_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 }
 
 inline ERR
-del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
+del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILE *file)
 {
   if (IS_ERR_FAILURE(select_where_quarantine_db(&inspector, &file)))
   {
@@ -84,7 +84,7 @@ del_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 }
 
 inline ERR
-restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
+restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILE *file)
 {
   if (select_where_quarantine_db(&inspector, &file))
   {
@@ -121,10 +121,10 @@ restore_quarantine_inspector(INSPECTOR *inspector, QUARANTINE_FILES *file)
 }
 
 inline ERR
-view_quarantine_inspector(INSPECTOR *inspector,
-                          int (*callback)(void *, int, char **, char **))
+view_json_dump_inspector(INSPECTOR *inspector,
+                         const char **__restrict__ json_dump)
 {
-  if (IS_ERR_FAILURE(select_all_quarantine_db(&inspector, callback)))
+  if (IS_ERR_FAILURE(select_all_quarantine_json_db(&inspector, json_dump)))
   {
     LOG_ERROR(LOG_MESSAGE_FORMAT("ERR_FAILURE Not select table quarantine"));
     return ERR_FAILURE;
@@ -143,7 +143,7 @@ sync_quarantine_inspector(INSPECTOR *inspector,
     return ERR_FAILURE;
   }
 
-  LOG_INFO(
-          LOG_MESSAGE_FORMAT("Database '%s' synced", inspector->config.database));
+  LOG_INFO(LOG_MESSAGE_FORMAT("Database '%s' synced",
+                              inspector->config.database));
   return ERR_SUCCESS;
 }

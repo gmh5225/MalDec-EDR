@@ -7,94 +7,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static inline void
-decision_making_event_type(const struct inotify_event **event,
-                           SCANNER                    **scanner)
-{
-  if ((*event)->mask & IN_ACCESS) { LOG_INFO("in_access "); }
-  else if ((*event)->mask & IN_MODIFY || (*event)->mask & IN_CLOSE_WRITE ||
-           (*event)->mask & IN_CREATE)
-  {
-    if ((*event)->mask & IN_MODIFY) { LOG_WARN("in_modify "); }
-    else if ((*event)->mask & IN_CLOSE_WRITE) { LOG_WARN("in_close_write "); }
-    else if ((*event)->mask & IN_CREATE) { LOG_WARN("in_create "); }
-    sleep(1);
-    SCANNER cscanner = **scanner; // Copy scanner for function scan
-    if (cscanner.config.filepath)
-    {
-      if (IS_ERR_FAILURE(scan(&cscanner)))
-      {
-        LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the created file '%s' ",
-                                     cscanner.config.filepath));
-      }
-    }
-    // Free filepath allocated in function watched_directory_event
-    free((*scanner)->config.filepath);
-    NO_USE_AFTER_FREE((*scanner)->config.filepath);
-  }
-}
-
-static inline void
-watched_directory_event(INOTIFY **inotify, const struct inotify_event *event,
-                        SCANNER **scanner)
-{
-  struct PATHS *paths = (*inotify)->config.paths;
-  for (size_t i = 0; i < (*inotify)->config.quantity_fds;
-       paths    = paths->hh.next, i++)
-  {
-    if ((*inotify)->wd[i] == event->wd)
-    {
-      if (event->len)
-      {
-        LOG_INFO("%s/%s", paths->path, event->name);
-
-        size_t path_size =
-                snprintf(NULL, 0, "%s/%s", paths->path, event->name) + 1;
-        (*scanner)->config.filepath = malloc(path_size);
-
-        ALLOC_ERR_FAILURE((*scanner)->config.filepath);
-
-        snprintf((*scanner)->config.filepath, path_size, "%s/%s", paths->path,
-                 event->name);
-      }
-      else
-        LOG_INFO("%s", paths->path);
-
-      break;
-    }
-  }
-}
-
-static inline void
-process_inotify_events(INOTIFY *inotify, char *buf, ssize_t len,
-                       SCANNER **scanner)
-{
-  const struct inotify_event *event = NULL;
-
-  for (char *ptr = buf; ptr < buf + len;
-       ptr += sizeof(struct inotify_event) + event->len)
-  {
-    event = (const struct inotify_event *)ptr;
-    (event->mask & IN_ISDIR) ? LOG_INFO("in_directory") : LOG_INFO("in_file");
-
-    watched_directory_event(&inotify, event, scanner);
-    decision_making_event_type(&event, scanner);
-  }
-}
-
-/**
- * Scanner Defaults for Inotify and File Scanning
- * 
- * This code defines default configurations and behavior for a scanner
- * utilizing inotify for file system monitoring and scanning files for
- * potential threats or changes.
- */
-
 inline void
 default_scan_inotify(INOTIFY *inotify, void *buff)
 {
   SCANNER                                         *scanner = (SCANNER *)buff;
   _Alignas(__alignof__(struct inotify_event)) char buf[4096];
+  const struct inotify_event                      *event = NULL;
 
   for (;;)
   {
@@ -109,7 +27,55 @@ default_scan_inotify(INOTIFY *inotify, void *buff)
 
     if (len <= 0) { break; }
 
-    process_inotify_events(inotify, buf, len, &scanner);
+    for (char *ptr = buf; ptr < buf + len;
+         ptr += sizeof(struct inotify_event) + event->len)
+    {
+      event = (const struct inotify_event *)ptr;
+      (event->mask & IN_ISDIR) ? LOG_INFO("in_directory") : LOG_INFO("in_file");
+      struct PATHS *paths = inotify->config.paths;
+
+      for (size_t i = 0; i < inotify->config.quantity_fds;
+           paths    = paths->hh.next, i++)
+      {
+        if (inotify->wd[i] == event->wd)
+        {
+          if (event->len)
+          {
+            LOG_INFO("%s/%s", paths->path, event->name);
+            size_t path_size =
+                    snprintf(NULL, 0, "%s/%s", paths->path, event->name) + 1;
+            scanner->config.filepath = malloc(path_size);
+            ALLOC_ERR_FAILURE(scanner->config.filepath);
+            snprintf(scanner->config.filepath, path_size, "%s/%s", paths->path,
+                     event->name);
+          }
+          else { LOG_INFO("%s", paths->path); }
+          break;
+        }
+      }
+      if (event->mask & IN_ACCESS) { LOG_INFO("in_access "); }
+      else if (event->mask & IN_MODIFY || event->mask & IN_CLOSE_WRITE ||
+               event->mask & IN_CREATE)
+      {
+        if (event->mask & IN_MODIFY) { LOG_WARN("in_modify "); }
+        else if (event->mask & IN_CLOSE_WRITE) { LOG_WARN("in_close_write "); }
+        else if (event->mask & IN_CREATE) { LOG_WARN("in_create "); }
+        sleep(1);
+        if (scanner->config.filepath)
+        {
+          SCANNER cscanner =
+                  *scanner; // Copy scanner for function scan_files_and_dirs
+          if (IS_ERR_FAILURE(scan_files_and_dirs(&cscanner)))
+          {
+            LOG_ERROR(LOG_MESSAGE_FORMAT("Unable to scan the created file "
+                                         "'%s' ",
+                                         scanner->config.filepath));
+          }
+        }
+        free(scanner->config.filepath);
+        NO_USE_AFTER_FREE(scanner->config.filepath);
+      }
+    }
   }
 }
 
@@ -177,6 +143,9 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 rule->identifier,
                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath,
                 strings_match));
+
+        free(strings_match);
+        NO_USE_AFTER_FREE(strings_match);
       }
       else
       {
@@ -195,8 +164,8 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.filepath));
       }
 
-      time_t           datetime = time(NULL);
-      QUARANTINE_FILES file     = (QUARANTINE_FILES){
+      time_t          datetime = time(NULL);
+      QUARANTINE_FILE file     = (QUARANTINE_FILE){
                   .filepath = path,
                   .detected = rule->identifier,
                   .filename = ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename,
@@ -212,13 +181,6 @@ default_scan_file(YR_SCAN_CONTEXT *context, int message, void *message_data,
                 "ERR_FAILURE Failed to add file '%s' to quarantine.",
                 ((SCANNER_CALLBACK_ARGS *)user_data)->config.filename));
       }
-
-      if (((SCANNER_CALLBACK_ARGS *)user_data)->config.verbose)
-      {
-        free(strings_match);
-        NO_USE_AFTER_FREE(strings_match);
-      }
-
       break;
 
     case CALLBACK_MSG_RULE_NOT_MATCHING: break;
