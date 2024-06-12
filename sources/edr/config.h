@@ -8,6 +8,6 @@
 
 typedef struct packed(8) EDR_CONFIG
 {
-  const char *settings_json_path;
+  const char *settings_json_path; // appsettings*.json
 }
 EDR_CONFIG;

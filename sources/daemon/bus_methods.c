@@ -10,7 +10,7 @@ thread_inotify(void *args)
 {
   // Workaround for `invalid pointer` (Abort)
   SCANNER *scanner_copy = calloc(1, sizeof(SCANNER));
-  memcpy(scanner_copy, (SCANNER*)args, sizeof(SCANNER));
+  memcpy(scanner_copy, (SCANNER *)args, sizeof(SCANNER));
   if (IS_ERR_FAILURE(scan_listen_inotify(scanner_copy)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error scan inotify\n"));
@@ -24,16 +24,16 @@ int
 init_all(void)
 {
   EDR_CONFIG config = (EDR_CONFIG){
-  #ifdef DEBUG
-            .settings_json_path = "../../../config/"
-                                  "appsettings.development.json",
+#ifdef DEBUG
+          .settings_json_path = "../../../config/"
+                                "appsettings.development.json",
 
-  #else
-            .settings_json_path = "../../../config/appsettings.json"
-  #endif
+#else
+          .settings_json_path = "../../../config/appsettings.json"
+#endif
   };
 
-  pthread_t  tid;
+  pthread_t tid;
 
   init_edr(&edr, config);
 
@@ -45,7 +45,8 @@ init_all(void)
 
   edr->scanner->config.inotify   = edr->inotify;
   edr->scanner->config.inspector = edr->inspector;
-  edr->scanner->config.inotify->config.mask = (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
+  edr->scanner->config.inotify->config.mask =
+          (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE);
   edr->scanner->config.inotify->config.time = -1;
 
   set_watch_paths_inotify(edr->inotify);
@@ -64,9 +65,8 @@ end_all()
 
   if (!IS_NULL_PTR(edr->logger)) exit_logger(&edr->logger);
 
-  if (!IS_NULL_PTR(edr->scanner))
-    if (IS_ERR_FAILURE(exit_scanner(&edr->scanner)))
-      printf(LOG_MESSAGE_FORMAT("Error in exit scanner"));
+  if (IS_ERR_FAILURE(exit_scanner(&edr->scanner)))
+    printf(LOG_MESSAGE_FORMAT("Error in exit scanner"));
 
   if (!IS_NULL_PTR(edr->inotify)) exit_inotify(&edr->inotify);
 
@@ -79,7 +79,7 @@ int
 method_init_params(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
   // unused parameters
-  userdata = userdata;
+  userdata  = userdata;
   ret_error = ret_error;
 
   bool    verbose   = false;
@@ -106,7 +106,7 @@ int
 method_scan(sd_bus_message *m, void *userdata, sd_bus_error *ret_error)
 {
   // unused parameters
-  userdata = userdata;
+  userdata  = userdata;
   ret_error = ret_error;
 
   char *filepath = NULL;
@@ -129,7 +129,7 @@ method_driver_crowarmor(sd_bus_message *m, void *userdata,
                         sd_bus_error *ret_error)
 {
   // unused parameters
-  userdata = userdata;
+  userdata  = userdata;
   ret_error = ret_error;
 
   init_crowarmor_main(&edr);
@@ -144,7 +144,7 @@ method_quarantine_view(sd_bus_message *m, void *userdata,
                        sd_bus_error *ret_error)
 {
   // unused parameters
-  userdata = userdata;
+  userdata  = userdata;
   ret_error = ret_error;
 
   const char *json = NULL;
@@ -162,7 +162,7 @@ method_quarantine_sync(sd_bus_message *m, void *userdata,
                        sd_bus_error *ret_error)
 {
   // unused parameters
-  userdata = userdata;
+  userdata  = userdata;
   ret_error = ret_error;
 
   int r = 0;
@@ -182,7 +182,7 @@ method_quarantine_restore(sd_bus_message *m, void *userdata,
                           sd_bus_error *ret_error)
 {
   // unused parameters
-  userdata = userdata;
+  userdata  = userdata;
   ret_error = ret_error;
 
   int r, id;
@@ -200,7 +200,7 @@ method_quarantine_restore(sd_bus_message *m, void *userdata,
   if (IS_ERR_FAILURE(restore_quarantine_inspector(edr->inspector, &file)))
   {
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error View quarantine\n"));
-    return 1;
+    r = 1;
   }
 
   return sd_bus_reply_method_return(m, "i", r);
@@ -211,7 +211,7 @@ method_quarantine_delete(sd_bus_message *m, void *userdata,
                          sd_bus_error *ret_error)
 {
   // unused parameters
-  userdata = userdata;
+  userdata  = userdata;
   ret_error = ret_error;
 
   int r, id;
@@ -228,7 +228,7 @@ method_quarantine_delete(sd_bus_message *m, void *userdata,
 
   if (IS_ERR_FAILURE(del_quarantine_inspector(edr->inspector, &file)))
   {
-    r = -1;
+    r = 1;
     fprintf(stderr, LOG_MESSAGE_FORMAT("Error Del quarantine\n"));
   }
 

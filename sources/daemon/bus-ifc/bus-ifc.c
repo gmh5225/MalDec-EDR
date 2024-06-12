@@ -3,14 +3,14 @@
 #include <string.h>
 #include <systemd/sd-bus.h>
 
-#include "bus_methods.h"
 #include "bus-ifc.h"
+#include "bus_methods.h"
 
 #define DBUS_CLEAN(slot, bus) \
   {                           \
     sd_bus_slot_unref(slot);  \
     sd_bus_unref(bus);        \
-    end_all();                 \
+    end_all();                \
   }
 
 const sd_bus_vtable DEFAULT_VTABLE[] = {
@@ -79,7 +79,8 @@ start_dbus_interface(const char *path, const char *interface)
       return r;
     }
 
-    if (r > 0) /* we processed a request, try to process another one, right-away */
+    if (r >
+        0) /* we processed a request, try to process another one, right-away */
       continue;
 
     /* Wait for the next request to process */

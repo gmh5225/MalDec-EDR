@@ -3,7 +3,9 @@
 inline void
 init_edr(EDR **edr, EDR_CONFIG config)
 {
-  *edr              = malloc(sizeof(struct EDR));
+  *edr = malloc(sizeof(struct EDR));
+  ALLOC_ERR_FAILURE(*edr);
+
   (*edr)->config    = config;
   (*edr)->inotify   = NULL;
   (*edr)->scanner   = NULL;
@@ -11,8 +13,6 @@ init_edr(EDR **edr, EDR_CONFIG config)
   (*edr)->logger    = NULL;
   (*edr)->inspector = NULL;
   (*edr)->crowarmor = NULL;
-
-  ALLOC_ERR_FAILURE(*edr);
 }
 
 inline void

@@ -39,15 +39,9 @@ signal_handler(void (*hdlr)(int))
   sigemptyset(&action.sa_mask);
   action.sa_flags = 0;
 
-  if ((r = sigaction(SIGTERM, &action, NULL)))
-  {
-    return r;
-  }
+  if ((r = sigaction(SIGTERM, &action, NULL))) { return r; }
 
-  if ((r = sigaction(SIGHUP, &action, NULL)))
-  {
-    return r;
-  }
+  if ((r = sigaction(SIGHUP, &action, NULL))) { return r; }
 
   return r;
 }

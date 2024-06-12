@@ -47,3 +47,24 @@ Every modification to the code, no matter how small, should ideally be accompani
 
 Changes should be tested by somebody other than the developer who wrote the code. This is especially important for large or high-risk changes. It is useful to add a test plan to the pull request description if testing the changes is not straightforward.
 
+Entendi, aqui está a lista de features no formato solicitado, baseada nos comandos fornecidos:
+
+## Features
+
+- Scan:
+    - Scans a specific file or folder (default maximum depth: X).
+    - Performs a quick scan for faster results.
+    - Sets the maximum depth for scanning folders.
+    - Enables detailed mode to display detailed scan information.
+
+- Quarantine Management:
+    - View a list of files currently in quarantine.
+    - Synchronizes files in quarantine and database.
+    - Restores a file from quarantine to another original path.
+    - Deletes a file from quarantine.
+
+- CrowArmor Driver:
+    - Checks the status of the CrowArmor driver and whether its features are active.
+
+- Daemon:
+    - Inotify continuously checks files as specified in the JSON settings using a 266 - (IN_MODIFY | IN_CLOSE_WRITE | IN_CREATE) mask, allowing monitoring of both files and folders.

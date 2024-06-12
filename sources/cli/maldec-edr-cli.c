@@ -82,7 +82,7 @@ help(char *prog_name)
 static inline void no_return
 pr_version()
 {
-  fprintf(stdout, "MalDec-EDR (MalDec Labs) %d.%d.%d\n",
+  fprintf(stdout, "MalDec-EDR (MalDec Labs) Beta %d.%d.%d\n",
           MALDEC_EDR_VERSION_MAJOR, MALDEC_EDR_VERSION_PATCHLEVEL,
           MALDEC_EDR_VERSION_SUBLEVEL);
   exit(ERR_SUCCESS);
@@ -153,7 +153,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
                     strerror(-r));
           }
 
-          fprintf(stdout,"%s\n", json);
+          fprintf(stdout, "%s\n", json);
         }
 
         // Quarantine for malwares
@@ -191,7 +191,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
                                                     "quarantine") == 0)
         {
           const int id = atoi(optarg);
-          r = CALL_METHOD(QuarantineDelete, "u", id);
+          r            = CALL_METHOD(QuarantineDelete, "u", id);
           if (r < 0)
           {
             fprintf(stderr,
@@ -253,7 +253,7 @@ process_command_line_options(sd_bus *bus, sd_bus_message *msg,
     if (r < 0)
     {
       fprintf(stderr, "Error during \"InitParams\" method call: %s\n",
-                strerror(-r));
+              strerror(-r));
       return;
     }
     BUS_CHECK(Scan);
